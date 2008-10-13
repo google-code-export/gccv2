@@ -1,4 +1,4 @@
-#summary One-sentence summary of this page.
+#summary General informations about GPS Cycle Computer v2
 
 = GPS Cycle Computer =
 ----
