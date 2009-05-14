@@ -1,0 +1,535 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://www.crossingways.com/" xmlns:s1="http://www.crossingways.com/AbstractTypes" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" targetNamespace="http://www.crossingways.com/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://www.crossingways.com/">
+      <s:element name="VerifyCredentials">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="username" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="passwordhash" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="control" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="VerifyCredentialsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="VerifyCredentialsResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CurrentPosition">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="username" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="password" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="lat" type="s:double" />
+            <s:element minOccurs="1" maxOccurs="1" name="lon" type="s:double" />
+            <s:element minOccurs="1" maxOccurs="1" name="alt" type="s:double" />
+            <s:element minOccurs="1" maxOccurs="1" name="heading" type="s:double" />
+            <s:element minOccurs="1" maxOccurs="1" name="timestamp" type="s:dateTime" />
+            <s:element minOccurs="1" maxOccurs="1" name="trackid" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="tracktypeid" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="message" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CurrentPositionResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CurrentPositionResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="LogPositions">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="username" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="password" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="lat" type="tns:ArrayOfDouble" />
+            <s:element minOccurs="0" maxOccurs="1" name="lon" type="tns:ArrayOfDouble" />
+            <s:element minOccurs="0" maxOccurs="1" name="alt" type="tns:ArrayOfDouble" />
+            <s:element minOccurs="0" maxOccurs="1" name="heading" type="tns:ArrayOfDouble" />
+            <s:element minOccurs="0" maxOccurs="1" name="timestamp" type="tns:ArrayOfDateTime" />
+            <s:element minOccurs="1" maxOccurs="1" name="trackid" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="message" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfDouble">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="double" type="s:double" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfDateTime">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="dateTime" type="s:dateTime" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="LogPositionsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="LogPositionsResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="UploadTrack">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="username" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="password" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="xmldoc" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="UploadTrackResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="UploadTrackResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="UploadGPX">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="username" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="password" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="trackname" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="gpx" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="UploadGPXResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="UploadGPXResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="boolean" type="s:boolean" />
+      <s:element name="string" nillable="true" type="s:string" />
+    </s:schema>
+    <s:schema targetNamespace="http://www.crossingways.com/AbstractTypes">
+      <s:import namespace="http://schemas.xmlsoap.org/soap/encoding/" />
+      <s:complexType name="StringArray">
+        <s:complexContent mixed="false">
+          <s:restriction base="soapenc:Array">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="unbounded" name="String" type="s:string" />
+            </s:sequence>
+          </s:restriction>
+        </s:complexContent>
+      </s:complexType>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="VerifyCredentialsSoapIn">
+    <wsdl:part name="parameters" element="tns:VerifyCredentials" />
+  </wsdl:message>
+  <wsdl:message name="VerifyCredentialsSoapOut">
+    <wsdl:part name="parameters" element="tns:VerifyCredentialsResponse" />
+  </wsdl:message>
+  <wsdl:message name="CurrentPositionSoapIn">
+    <wsdl:part name="parameters" element="tns:CurrentPosition" />
+  </wsdl:message>
+  <wsdl:message name="CurrentPositionSoapOut">
+    <wsdl:part name="parameters" element="tns:CurrentPositionResponse" />
+  </wsdl:message>
+  <wsdl:message name="LogPositionsSoapIn">
+    <wsdl:part name="parameters" element="tns:LogPositions" />
+  </wsdl:message>
+  <wsdl:message name="LogPositionsSoapOut">
+    <wsdl:part name="parameters" element="tns:LogPositionsResponse" />
+  </wsdl:message>
+  <wsdl:message name="UploadTrackSoapIn">
+    <wsdl:part name="parameters" element="tns:UploadTrack" />
+  </wsdl:message>
+  <wsdl:message name="UploadTrackSoapOut">
+    <wsdl:part name="parameters" element="tns:UploadTrackResponse" />
+  </wsdl:message>
+  <wsdl:message name="UploadGPXSoapIn">
+    <wsdl:part name="parameters" element="tns:UploadGPX" />
+  </wsdl:message>
+  <wsdl:message name="UploadGPXSoapOut">
+    <wsdl:part name="parameters" element="tns:UploadGPXResponse" />
+  </wsdl:message>
+  <wsdl:message name="VerifyCredentialsHttpGetIn">
+    <wsdl:part name="username" type="s:string" />
+    <wsdl:part name="passwordhash" type="s:string" />
+    <wsdl:part name="control" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="VerifyCredentialsHttpGetOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="CurrentPositionHttpGetIn">
+    <wsdl:part name="username" type="s:string" />
+    <wsdl:part name="password" type="s:string" />
+    <wsdl:part name="lat" type="s:string" />
+    <wsdl:part name="lon" type="s:string" />
+    <wsdl:part name="alt" type="s:string" />
+    <wsdl:part name="heading" type="s:string" />
+    <wsdl:part name="timestamp" type="s:string" />
+    <wsdl:part name="trackid" type="s:string" />
+    <wsdl:part name="tracktypeid" type="s:string" />
+    <wsdl:part name="message" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="CurrentPositionHttpGetOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="LogPositionsHttpGetIn">
+    <wsdl:part name="username" type="s:string" />
+    <wsdl:part name="password" type="s:string" />
+    <wsdl:part name="lat" type="s1:StringArray" />
+    <wsdl:part name="lon" type="s1:StringArray" />
+    <wsdl:part name="alt" type="s1:StringArray" />
+    <wsdl:part name="heading" type="s1:StringArray" />
+    <wsdl:part name="timestamp" type="s1:StringArray" />
+    <wsdl:part name="trackid" type="s:string" />
+    <wsdl:part name="message" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="LogPositionsHttpGetOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="UploadTrackHttpGetIn">
+    <wsdl:part name="username" type="s:string" />
+    <wsdl:part name="password" type="s:string" />
+    <wsdl:part name="xmldoc" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="UploadTrackHttpGetOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="UploadGPXHttpGetIn">
+    <wsdl:part name="username" type="s:string" />
+    <wsdl:part name="password" type="s:string" />
+    <wsdl:part name="trackname" type="s:string" />
+    <wsdl:part name="gpx" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="UploadGPXHttpGetOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="VerifyCredentialsHttpPostIn">
+    <wsdl:part name="username" type="s:string" />
+    <wsdl:part name="passwordhash" type="s:string" />
+    <wsdl:part name="control" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="VerifyCredentialsHttpPostOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="CurrentPositionHttpPostIn">
+    <wsdl:part name="username" type="s:string" />
+    <wsdl:part name="password" type="s:string" />
+    <wsdl:part name="lat" type="s:string" />
+    <wsdl:part name="lon" type="s:string" />
+    <wsdl:part name="alt" type="s:string" />
+    <wsdl:part name="heading" type="s:string" />
+    <wsdl:part name="timestamp" type="s:string" />
+    <wsdl:part name="trackid" type="s:string" />
+    <wsdl:part name="tracktypeid" type="s:string" />
+    <wsdl:part name="message" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="CurrentPositionHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="LogPositionsHttpPostIn">
+    <wsdl:part name="username" type="s:string" />
+    <wsdl:part name="password" type="s:string" />
+    <wsdl:part name="lat" type="s1:StringArray" />
+    <wsdl:part name="lon" type="s1:StringArray" />
+    <wsdl:part name="alt" type="s1:StringArray" />
+    <wsdl:part name="heading" type="s1:StringArray" />
+    <wsdl:part name="timestamp" type="s1:StringArray" />
+    <wsdl:part name="trackid" type="s:string" />
+    <wsdl:part name="message" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="LogPositionsHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="UploadTrackHttpPostIn">
+    <wsdl:part name="username" type="s:string" />
+    <wsdl:part name="password" type="s:string" />
+    <wsdl:part name="xmldoc" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="UploadTrackHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="UploadGPXHttpPostIn">
+    <wsdl:part name="username" type="s:string" />
+    <wsdl:part name="password" type="s:string" />
+    <wsdl:part name="trackname" type="s:string" />
+    <wsdl:part name="gpx" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="UploadGPXHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:portType name="LiveTrackingSoap">
+    <wsdl:operation name="VerifyCredentials">
+      <wsdl:input message="tns:VerifyCredentialsSoapIn" />
+      <wsdl:output message="tns:VerifyCredentialsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CurrentPosition">
+      <wsdl:input message="tns:CurrentPositionSoapIn" />
+      <wsdl:output message="tns:CurrentPositionSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="LogPositions">
+      <wsdl:input message="tns:LogPositionsSoapIn" />
+      <wsdl:output message="tns:LogPositionsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="UploadTrack">
+      <wsdl:input message="tns:UploadTrackSoapIn" />
+      <wsdl:output message="tns:UploadTrackSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="UploadGPX">
+      <wsdl:input message="tns:UploadGPXSoapIn" />
+      <wsdl:output message="tns:UploadGPXSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="LiveTrackingHttpGet">
+    <wsdl:operation name="VerifyCredentials">
+      <wsdl:input message="tns:VerifyCredentialsHttpGetIn" />
+      <wsdl:output message="tns:VerifyCredentialsHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CurrentPosition">
+      <wsdl:input message="tns:CurrentPositionHttpGetIn" />
+      <wsdl:output message="tns:CurrentPositionHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="LogPositions">
+      <wsdl:input message="tns:LogPositionsHttpGetIn" />
+      <wsdl:output message="tns:LogPositionsHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="UploadTrack">
+      <wsdl:input message="tns:UploadTrackHttpGetIn" />
+      <wsdl:output message="tns:UploadTrackHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="UploadGPX">
+      <wsdl:input message="tns:UploadGPXHttpGetIn" />
+      <wsdl:output message="tns:UploadGPXHttpGetOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="LiveTrackingHttpPost">
+    <wsdl:operation name="VerifyCredentials">
+      <wsdl:input message="tns:VerifyCredentialsHttpPostIn" />
+      <wsdl:output message="tns:VerifyCredentialsHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CurrentPosition">
+      <wsdl:input message="tns:CurrentPositionHttpPostIn" />
+      <wsdl:output message="tns:CurrentPositionHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="LogPositions">
+      <wsdl:input message="tns:LogPositionsHttpPostIn" />
+      <wsdl:output message="tns:LogPositionsHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="UploadTrack">
+      <wsdl:input message="tns:UploadTrackHttpPostIn" />
+      <wsdl:output message="tns:UploadTrackHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="UploadGPX">
+      <wsdl:input message="tns:UploadGPXHttpPostIn" />
+      <wsdl:output message="tns:UploadGPXHttpPostOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="LiveTrackingSoap" type="tns:LiveTrackingSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="VerifyCredentials">
+      <soap:operation soapAction="http://www.crossingways.com/VerifyCredentials" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CurrentPosition">
+      <soap:operation soapAction="http://www.crossingways.com/CurrentPosition" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="LogPositions">
+      <soap:operation soapAction="http://www.crossingways.com/LogPositions" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UploadTrack">
+      <soap:operation soapAction="http://www.crossingways.com/UploadTrack" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UploadGPX">
+      <soap:operation soapAction="http://www.crossingways.com/UploadGPX" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="LiveTrackingSoap12" type="tns:LiveTrackingSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="VerifyCredentials">
+      <soap12:operation soapAction="http://www.crossingways.com/VerifyCredentials" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CurrentPosition">
+      <soap12:operation soapAction="http://www.crossingways.com/CurrentPosition" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="LogPositions">
+      <soap12:operation soapAction="http://www.crossingways.com/LogPositions" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UploadTrack">
+      <soap12:operation soapAction="http://www.crossingways.com/UploadTrack" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UploadGPX">
+      <soap12:operation soapAction="http://www.crossingways.com/UploadGPX" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="LiveTrackingHttpGet" type="tns:LiveTrackingHttpGet">
+    <http:binding verb="GET" />
+    <wsdl:operation name="VerifyCredentials">
+      <http:operation location="/VerifyCredentials" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CurrentPosition">
+      <http:operation location="/CurrentPosition" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="LogPositions">
+      <http:operation location="/LogPositions" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UploadTrack">
+      <http:operation location="/UploadTrack" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UploadGPX">
+      <http:operation location="/UploadGPX" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="LiveTrackingHttpPost" type="tns:LiveTrackingHttpPost">
+    <http:binding verb="POST" />
+    <wsdl:operation name="VerifyCredentials">
+      <http:operation location="/VerifyCredentials" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CurrentPosition">
+      <http:operation location="/CurrentPosition" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="LogPositions">
+      <http:operation location="/LogPositions" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UploadTrack">
+      <http:operation location="/UploadTrack" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UploadGPX">
+      <http:operation location="/UploadGPX" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="LiveTracking">
+    <wsdl:port name="LiveTrackingSoap" binding="tns:LiveTrackingSoap">
+      <soap:address location="http://www.crossingways.com/services/livetracking.asmx" />
+    </wsdl:port>
+    <wsdl:port name="LiveTrackingSoap12" binding="tns:LiveTrackingSoap12">
+      <soap12:address location="http://www.crossingways.com/services/livetracking.asmx" />
+    </wsdl:port>
+    <wsdl:port name="LiveTrackingHttpGet" binding="tns:LiveTrackingHttpGet">
+      <http:address location="http://www.crossingways.com/services/livetracking.asmx" />
+    </wsdl:port>
+    <wsdl:port name="LiveTrackingHttpPost" binding="tns:LiveTrackingHttpPost">
+      <http:address location="http://www.crossingways.com/services/livetracking.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
