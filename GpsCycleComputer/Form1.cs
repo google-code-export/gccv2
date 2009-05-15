@@ -338,10 +338,9 @@ namespace GpsCycleComputer
             comboBoxCwLogMode.SelectedIndex = 0;
             comboLapOptions.SelectedIndex = 0;
 
-            string Revision = "$Revision: 1.107 $";
-            Revision = Revision.Replace("Revision: 1",  " 3");
-            Revision = Revision.Replace("$", "");
-            Revision = Revision.Trim();
+            string Revision = Assembly.GetExecutingAssembly().GetName().Version.Major.ToString() + "."
+                            + Assembly.GetExecutingAssembly().GetName().Version.Minor.ToString();
+            
             labelRevision.Text = "programming/idea : AndyZap\ndesign : expo7\nspecial thanks to AngelGR\n\nversion " + Revision;
 
             ApplyCustomBackground();
