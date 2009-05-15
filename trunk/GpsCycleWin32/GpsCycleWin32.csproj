@@ -42,7 +42,6 @@
     <Compile Include="FormWin32.Designer.cs">
       <DependentUpon>FormWin32.cs</DependentUpon>
     </Compile>
-    <Compile Include="MapUtil.cs" />
     <Compile Include="ProgramWin32.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="FormWin32.resx">
@@ -67,9 +66,12 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="ReadFileUtil.cs" />
-    <Compile Include="Utils.cs" />
-    <Compile Include="UtmUtil.cs" />
+    <Compile Include="Utils\MapUtil.cs" />
+    <Compile Include="Utils\ReadFileUtil.cs" />
+    <Compile Include="Utils\Utils.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utils\UtmUtil.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
