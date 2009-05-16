@@ -485,7 +485,7 @@ namespace GpsCycleComputer
             }
 
             // not exists, load internal one
-            return new Bitmap(Assembly.GetExecutingAssembly().GetManifestResourceStream("GpsSample." + name));
+            return new Bitmap(Assembly.GetExecutingAssembly().GetManifestResourceStream("GpsSample.Graphics." + name));
         }
         private Color LoadBkColor()
         {
@@ -758,9 +758,9 @@ namespace GpsCycleComputer
             NoBkPanel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.tabGraph_MouseDown);
 
             // about tab image, blank image and CW logo image
-            AboutTabImage = new Bitmap(asm.GetManifestResourceStream("GpsSample.about.jpg"));
+            AboutTabImage = new Bitmap(asm.GetManifestResourceStream("GpsSample.Graphics.about.jpg"));
             BlankImage = LoadBitmap("blank.jpg");
-            CWImage = new Bitmap(asm.GetManifestResourceStream("GpsSample.CW_logo.png"));
+            CWImage = new Bitmap(asm.GetManifestResourceStream("GpsSample.Graphics.CW_logo.png"));
 
             NoBkPanel.BringToFront();
             buttonOptions.BringToFront();

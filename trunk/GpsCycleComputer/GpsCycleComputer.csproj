@@ -19,7 +19,7 @@
     <FormFactorID>
     </FormFactorID>
     <DeployDirPrefix>\</DeployDirPrefix>
-    <ApplicationIcon>icon2.ico</ApplicationIcon>
+    <ApplicationIcon>Properties\icon2.ico</ApplicationIcon>
     <SignAssembly>false</SignAssembly>
     <AssemblyOriginatorKeyFile>
     </AssemblyOriginatorKeyFile>
@@ -79,52 +79,52 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="about.jpg" />
+    <EmbeddedResource Include="Graphics\about.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="bklight.jpg" />
-    <EmbeddedResource Include="bklight_p.jpg" />
-    <EmbeddedResource Include="cancel.jpg" />
-    <EmbeddedResource Include="cancel_p.jpg" />
-    <EmbeddedResource Include="down.jpg" />
-    <EmbeddedResource Include="down_p.jpg" />
-    <EmbeddedResource Include="edit.jpg" />
-    <EmbeddedResource Include="edit_p.jpg" />
-    <EmbeddedResource Include="gpx.jpg" />
-    <EmbeddedResource Include="gpx_p.jpg" />
-    <EmbeddedResource Include="graph.jpg" />
-    <EmbeddedResource Include="graph_p.jpg" />
-    <EmbeddedResource Include="blank.jpg" />
-    <EmbeddedResource Include="CW_logo.png" />
-    <Content Include="icon2.ico" />
-    <EmbeddedResource Include="pause_mode.jpg" />
-    <EmbeddedResource Include="pause_p.jpg" />
-    <EmbeddedResource Include="up.jpg" />
-    <EmbeddedResource Include="up_p.jpg" />
-    <EmbeddedResource Include="kml.jpg" />
-    <EmbeddedResource Include="kml_p.jpg" />
-    <EmbeddedResource Include="left.jpg" />
-    <EmbeddedResource Include="left_p.jpg" />
-    <EmbeddedResource Include="main.jpg" />
-    <EmbeddedResource Include="main_p.jpg" />
-    <EmbeddedResource Include="map.jpg" />
-    <EmbeddedResource Include="map_p.jpg" />
-    <EmbeddedResource Include="open.jpg" />
-    <EmbeddedResource Include="open_p.jpg" />
-    <EmbeddedResource Include="options.jpg" />
-    <EmbeddedResource Include="options_p.jpg" />
-    <EmbeddedResource Include="pause.jpg" />
-    <EmbeddedResource Include="pause_mode_p.jpg" />
-    <EmbeddedResource Include="right.jpg" />
-    <EmbeddedResource Include="right_p.jpg" />
-    <EmbeddedResource Include="start.jpg" />
-    <EmbeddedResource Include="start_p.jpg" />
-    <EmbeddedResource Include="stop.jpg" />
-    <EmbeddedResource Include="stop_p.jpg" />
-    <EmbeddedResource Include="zoom_in.jpg" />
-    <EmbeddedResource Include="zoom_in_p.jpg" />
-    <EmbeddedResource Include="zoom_out.jpg" />
-    <EmbeddedResource Include="zoom_out_p.jpg" />
+    <EmbeddedResource Include="Graphics\bklight.jpg" />
+    <EmbeddedResource Include="Graphics\bklight_p.jpg" />
+    <EmbeddedResource Include="Graphics\cancel.jpg" />
+    <EmbeddedResource Include="Graphics\cancel_p.jpg" />
+    <EmbeddedResource Include="Graphics\down.jpg" />
+    <EmbeddedResource Include="Graphics\down_p.jpg" />
+    <EmbeddedResource Include="Graphics\edit.jpg" />
+    <EmbeddedResource Include="Graphics\edit_p.jpg" />
+    <EmbeddedResource Include="Graphics\gpx.jpg" />
+    <EmbeddedResource Include="Graphics\gpx_p.jpg" />
+    <EmbeddedResource Include="Graphics\graph.jpg" />
+    <EmbeddedResource Include="Graphics\graph_p.jpg" />
+    <EmbeddedResource Include="Graphics\blank.jpg" />
+    <EmbeddedResource Include="Graphics\CW_logo.png" />
+    <Content Include="Properties\icon2.ico" />
+    <EmbeddedResource Include="Graphics\pause_mode.jpg" />
+    <EmbeddedResource Include="Graphics\pause_p.jpg" />
+    <EmbeddedResource Include="Graphics\up.jpg" />
+    <EmbeddedResource Include="Graphics\up_p.jpg" />
+    <EmbeddedResource Include="Graphics\kml.jpg" />
+    <EmbeddedResource Include="Graphics\kml_p.jpg" />
+    <EmbeddedResource Include="Graphics\left.jpg" />
+    <EmbeddedResource Include="Graphics\left_p.jpg" />
+    <EmbeddedResource Include="Graphics\main.jpg" />
+    <EmbeddedResource Include="Graphics\main_p.jpg" />
+    <EmbeddedResource Include="Graphics\map.jpg" />
+    <EmbeddedResource Include="Graphics\map_p.jpg" />
+    <EmbeddedResource Include="Graphics\open.jpg" />
+    <EmbeddedResource Include="Graphics\open_p.jpg" />
+    <EmbeddedResource Include="Graphics\options.jpg" />
+    <EmbeddedResource Include="Graphics\options_p.jpg" />
+    <EmbeddedResource Include="Graphics\pause.jpg" />
+    <EmbeddedResource Include="Graphics\pause_mode_p.jpg" />
+    <EmbeddedResource Include="Graphics\right.jpg" />
+    <EmbeddedResource Include="Graphics\right_p.jpg" />
+    <EmbeddedResource Include="Graphics\start.jpg" />
+    <EmbeddedResource Include="Graphics\start_p.jpg" />
+    <EmbeddedResource Include="Graphics\stop.jpg" />
+    <EmbeddedResource Include="Graphics\stop_p.jpg" />
+    <EmbeddedResource Include="Graphics\zoom_in.jpg" />
+    <EmbeddedResource Include="Graphics\zoom_in_p.jpg" />
+    <EmbeddedResource Include="Graphics\zoom_out.jpg" />
+    <EmbeddedResource Include="Graphics\zoom_out_p.jpg" />
     <None Include="Web References\CW\livetracking.disco" />
     <None Include="Web References\CW\livetracking.wsdl" />
     <None Include="Web References\CW\Reference.map">
