@@ -5,7 +5,7 @@ using System.Net;
 using System.IO;
 using System.Globalization;
 
-namespace LiveTracker
+namespace GpsCycleComputer
 {
     class CWUtils
     {
