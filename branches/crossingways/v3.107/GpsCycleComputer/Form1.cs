@@ -10,7 +10,6 @@ using System.Text;
 using System.Reflection;
 using Microsoft.Win32;
 using GpsUtils;
-using LiveTracker;
 
 /* From WIKI:
  1 international knot = 
