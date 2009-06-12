@@ -1,0 +1,162 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{3EE8F42C-9902-47AF-B186-D159E90124F2}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>GpsSample</RootNamespace>
+    <AssemblyName>GpsCycleComputer</AssemblyName>
+    <ProjectTypeGuids>{4D628B5B-2FBC-4AA6-8C16-197242AEB884};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <PlatformFamilyName>PocketPC</PlatformFamilyName>
+    <PlatformID>b2c48bd2-963d-4549-9169-1fa021dce484</PlatformID>
+    <OSVersion>5.02</OSVersion>
+    <DeployDirSuffix>
+    </DeployDirSuffix>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <FormFactorID>
+    </FormFactorID>
+    <DeployDirPrefix>\</DeployDirPrefix>
+    <ApplicationIcon>icon2.ico</ApplicationIcon>
+    <SignAssembly>false</SignAssembly>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;$(PlatformFamilyName)</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <FileAlignment>512</FileAlignment>
+    <WarningLevel>4</WarningLevel>
+    <GenerateSerializationAssemblies>off</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;$(PlatformFamilyName)</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <FileAlignment>512</FileAlignment>
+    <WarningLevel>4</WarningLevel>
+    <GenerateSerializationAssemblies>off</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.WindowsCE.Forms" />
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utils\CWUtils.cs" />
+    <Compile Include="Form1.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="GPS.cs" />
+    <Compile Include="GpsPosition.cs" />
+    <Compile Include="Utils\MapUtil.cs" />
+    <Compile Include="Utils\ReadFileUtil.cs" />
+    <Compile Include="Utils\Utils.cs" />
+    <Compile Include="Utils\UtmUtil.cs" />
+    <Compile Include="Web References\CW\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="Form1.resx">
+      <DependentUpon>Form1.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="about.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bklight.jpg" />
+    <EmbeddedResource Include="bklight_p.jpg" />
+    <EmbeddedResource Include="cancel.jpg" />
+    <EmbeddedResource Include="cancel_p.jpg" />
+    <EmbeddedResource Include="down.jpg" />
+    <EmbeddedResource Include="down_p.jpg" />
+    <EmbeddedResource Include="edit.jpg" />
+    <EmbeddedResource Include="edit_p.jpg" />
+    <EmbeddedResource Include="gpx.jpg" />
+    <EmbeddedResource Include="gpx_p.jpg" />
+    <EmbeddedResource Include="graph.jpg" />
+    <EmbeddedResource Include="graph_p.jpg" />
+    <EmbeddedResource Include="blank.jpg" />
+    <EmbeddedResource Include="CW_logo.png" />
+    <Content Include="icon2.ico" />
+    <EmbeddedResource Include="pause_mode.jpg" />
+    <EmbeddedResource Include="pause_p.jpg" />
+    <EmbeddedResource Include="up.jpg" />
+    <EmbeddedResource Include="up_p.jpg" />
+    <EmbeddedResource Include="kml.jpg" />
+    <EmbeddedResource Include="kml_p.jpg" />
+    <EmbeddedResource Include="left.jpg" />
+    <EmbeddedResource Include="left_p.jpg" />
+    <EmbeddedResource Include="main.jpg" />
+    <EmbeddedResource Include="main_p.jpg" />
+    <EmbeddedResource Include="map.jpg" />
+    <EmbeddedResource Include="map_p.jpg" />
+    <EmbeddedResource Include="open.jpg" />
+    <EmbeddedResource Include="open_p.jpg" />
+    <EmbeddedResource Include="options.jpg" />
+    <EmbeddedResource Include="options_p.jpg" />
+    <EmbeddedResource Include="pause.jpg" />
+    <EmbeddedResource Include="pause_mode_p.jpg" />
+    <EmbeddedResource Include="right.jpg" />
+    <EmbeddedResource Include="right_p.jpg" />
+    <EmbeddedResource Include="start.jpg" />
+    <EmbeddedResource Include="start_p.jpg" />
+    <EmbeddedResource Include="stop.jpg" />
+    <EmbeddedResource Include="stop_p.jpg" />
+    <EmbeddedResource Include="zoom_in.jpg" />
+    <EmbeddedResource Include="zoom_in_p.jpg" />
+    <EmbeddedResource Include="zoom_out.jpg" />
+    <EmbeddedResource Include="zoom_out_p.jpg" />
+    <None Include="Web References\CW\livetracking.disco" />
+    <None Include="Web References\CW\livetracking.wsdl" />
+    <None Include="Web References\CW\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <WebReferences Include="Web References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <WebReferenceUrl Include="http://www.crossingways.com/services/livetracking.asmx">
+      <UrlBehavior>Static</UrlBehavior>
+      <RelPath>Web References\CW\</RelPath>
+      <UpdateFromURL>http://www.crossingways.com/services/livetracking.asmx</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>
+      </CachedAppSettingsObjectName>
+      <CachedSettingsPropName>
+      </CachedSettingsPropName>
+    </WebReferenceUrl>
+  </ItemGroup>
+  <Import Condition="'$(TargetFrameworkVersion)' == 'v1.0'" Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.v1.targets" />
+  <Import Condition="'$(TargetFrameworkVersion)' == 'v2.0'" Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}">
+        <HostingProcess disable="1" />
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>
