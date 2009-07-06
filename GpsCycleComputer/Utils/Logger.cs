@@ -15,13 +15,13 @@ namespace Log
         {
 
             DateTime now = System.DateTime.Now.Date;
-            this.filePath = path + "/gcc_" /*+
+            this.filePath = path + "/gcc" /*+
                 now.Year + now.Month + now.Day + "_" +
                 now.Hour + now.Minute + now.Second +
                 now.Millisecond */+ ".log";
             try
             {
-                fs = new FileStream (filePath, FileMode.Create);
+                fs = new FileStream (filePath, FileMode.Append);
                 wr = new StreamWriter (fs);
             }
             catch (Exception e)

@@ -131,8 +131,11 @@ namespace GpsCycleComputer
         int[] PollGpsTimeSec = new int[14] { 0, 5, 10, 20, 30, 60, 2*60, 3*60, 5*60, 10*60, 20*60, 30*60, 60*60, 120*60};
         DateTime LastPointUtc;
         int GpsSearchCount = 0;
-        int FirstSampleValidCount = 0;
+        int FirstSampleValidCount = 1;
 
+        //Drop first points (only available in Start/Stop mode            
+        int [] dropFirst = new int [7] { 0, 1, 2, 4, 8, 16, 32 };
+        
         // flag to indicate the the data was accepted by GetGpsData and save into file
         bool GpsDataOk = false;
 
@@ -154,15 +157,14 @@ namespace GpsCycleComputer
         double OldX = 0.0, OldY = 0.0;
         int OldT = 0;
 
-        // last logged lat/lon, for checkpoint saving
-        double lastLat = 0.0, lastLon = 0.0;
-
         // Current time, X/Y relative to starting point, abs height Z and current speed
         int CurrentTimeSec = 0;
         int CurrentStoppageTimeSec = 0;
         double CurrentLat = 0.0, CurrentLong = 0.0, CurrentZ = 0.0;
         double CurrentSpeed = 0.0;
         string CurrentFileName = "";
+        string CurrentChkPtFileName = "";
+        int ChkPtCount = 0;
         string CurrentStatusString = "gps off";
         Color CurrentGpsLedColor = Color.Gray;
         int CurrentBattery = -1;
@@ -191,10 +193,7 @@ namespace GpsCycleComputer
 
         // to disable auto-save of controls on option page during startup
         bool DoNotSaveSettingsFlag = true;
-
-        // temp file name in the root folder (main memory)
-        string TempFileName = "\\tmp.gcc";
-
+              
         // vars to work with the custom folder open box
         // 1. flag to activate folder open mode or file open mode in the custom dialog
         bool FolderSetupMode = false;
@@ -330,6 +329,8 @@ namespace GpsCycleComputer
         private TabPage tabPageAbout;
         private TabPage tabPageLaps;
         private CheckBox checkUploadGpx;
+        private ComboBox comboDropFirst;
+        private Label labelDropFirst;
         private Panel panelCwLogo;
 
 
@@ -341,6 +342,7 @@ namespace GpsCycleComputer
 
             // set defaults (shall load from file later)
             comboGpsPoll.SelectedIndex = 0;
+            comboDropFirst.SelectedIndex = 0;
             comboUnits.SelectedIndex = 0;
             comboBoxKmlOptColor.SelectedIndex = 0;
             comboBoxKmlOptWidth.SelectedIndex = 1;
@@ -367,7 +369,8 @@ namespace GpsCycleComputer
             ScaleToCurrentResolution();
 
             DoOrientationSwitch();
-            LockResize = false;
+            LockResize = false;                        
+          
         }
 
         private void ApplyCustomBackground()
@@ -385,6 +388,8 @@ namespace GpsCycleComputer
             tabOpenFile.BackColor = bkColor;
             comboGpsPoll.BackColor = bkColor;  comboGpsPoll.ForeColor = foColor;
             labelGpsActivity.BackColor = bkColor; labelGpsActivity.ForeColor = foColor;
+            comboDropFirst.BackColor = bkColor; comboDropFirst.ForeColor = foColor;
+            labelDropFirst.BackColor = bkColor; labelDropFirst.ForeColor = foColor;
             comboUnits.BackColor = bkColor; comboUnits.ForeColor = foColor;
             checkStopOnLow.BackColor = bkColor; checkStopOnLow.ForeColor = foColor;
             checkExStopTime.BackColor = bkColor; checkExStopTime.ForeColor = foColor;
@@ -861,6 +866,8 @@ namespace GpsCycleComputer
             ScaleControl((Control)tabOpenFile);
             ScaleControl((Control)NoBkPanel);
             ScaleControl((Control)comboGpsPoll);
+            ScaleControl ((Control) comboDropFirst);
+            ScaleControl ((Control) labelDropFirst);
             ScaleControl((Control)labelGpsActivity);
             ScaleControl((Control)comboUnits);
             ScaleControl((Control)checkStopOnLow);
@@ -985,7 +992,10 @@ namespace GpsCycleComputer
         }
         private bool CheckIoDirectoryExists()
         {
-            if (Directory.Exists(IoFilesDirectory)) { return true; }
+            if (Directory.Exists(IoFilesDirectory)) 
+            { 
+                return true; 
+            }
 
             MessageBox.Show("Resetting input/output files location to the application folder", "Folder does not exist!",
                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
@@ -1082,6 +1092,8 @@ namespace GpsCycleComputer
             this.tabControl = new System.Windows.Forms.TabControl();
             this.tabPageOptions = new System.Windows.Forms.TabPage();
             this.tabPageGps = new System.Windows.Forms.TabPage();
+            this.comboDropFirst = new System.Windows.Forms.ComboBox ();
+            this.labelDropFirst = new System.Windows.Forms.Label ();
             this.tabPageMainScr = new System.Windows.Forms.TabPage();
             this.tabPageMapScr = new System.Windows.Forms.TabPage();
             this.tabPageKmlGpx = new System.Windows.Forms.TabPage();
@@ -1286,7 +1298,7 @@ namespace GpsCycleComputer
             // 
             this.checkStopOnLow.Checked = true;
             this.checkStopOnLow.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkStopOnLow.Location = new System.Drawing.Point(2, 55);
+            this.checkStopOnLow.Location = new System.Drawing.Point (5, 105);
             this.checkStopOnLow.Name = "checkStopOnLow";
             this.checkStopOnLow.Size = new System.Drawing.Size(477, 40);
             this.checkStopOnLow.TabIndex = 16;
@@ -1324,7 +1336,7 @@ namespace GpsCycleComputer
             // 
             // checkBoxUseGccDll
             // 
-            this.checkBoxUseGccDll.Location = new System.Drawing.Point(2, 105);
+            this.checkBoxUseGccDll.Location = new System.Drawing.Point (5, 155);
             this.checkBoxUseGccDll.Name = "checkBoxUseGccDll";
             this.checkBoxUseGccDll.Size = new System.Drawing.Size(312, 40);
             this.checkBoxUseGccDll.TabIndex = 24;
@@ -1338,7 +1350,7 @@ namespace GpsCycleComputer
             this.comboBoxUseGccDllRate.Items.Add("38400");
             this.comboBoxUseGccDllRate.Items.Add("57600");
             this.comboBoxUseGccDllRate.Items.Add("115200");
-            this.comboBoxUseGccDllRate.Location = new System.Drawing.Point(321, 155);
+            this.comboBoxUseGccDllRate.Location = new System.Drawing.Point (324, 205);
             this.comboBoxUseGccDllRate.Name = "comboBoxUseGccDllRate";
             this.comboBoxUseGccDllRate.Size = new System.Drawing.Size(156, 41);
             this.comboBoxUseGccDllRate.TabIndex = 32;
@@ -1359,21 +1371,21 @@ namespace GpsCycleComputer
             this.comboBoxUseGccDllCom.Items.Add("COM12:");
             this.comboBoxUseGccDllCom.Items.Add("COM13:");
             this.comboBoxUseGccDllCom.Items.Add("COM14:");
-            this.comboBoxUseGccDllCom.Location = new System.Drawing.Point(321, 105);
+            this.comboBoxUseGccDllCom.Location = new System.Drawing.Point (324, 155);
             this.comboBoxUseGccDllCom.Name = "comboBoxUseGccDllCom";
             this.comboBoxUseGccDllCom.Size = new System.Drawing.Size(156, 41);
             this.comboBoxUseGccDllCom.TabIndex = 31;
             // 
             // labelGpsBaudRate
             // 
-            this.labelGpsBaudRate.Location = new System.Drawing.Point(181, 155);
+            this.labelGpsBaudRate.Location = new System.Drawing.Point (184, 205);
             this.labelGpsBaudRate.Name = "labelGpsBaudRate";
             this.labelGpsBaudRate.Size = new System.Drawing.Size(134, 40);
             this.labelGpsBaudRate.Text = "Baud rate:";
             // 
             // numericGeoID
             // 
-            this.numericGeoID.Location = new System.Drawing.Point(321, 205);
+            this.numericGeoID.Location = new System.Drawing.Point (324, 255);
             this.numericGeoID.Maximum = new decimal(new int[] {
             300,
             0,
@@ -1390,7 +1402,7 @@ namespace GpsCycleComputer
             // 
             // labelGeoID
             // 
-            this.labelGeoID.Location = new System.Drawing.Point(2, 205);
+            this.labelGeoID.Location = new System.Drawing.Point (5, 255);
             this.labelGeoID.Name = "labelGeoID";
             this.labelGeoID.Size = new System.Drawing.Size(379, 40);
             this.labelGeoID.Text = "Manual altitude correction, m";
@@ -1858,6 +1870,8 @@ namespace GpsCycleComputer
             // 
             // tabPageGps
             // 
+            this.tabPageGps.Controls.Add (this.comboDropFirst);
+            this.tabPageGps.Controls.Add (this.labelDropFirst);
             this.tabPageGps.Controls.Add(this.checkStopOnLow);
             this.tabPageGps.Controls.Add(this.comboGpsPoll);
             this.tabPageGps.Controls.Add(this.labelGpsActivity);
@@ -1869,8 +1883,31 @@ namespace GpsCycleComputer
             this.tabPageGps.Controls.Add(this.labelGeoID);
             this.tabPageGps.Location = new System.Drawing.Point(0, 0);
             this.tabPageGps.Name = "tabPageGps";
-            this.tabPageGps.Size = new System.Drawing.Size(472, 469);
+            this.tabPageGps.Size = new System.Drawing.Size (480, 463);
             this.tabPageGps.Text = "GPS";
+            // 
+            // comboDropFirst
+            // 
+            this.comboDropFirst.Enabled = false;
+            this.comboDropFirst.Items.Add ("none");
+            this.comboDropFirst.Items.Add ("1   point");
+            this.comboDropFirst.Items.Add ("2   points");
+            this.comboDropFirst.Items.Add ("4   points");
+            this.comboDropFirst.Items.Add ("8   points");
+            this.comboDropFirst.Items.Add ("16 points");
+            this.comboDropFirst.Items.Add ("32 points");
+            this.comboDropFirst.Location = new System.Drawing.Point (153, 52);
+            this.comboDropFirst.Name = "comboDropFirst";
+            this.comboDropFirst.Size = new System.Drawing.Size (323, 41);
+            this.comboDropFirst.TabIndex = 36;
+            this.comboDropFirst.SelectedIndexChanged += new System.EventHandler (this.comboDropFirst_SelectedIndexChanged);
+            // 
+            // labelDropFirst
+            // 
+            this.labelDropFirst.Location = new System.Drawing.Point (1, 54);
+            this.labelDropFirst.Name = "labelDropFirst";
+            this.labelDropFirst.Size = new System.Drawing.Size (219, 40);
+            this.labelDropFirst.Text = "Drop first:";
             // 
             // tabPageMainScr
             // 
@@ -1915,7 +1952,7 @@ namespace GpsCycleComputer
             this.tabPageKmlGpx.Controls.Add(this.checkGpxRte);
             this.tabPageKmlGpx.Location = new System.Drawing.Point(0, 0);
             this.tabPageKmlGpx.Name = "tabPageKmlGpx";
-            this.tabPageKmlGpx.Size = new System.Drawing.Size(480, 463);
+            this.tabPageKmlGpx.Size = new System.Drawing.Size (472, 469);
             this.tabPageKmlGpx.Text = "Kml/Gpx";
             // 
             // tabPageLiveLog
@@ -1931,7 +1968,7 @@ namespace GpsCycleComputer
             this.tabPageLiveLog.Controls.Add(this.panelCwLogo);
             this.tabPageLiveLog.Location = new System.Drawing.Point(0, 0);
             this.tabPageLiveLog.Name = "tabPageLiveLog";
-            this.tabPageLiveLog.Size = new System.Drawing.Size(480, 463);
+            this.tabPageLiveLog.Size = new System.Drawing.Size (472, 469);
             this.tabPageLiveLog.Text = "Live log";
             // 
             // checkUploadGpx
@@ -2035,6 +2072,16 @@ namespace GpsCycleComputer
                 BinaryReader wr = new BinaryReader(fs, Encoding.ASCII);
 
                 if (wr.PeekChar() != -1) { comboGpsPoll.SelectedIndex = wr.ReadInt32(); }
+                if (comboGpsPoll.SelectedIndex != 0)
+                {
+                    comboDropFirst.Enabled = true;
+                }
+                else
+                {
+                    comboDropFirst.SelectedIndex = 0;
+                    comboDropFirst.Enabled = false;
+                }
+                if (wr.PeekChar () != -1) { comboDropFirst.SelectedIndex = wr.ReadInt32 (); }
                 if (wr.PeekChar() != -1) { comboUnits.SelectedIndex = wr.ReadInt32(); }
                 if (wr.PeekChar() != -1) { wr.ReadInt32(); }  // not used anymore
                 if (wr.PeekChar() != -1) { int i = wr.ReadInt32(); checkExStopTime.Checked = (i == 1); }
@@ -2168,6 +2215,7 @@ namespace GpsCycleComputer
             // select option pages to show and apply map bkground option
             FillPagesToShow();
             checkMapsWhiteBk_Click(checkMapsWhiteBk, EventArgs.Empty);
+                       
         }
 
         // close GPS and files on form close
@@ -2177,7 +2225,9 @@ namespace GpsCycleComputer
             timerGps.Enabled = false;
 
             if (gps.Opened)
-            { gps.Close(); }
+            { 
+                gps.Close(); 
+            }
 
             // Stop button enabled - indivate that we need to close streams
             if (buttonStop.Enabled)
@@ -2186,9 +2236,7 @@ namespace GpsCycleComputer
                 {
                 writer.Close();
                 fstream.Close();
-
-                // copy file into "permanent place"
-                File.Copy(TempFileName, CurrentFileName, true);
+              
                 saveCsvLog();
             }
                 catch (Exception ee)
@@ -2232,6 +2280,7 @@ namespace GpsCycleComputer
             BinaryWriter wr = new BinaryWriter(fs, Encoding.ASCII);
 
             wr.Write((int)comboGpsPoll.SelectedIndex);
+            wr.Write ((int) comboDropFirst.SelectedIndex);
             wr.Write((int)comboUnits.SelectedIndex);
             wr.Write((int)0); // not used anymore
             wr.Write((int)(checkExStopTime.Checked ? 1 : 0));
@@ -2329,7 +2378,7 @@ namespace GpsCycleComputer
                 if (position != null)
                 {
                     if (position.LatitudeValid && position.LongitudeValid
-                        && position.TimeValid)
+                        && position.TimeValid )
                     {
                         // if blank - set to curently returned time
                         if (LastPointUtc == DateTime.MinValue)
@@ -2339,15 +2388,15 @@ namespace GpsCycleComputer
                         else if ((LastPointUtc != DateTime.MinValue) && (LastPointUtc < position.Time))
                         {
                             // OK, time is increasing- need more checks for first sample
-                            if (Counter == 0)
+                            if (FirstSampleValidCount <= dropFirst [comboDropFirst.SelectedIndex])
                             {
                                 // wait first few samples to get a "better grip" !
-                                if (FirstSampleValidCount > 3)
+                                if (FirstSampleValidCount > dropFirst [comboDropFirst.SelectedIndex])
                                 {
                                     time_check_passed = true;
                                 }
-
                                 FirstSampleValidCount++;
+                                GpsSearchCount = 0; //Point received (even if it's dropped). Start search to search for the next one
                             }
                             else
                             {
@@ -2358,6 +2407,7 @@ namespace GpsCycleComputer
                             LastPointUtc = position.Time;
                         }
                     }
+                 
 
                     // passed the time check
                     if (time_check_passed)
@@ -2380,6 +2430,10 @@ namespace GpsCycleComputer
                             catch (Exception e)
                             {
                                 Utils.log.Error (" GetGpsData - save and write starting position", e);
+                            }
+                            finally
+                            {
+                                writer.Flush ();
                             }
                             utmUtil.setReferencePoint(position.Latitude, position.Longitude);
 
@@ -2410,19 +2464,20 @@ namespace GpsCycleComputer
             // indication that value was not set ...
             if (!GpsDataOk)
             {
+                CurrentStatusString = "searching " +
+                                          (dropFirst [comboDropFirst.SelectedIndex] > 0
+                                          && (FirstSampleValidCount <= dropFirst [comboDropFirst.SelectedIndex]) ? ("D" + FirstSampleValidCount) : "");
                 if (position != null)
                 {
-                    CurrentStatusString = "searching " +
-                                           (position.LatitudeValid ? "P" : "") +
+                    CurrentStatusString += (position.LatitudeValid ? "P" : "") +
                                            (position.SpeedValid ? "S" : "") +
                                            (position.TimeValid ? "T" : "") +
                                            (time_check_passed ? "T+" : "") +
-                                           " " + GpsSearchCount;
+                                           " ";
+
                 }
-                else
-                {
-                    CurrentStatusString = "searching " + GpsSearchCount;
-                }
+                CurrentStatusString += GpsSearchCount;
+
                 GpsSearchCount++;
                 CurrentGpsLedColor = Color.Red;
             }
@@ -2437,10 +2492,7 @@ namespace GpsCycleComputer
 
         // Write record. Position must be valid
         private void WriteRecord(GpsPosition pos)
-        {
-            lastLat = pos.Latitude;
-            lastLon = pos.Longitude;
-
+        {   
             double x;
             double y;
             utmUtil.getXY(pos.Latitude, pos.Longitude, out x, out y);
@@ -2459,12 +2511,28 @@ namespace GpsCycleComputer
             while ((Math.Abs(x) > 30000.0) || (Math.Abs(y) > 30000.0))
             {
                 Int16 deltaX = 0;
-                if (x > 30000.0) { x -= 30000.0; deltaX = 30000; }
-                else if (x < -30000.0) { x += 30000.0; deltaX = -30000; }
+                if (x > 30000.0) 
+                { 
+                    x -= 30000.0; 
+                    deltaX = 30000; 
+                }
+                else if (x < -30000.0) 
+                { 
+                    x += 30000.0; 
+                    deltaX = -30000; 
+                }
 
                 Int16 deltaY = 0;
-                if (y > 30000.0) { y -= 30000.0; deltaY = 30000; }
-                else if (y < -30000.0) { y += 30000.0; deltaY = -30000; }
+                if (y > 30000.0) 
+                { 
+                    y -= 30000.0; 
+                    deltaY = 30000; 
+                }
+                else if (y < -30000.0) 
+                { 
+                    y += 30000.0; 
+                    deltaY = -30000; 
+                }
 
                 // Yes, need an origin shift record
                 if ((deltaX != 0) || (deltaY != 0))
@@ -2474,16 +2542,19 @@ namespace GpsCycleComputer
 
                     try
                     {
-                    writer.Write((Int16)deltaX);
-                    writer.Write((Int16)deltaY);
-                    writer.Write((Int16)0);         // this is origin update (0)
-                    writer.Write((UInt16)0xFFFF);   // status record (0xFFFF/0xFFFF)
-                    writer.Write((UInt16)0xFFFF);
-
+                        writer.Write((Int16)deltaX);
+                        writer.Write((Int16)deltaY);
+                        writer.Write((Int16)0);         // this is origin update (0)
+                        writer.Write((UInt16)0xFFFF);   // status record (0xFFFF/0xFFFF)
+                        writer.Write((UInt16)0xFFFF);
                     }
                     catch (Exception e)
                     {
                         Utils.log.Error (" WriteRecord - Origin Shift ", e);
+                    }
+                    finally
+                    {
+                        writer.Flush ();
                     }
                 }
             }
@@ -2491,50 +2562,68 @@ namespace GpsCycleComputer
             // proceed with "normal" record
             try
             {
-            Int16 x_int = (Int16)x; writer.Write((Int16)x_int);
-            Int16 y_int = (Int16)y; writer.Write((Int16)y_int);
+                Int16 x_int = (Int16) x;
+                writer.Write ((Int16) x_int);
+                Int16 y_int = (Int16) y;
+                writer.Write ((Int16) y_int);
 
-            Int16 z_int = 0;
-            if (position.EllipsoidAltitudeValid)
-            { z_int = (Int16)(pos.EllipsoidAltitude); }
-            writer.Write((Int16)z_int);
+                Int16 z_int = 0;
+                if (position.EllipsoidAltitudeValid)
+                {
+                    z_int = (Int16) (pos.EllipsoidAltitude);
+                }
+                writer.Write ((Int16) z_int);
 
-            // speed in in kmh*10 (as UInt16) - converted from knots (see top of this file)
-            UInt16 v_int = (UInt16)((pos.SpeedValid ? pos.Speed : 0.0) * 1.852 * 10.0); writer.Write((UInt16)v_int);
+                // speed in in kmh*10 (as UInt16) - converted from knots (see top of this file)
+                UInt16 v_int = (UInt16) ((pos.SpeedValid ? pos.Speed : 0.0) * 1.852 * 10.0); 
+                writer.Write ((UInt16) v_int);
 
-            TimeSpan run_time = DateTime.UtcNow - StartTimeUtc;
+                TimeSpan run_time = DateTime.UtcNow - StartTimeUtc;
 
-            // Safety check 1: make sure elapsed time is not negative
-            double double_total_sec = run_time.TotalSeconds;
-            if (double_total_sec < 0.0) double_total_sec = 0.0;
+                // Safety check 1: make sure elapsed time is not negative
+                double double_total_sec = run_time.TotalSeconds;
+                if (double_total_sec < 0.0) double_total_sec = 0.0;
 
-            // Safety check 2: make sure new time is increasing
-            if ((int)double_total_sec < OldT) { OldT = (int)double_total_sec; }
+                // Safety check 2: make sure new time is increasing
+                if ((int) double_total_sec < OldT) 
+                { 
+                    OldT = (int) double_total_sec; 
+                }
 
-            // OK, write
-            UInt16 t_int = (UInt16)double_total_sec;
-            writer.Write((UInt16)t_int);
+                // OK, write
+                UInt16 t_int = (UInt16) double_total_sec;
+                writer.Write ((UInt16) t_int);
 
-            // compute Stoppage time
-            if (v_int == 0) { CurrentStoppageTimeSec += t_int - OldT; }
-            OldT = t_int;
+                // compute Stoppage time
+                if (v_int == 0) 
+                { 
+                    CurrentStoppageTimeSec += t_int - OldT; 
+                }
+                OldT = t_int;
 
-            // Update max speed (in kmh)
-            if (v_int / 10.0 > MaxSpeed) { MaxSpeed = v_int / 10.0; }
+                // Update max speed (in kmh)
+                if (v_int / 10.0 > MaxSpeed) 
+                { 
+                    MaxSpeed = v_int / 10.0; 
+                }
 
-            // update current vars
-            CurrentTimeSec = t_int;
-            CurrentLat = pos.Latitude;
-            CurrentLong = pos.Longitude;
-            CurrentZ = z_int;
-            CurrentSpeed = v_int / 10.0;
+                // update current vars
+                CurrentTimeSec = t_int;
+                CurrentLat = pos.Latitude;
+                CurrentLong = pos.Longitude;
+                CurrentZ = z_int;
+                CurrentSpeed = v_int / 10.0;
 
-            // store data
-            AddPlotData((float)CurrentLat, (float)CurrentLong, z_int, t_int, v_int);
+                // store data
+                AddPlotData ((float) CurrentLat, (float) CurrentLong, z_int, t_int, v_int);
             }
             catch (Exception e)
             {
                 Utils.log.Error (" WriteRecord - Normal Record ", e);
+            }
+            finally
+            {
+                writer.Flush ();
             }
 
         }
@@ -2568,16 +2657,26 @@ namespace GpsCycleComputer
             Byte x;
             try
             {
-                x = (Byte)(StartTime.Year - 2000); writer.Write((Byte)x);
-                x = (Byte)StartTime.Month; writer.Write((Byte)x);
-                x = (Byte)StartTime.Day; writer.Write((Byte)x);
-                x = (Byte)StartTime.Hour; writer.Write((Byte)x);
-                x = (Byte)StartTime.Minute; writer.Write((Byte)x);
-                x = (Byte)StartTime.Second; writer.Write((Byte)x);
+                x = (Byte) (StartTime.Year - 2000);
+                writer.Write ((Byte) x);
+                x = (Byte) StartTime.Month;
+                writer.Write ((Byte) x);
+                x = (Byte) StartTime.Day;
+                writer.Write ((Byte) x);
+                x = (Byte) StartTime.Hour;
+                writer.Write ((Byte) x);
+                x = (Byte) StartTime.Minute;
+                writer.Write ((Byte) x);
+                x = (Byte) StartTime.Second;
+                writer.Write ((Byte) x);
             }
             catch (Exception e)
             {
                 Utils.log.Error (" WriteStartDateTime ", e);
+            }
+            finally
+            {
+                writer.Flush ();
             }
         }
 
@@ -2588,7 +2687,9 @@ namespace GpsCycleComputer
             {
                 TimeSpan maxAge = new TimeSpan(0, 3, 0); // 3 min
                 if ((LastBatterySave + maxAge) >= DateTime.UtcNow)
-                { return; }
+                { 
+                    return; 
+                }
             }
 
             LastBatterySave = DateTime.UtcNow;
@@ -2598,15 +2699,19 @@ namespace GpsCycleComputer
 
             try
             {
-            writer.Write((Int16)x);
-            writer.Write((Int16)0);
-            writer.Write((Int16)1);         // this is battery status record (1)
-            writer.Write((UInt16)0xFFFF);   // status record (0xFFFF/0xFFFF)
-            writer.Write((UInt16)0xFFFF);
+                writer.Write ((Int16) x);
+                writer.Write ((Int16) 0);
+                writer.Write ((Int16) 1);         // this is battery status record (1)
+                writer.Write ((UInt16) 0xFFFF);   // status record (0xFFFF/0xFFFF)
+                writer.Write ((UInt16) 0xFFFF);
             }
             catch (Exception e)
             {
                 Utils.log.Error (" WriteBatteryInfo ", e);
+            }
+            finally
+            {
+                writer.Flush ();
             }
 
             // terminate if low power
@@ -2617,7 +2722,10 @@ namespace GpsCycleComputer
                     LockGpsTick = true;
                     timerGps.Enabled = false;
                     timerIdleReset.Enabled = false;
-                    if (gps.Opened) { gps.Close(); }
+                    if (gps.Opened) 
+                    { 
+                        gps.Close(); 
+                    }
                     StoppedOnLow = true;
                     CurrentStatusString = "Stopped on low power";
                 }
@@ -2637,6 +2745,10 @@ namespace GpsCycleComputer
             catch (Exception e)
             {
                 Utils.log.Error (" WriteOptionsInfo ", e);
+            }
+            finally
+            {
+                writer.Flush ();
             }
         }
 
@@ -2674,6 +2786,8 @@ namespace GpsCycleComputer
             else { file_name = IoFilesDirectory + "\\" + file_name; }
 
             CurrentFileName = file_name;
+            CurrentChkPtFileName = Path.GetDirectoryName (CurrentFileName) + "/" +
+                        Path.GetFileNameWithoutExtension (CurrentFileName) + "_chkpt.gccc";
 
             return file_name;
         }
@@ -2689,18 +2803,21 @@ namespace GpsCycleComputer
             // create writer and write header
             try
             {
-            fstream = new FileStream(TempFileName, FileMode.Create);
-            writer = new BinaryWriter(fstream, Encoding.ASCII);
-
-            writer.Write((char)'G'); writer.Write((char)'C'); writer.Write((char)'C'); writer.Write((Byte)1);
+                fstream = new FileStream(CurrentFileName, FileMode.Create);
+                writer = new BinaryWriter(fstream, Encoding.ASCII);
+                writer.Write((char)'G'); writer.Write((char)'C'); writer.Write((char)'C'); writer.Write((Byte)1);
 
                 // checkpoints file                
-                fsCheckpoints = new FileStream (CurrentFileName.Replace (".gcc", "_CheckPoints.xml"), FileMode.Create);
+                fsCheckpoints = new FileStream (CurrentChkPtFileName, FileMode.Create);
                 wrCheckpoints = new StreamWriter (fsCheckpoints);
             }
             catch (Exception e)
             {
                 Utils.log.Error (" StartNewTrace - create writer and write header ", e);
+            }
+            finally
+            {
+                writer.Flush ();
             }
 
             OriginShiftX = 0.0;
@@ -2715,7 +2832,7 @@ namespace GpsCycleComputer
 
             Counter = 0;
             Decimation = 1;
-            FirstSampleValidCount = 0;
+            FirstSampleValidCount = 1;
 
             LastPointUtc = DateTime.MinValue;
         }
@@ -2738,15 +2855,10 @@ namespace GpsCycleComputer
 
         private void buttonEnterCheckpoint_Click (object sender, EventArgs e)
         {
-            wrCheckpoints.WriteLine ("<wpt lat=\"" + lastLat + "\" lon=\"" + lastLon + "\" >");
-            wrCheckpoints.WriteLine ("   <name>" + textBoxEnterCheckpoint.Text + "</name>");
-            wrCheckpoints.WriteLine ("   <desc>" + textBoxEnterCheckpoint.Text + "</desc>");
-            wrCheckpoints.WriteLine ("   <url>http://localhost</url>\r\n"); // dummy url
-            wrCheckpoints.WriteLine ("   <urlname>" + textBoxEnterCheckpoint.Text + "</urlname>n"); // trick in order for Googke Earth to display the popup box
-            wrCheckpoints.WriteLine ("</wpt>");
+            wrCheckpoints.WriteLine (CurrentLat+"|"+CurrentLong+"|"+textBoxEnterCheckpoint.Text);
             wrCheckpoints.Flush ();
-
             buttonCheckpointPause_Click (sender, e);
+            ChkPtCount++;
         }
 
         private void buttonCheckpointPause_Click (object sender, EventArgs e)
@@ -2858,11 +2970,16 @@ namespace GpsCycleComputer
 
             try
             {
-            writer.Close();
-            fstream.Close();
+                writer.Close ();
+                fstream.Close ();
 
                 fsCheckpoints.Close ();
                 wrCheckpoints.Close ();
+                if (ChkPtCount == 0) // no need to keep an empty file
+                {
+                    File.Delete (CurrentChkPtFileName);
+                }
+
             }
             catch (Exception e)
             {
@@ -2893,10 +3010,9 @@ namespace GpsCycleComputer
             labelFileName.SetText("");
 
             // copy file into "permanent place", only if any records
-            if (Counter > 0)
-            { 
-                File.Copy(TempFileName, CurrentFileName, true);
-                saveCsvLog();
+            if (Counter == 0)
+            {
+                saveCsvLog ();
             }
 
             Cursor.Current = Cursors.Default;
@@ -2922,7 +3038,7 @@ namespace GpsCycleComputer
                 if (timerGps.Enabled == false)
                 {
                     //Add CheckPoint
-                    if (lastLat != 0 && lastLon != 0)
+                    if (CurrentLat != 0 && CurrentLong != 0)
                     {
                         textBoxEnterCheckpoint.Text = ("");
                         tabEnterCheckpoint.Height = this.Height;
@@ -3044,7 +3160,9 @@ namespace GpsCycleComputer
             int gps_poll_sec = 0;
 
             CurrentFileName = filename;
-
+            CurrentChkPtFileName = Path.GetDirectoryName (CurrentFileName) + "/" +
+                                   Path.GetFileNameWithoutExtension (CurrentFileName) + "_chkpt.gccc";
+             
             // preset label text for errors
             CurrentStatusString = "File has errors or blank";
 
@@ -3200,7 +3318,9 @@ namespace GpsCycleComputer
         // start/stop GPS
         private void timerGps_Tick(object sender, EventArgs e)
         {
+
             if (LockGpsTick) { return; }
+
 
             // set a lock for this function (just in case it got stack in GPS calls)
             LockGpsTick = true;
@@ -3232,24 +3352,35 @@ namespace GpsCycleComputer
             if (gps.Opened)
             {
                 GetGpsData();
-
+               
                 // if data was not valid, need to wait before disabling GPS
                 // do not search for longer that 3 min (if e.g. temporary lost the signal) - go to sleep
                 if ((GpsDataOk == false) && (GpsSearchCount < 180))
-                    { LockGpsTick = false; return; }
+                {
+                    LockGpsTick = false;
+                    return;
+                }
 
                 // set "long" interval
                 timerGps.Interval = 1000 * PollGpsTimeSec[comboGpsPoll.SelectedIndex];
 
                 gps.Close();
-                if (!StoppedOnLow) { CurrentStatusString = "gps off for " + PollGpsTimeSec[comboGpsPoll.SelectedIndex] + " sec"; }
+                if (!StoppedOnLow) 
+                { 
+                    CurrentStatusString = "gps off for " + PollGpsTimeSec[comboGpsPoll.SelectedIndex] + " sec"; 
+                }
 
                 LastPointUtc = DateTime.MinValue;
             }
             else
             {
                 gps.Open();
-                if (!StoppedOnLow) { CurrentStatusString = "gps opening ..."; }
+                FirstSampleValidCount = 1;
+
+                if (!StoppedOnLow) 
+                { 
+                    CurrentStatusString = "gps opening ..."; 
+                }
 
                 // set "short" interval
                 timerGps.Interval = 1000;
@@ -3283,8 +3414,14 @@ namespace GpsCycleComputer
                 gcc_file = gcc_file.Replace("*", ""); // remove * and + for the gpx/kml indication
                 gcc_file = gcc_file.Replace("+", "");
 
-                if (IoFilesDirectory == "\\") { gcc_file = "\\" + gcc_file; ; }
-                else { gcc_file = IoFilesDirectory + "\\" + gcc_file; }
+                if (IoFilesDirectory == "\\") 
+                { 
+                    gcc_file = "\\" + gcc_file; ; 
+                }
+                else 
+                { 
+                    gcc_file = IoFilesDirectory + "\\" + gcc_file; 
+                }
 
                 if (!LoadGcc(gcc_file))
                 {
@@ -3323,6 +3460,42 @@ namespace GpsCycleComputer
                 // write KML header
                 wr.WriteLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
                 wr.WriteLine("<kml xmlns=\"http://www.opengis.net/kml/2.2\">");
+
+                wr.WriteLine(" <Document>");
+                wr.WriteLine ("  <name><![CDATA[" + StartTime.ToString () + "]]></name>");
+
+                // Get the checkpoints
+                if (File.Exists(CurrentChkPtFileName))
+                {
+                    try
+                    {
+                        wr.WriteLine ("  <Folder> <name>Waypoints</name>");
+
+                        StreamReader re = File.OpenText (CurrentChkPtFileName);
+
+                        string line = re.ReadLine ();
+                        string [] tokens = line != null ? line.Split ('|') : null;
+ 
+                        while (tokens!=null && tokens.Length == 3)
+                        {
+                            wr.WriteLine ("  <Placemark><name>" + tokens [2] 
+                                        + "</name><Point><altitudeMode>clampToGround</altitudeMode><coordinates>" + tokens [1] 
+                                        + "," + tokens[0] + ",0.000000</coordinates></Point></Placemark>");
+                            
+                            line = re.ReadLine ();
+                            tokens = line != null ? line.Split ('|') : null;
+                        }
+
+                        re.Close ();
+                        wr.WriteLine ("  </Folder>");
+                    }
+                    catch (Exception eee)
+                    {
+                        Utils.log.Error (" buttonSaveKML_Click load checkpoints", eee);
+                    }
+                }
+
+                wr.WriteLine (" <Folder> <name>Tracks</name>");
                 wr.WriteLine("  <Placemark>");
                 wr.WriteLine("    <name>" + StartTime.ToString() + "</name>");
 
@@ -3397,6 +3570,8 @@ namespace GpsCycleComputer
                 wr.WriteLine("        </coordinates>");
                 wr.WriteLine("      </LineString>");
                 wr.WriteLine("    </Placemark>");
+                wr.WriteLine("   </Folder>");
+                wr.WriteLine (" </Document>");
                 wr.WriteLine("</kml>");
                 wr.Close();
                 fs.Close();
@@ -3470,7 +3645,45 @@ namespace GpsCycleComputer
                 wr.WriteLine(" xmlns=\"http://www.topografix.com/GPX/1/0\"");
                 wr.WriteLine(" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd\">");
                 wr.WriteLine("");
-                if (checkGpxRte.Checked) { wr.WriteLine("<rte>"); } else { wr.WriteLine("<trk>"); }
+
+                // Get the checkpoints
+                
+                if (File.Exists (CurrentChkPtFileName))
+                {
+
+                    try
+                    {
+                        StreamReader re = File.OpenText (CurrentChkPtFileName);
+
+                        string line = re.ReadLine ();
+                        string [] tokens = line != null ? line.Split ('|') : null;
+                        while (tokens != null && tokens.Length == 3)
+                        {
+                            wr.WriteLine ("<wpt lat=\"" + tokens [0]
+                                        + "\" lon=\"" + tokens [1]
+                                        + "\" ><name>" + tokens [2]
+                                        + "</name></wpt>");
+                            line = re.ReadLine ();
+                            tokens = line!=null?line.Split ('|'):null;
+                        }
+                        re.Close ();
+                        wr.WriteLine ("");
+                    }
+                    catch (Exception eee)
+                    {
+                        Utils.log.Error (" buttonSaveGPX_Click load checkpoints", eee);
+                    }
+                }
+
+
+                if (checkGpxRte.Checked) 
+                { 
+                    wr.WriteLine("<rte>"); 
+                } 
+                else 
+                { 
+                    wr.WriteLine("<trk>"); 
+                }
                 wr.WriteLine("<name>" + StartTime.ToString() + "</name>");
 
                 string dist_unit, speed_unit, alt_unit, exstop_info;
@@ -3508,7 +3721,14 @@ namespace GpsCycleComputer
 
                     wr.WriteLine("<speed>" + replaceCommas(PlotS[i] * 0.1) + "</speed>");
 
-                    if (checkGpxRte.Checked) { wr.WriteLine("</rtept>"); } else { wr.WriteLine("</trkpt>"); } 
+                    if (checkGpxRte.Checked) 
+                    { 
+                        wr.WriteLine("</rtept>"); 
+                    } 
+                    else 
+                    {
+                        wr.WriteLine("</trkpt>"); 
+                    } 
                 }
                 // write end of the GPX file
                 if (checkGpxRte.Checked == false) { wr.WriteLine("</trkseg>"); }
@@ -3624,7 +3844,22 @@ namespace GpsCycleComputer
 
         private void comboGpsPoll_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (DoNotSaveSettingsFlag) return;
+         
+            if (comboGpsPoll.SelectedIndex != 0)
+            {
+                comboDropFirst.Enabled = true;
+            }
+            else
+            {
+                comboDropFirst.SelectedIndex = 0;
+                comboDropFirst.Enabled = false;
+            }
+
+            if (DoNotSaveSettingsFlag)
+            {
+                return;
+            }
+               
             SaveSettings();
         }
 
@@ -4796,7 +5031,7 @@ namespace GpsCycleComputer
                     StartTime = DateTime.Now;       StartTimeUtc = DateTime.UtcNow;
                     LastBatterySave = StartTimeUtc; LastLiveLogging = StartTimeUtc;
                     MaxSpeed = 0.0; Distance = 0.0; CurrentStoppageTimeSec = 0;
-                    FirstSampleValidCount = 0;      GpsSearchCount = 0;
+                    FirstSampleValidCount = 1;      GpsSearchCount = 0;
                     CurrentStatusString = "gps off"; CurrentLiveLoggingString = "";
 
                     labelFileName.SetText("All tracks cleared");
@@ -5027,6 +5262,16 @@ namespace GpsCycleComputer
             {
                 Utils.log.Error (" DebugPrintout ", e);
             }
+        }
+
+        private void comboDropFirst_SelectedIndexChanged (object sender, EventArgs e)
+        {
+            if (DoNotSaveSettingsFlag)
+            {
+                return;
+            }
+
+            SaveSettings ();
         }
 
     }
