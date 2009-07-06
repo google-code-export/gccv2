@@ -2065,7 +2065,10 @@ namespace GpsCycleComputer
                 wr.Close();
                 fs.Close();
             }
-            catch (Exception /*e*/) { }
+            catch (Exception ee)
+            {
+                Utils.log.Error (" Form1_Load ", ee);
+            }
 
             // now allow to save setting on combo change
             DoNotSaveSettingsFlag = false;
@@ -2106,15 +2109,22 @@ namespace GpsCycleComputer
             // Stop button enabled - indivate that we need to close streams
             if (buttonStop.Enabled)
             {
-                try{
+                try
+                {
                 writer.Close();
                 fstream.Close();
 
                 // copy file into "permanent place"
                 File.Copy(TempFileName, CurrentFileName, true);
                 saveCsvLog();
-                } catch (Exception /*e*/) { }
             }
+                catch (Exception ee)
+                {
+                    Utils.log.Error (" Form1_Closed ", ee);
+                }
+            }
+
+            Utils.log = null;
         }
 
         private void Form1_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -2143,7 +2153,8 @@ namespace GpsCycleComputer
             if (CurrentDirectory != "")
             { file_name = CurrentDirectory + "\\" + file_name; }
 
-            try {
+            try
+            {
             FileStream fs = new FileStream(file_name, FileMode.Create);
             BinaryWriter wr = new BinaryWriter(fs, Encoding.ASCII);
 
@@ -2225,7 +2236,11 @@ namespace GpsCycleComputer
 
             wr.Close();
             fs.Close();
-            } catch (Exception /*e*/) { }
+            }
+            catch (Exception e)
+            {
+                Utils.log.Error (" SaveSettings ", e);
+            }
         }
 
         // main logging function to receive date from GPS
@@ -2254,7 +2269,10 @@ namespace GpsCycleComputer
                             if (Counter == 0)
                             {
                                 // wait first few samples to get a "better grip" !
-                                if (FirstSampleValidCount > 3) { time_check_passed = true; }
+                                if (FirstSampleValidCount > 3)
+                                {
+                                    time_check_passed = true;
+                                }
 
                                 FirstSampleValidCount++;
                             }
@@ -2286,8 +2304,10 @@ namespace GpsCycleComputer
                                 writer.Write((double)position.Latitude);
                                 writer.Write((double)position.Longitude);
                             }
-                            catch (Exception /*e*/) { }
-
+                            catch (Exception e)
+                            {
+                                Utils.log.Error (" GetGpsData - save and write starting position", e);
+                            }
                             utmUtil.setReferencePoint(position.Latitude, position.Longitude);
 
                             WriteOptionsInfo();
@@ -2376,18 +2396,25 @@ namespace GpsCycleComputer
                     OriginShiftX += deltaX;
                     OriginShiftY += deltaY;
 
-                    try {
+                    try
+                    {
                     writer.Write((Int16)deltaX);
                     writer.Write((Int16)deltaY);
                     writer.Write((Int16)0);         // this is origin update (0)
                     writer.Write((UInt16)0xFFFF);   // status record (0xFFFF/0xFFFF)
                     writer.Write((UInt16)0xFFFF);
-                    } catch (Exception /*e*/) { }
+
+                    }
+                    catch (Exception e)
+                    {
+                        Utils.log.Error (" WriteRecord - Origin Shift ", e);
+                    }
                 }
             }
 
             // proceed with "normal" record
-            try {
+            try
+            {
             Int16 x_int = (Int16)x; writer.Write((Int16)x_int);
             Int16 y_int = (Int16)y; writer.Write((Int16)y_int);
 
@@ -2428,7 +2455,12 @@ namespace GpsCycleComputer
 
             // store data
             AddPlotData((float)CurrentLat, (float)CurrentLong, z_int, t_int, v_int);
-            } catch (Exception /*e*/) { }
+            }
+            catch (Exception e)
+            {
+                Utils.log.Error (" WriteRecord - Normal Record ", e);
+            }
+
         }
 
         private void AddPlotData(float lat, float lng, Int16 z, UInt16 t, UInt16 s)
@@ -2458,14 +2490,19 @@ namespace GpsCycleComputer
         private void WriteStartDateTime()
         {
             Byte x;
-            try {
+            try
+            {
                 x = (Byte)(StartTime.Year - 2000); writer.Write((Byte)x);
                 x = (Byte)StartTime.Month; writer.Write((Byte)x);
                 x = (Byte)StartTime.Day; writer.Write((Byte)x);
                 x = (Byte)StartTime.Hour; writer.Write((Byte)x);
                 x = (Byte)StartTime.Minute; writer.Write((Byte)x);
                 x = (Byte)StartTime.Second; writer.Write((Byte)x);
-            }  catch (Exception /*e*/) { }
+            }
+            catch (Exception e)
+            {
+                Utils.log.Error (" WriteStartDateTime ", e);
+            }
         }
 
         // write battery info
@@ -2483,13 +2520,18 @@ namespace GpsCycleComputer
             CurrentBattery = Utils.GetBatteryStatus();
             Int16 x = (Int16) CurrentBattery;
 
-            try {
+            try
+            {
             writer.Write((Int16)x);
             writer.Write((Int16)0);
             writer.Write((Int16)1);         // this is battery status record (1)
             writer.Write((UInt16)0xFFFF);   // status record (0xFFFF/0xFFFF)
             writer.Write((UInt16)0xFFFF);
-            } catch (Exception /*e*/) { }
+            }
+            catch (Exception e)
+            {
+                Utils.log.Error (" WriteBatteryInfo ", e);
+            }
 
             // terminate if low power
             if (x > 0)
@@ -2516,7 +2558,10 @@ namespace GpsCycleComputer
                 writer.Write((UInt16)0xFFFF);   // status record (0xFFFF/0xFFFF)
                 writer.Write((UInt16)0xFFFF);
             }
-            catch (Exception /*e*/) { }
+            catch (Exception e)
+            {
+                Utils.log.Error (" WriteOptionsInfo ", e);
+            }
         }
 
         // generate a new file name using StartTime
@@ -2566,12 +2611,18 @@ namespace GpsCycleComputer
             LastLiveLogging = StartTimeUtc;
 
             // create writer and write header
-            try {
+            try
+            {
             fstream = new FileStream(TempFileName, FileMode.Create);
             writer = new BinaryWriter(fstream, Encoding.ASCII);
 
             writer.Write((char)'G'); writer.Write((char)'C'); writer.Write((char)'C'); writer.Write((Byte)1);
-            } catch (Exception /*e*/) { }
+                             
+            }
+            catch (Exception e)
+            {
+                Utils.log.Error (" StartNewTrace - create writer and write header ", e);
+            }
 
             OriginShiftX = 0.0;
             OriginShiftY = 0.0;
@@ -2674,7 +2725,10 @@ namespace GpsCycleComputer
                     else { SaveGpdUnattendedValue = 4; } // default is 4
                     rk.SetValue("gpd0:", 0, RegistryValueKind.DWord);    // set to 0, i.e. GPS is ON
                 }
-                catch (Exception /*e*/) { }
+                catch (Exception e)
+                {
+                    Utils.log.Error (" DoStart - keep tool running if power turned off ", e);
+                }
             }
         }
         private void buttonStop_Click()
@@ -2693,17 +2747,26 @@ namespace GpsCycleComputer
                     RegistryKey rk = Registry.LocalMachine.OpenSubKey("System\\CurrentControlSet\\Control\\Power\\State\\Unattended", true);
                     rk.SetValue("gpd0:", SaveGpdUnattendedValue, RegistryValueKind.DWord);
                 }
-                catch (Exception /*e*/) { }
+                catch (Exception e)
+                {
+                    Utils.log.Error (" buttonStop_Click -keep tool running if power turned off ", e);
+                }
             }
 
             buttonStop.Enabled = false;
 
             if (gps.Opened) { gps.Close(); }
 
-            try {
+            try
+            {
             writer.Close();
             fstream.Close();
-            } catch (Exception /*e*/) { }
+
+            }
+            catch (Exception e)
+            {
+                Utils.log.Error (" buttonStop_Click - writer close ", e);
+            }
             comboGpsPoll.Enabled = true;
             GpsSearchCount = 0;
             CurrentStatusString = "gps off";
@@ -2914,7 +2977,11 @@ namespace GpsCycleComputer
                             if (rd.PeekChar() != -1) { v_int = rd.ReadUInt16(); } else { break; }
                             if (rd.PeekChar() != -1) { t_int = rd.ReadUInt16(); } else { break; }
                         }
-                        catch (Exception /*e*/) { break; }
+                        catch (Exception e)
+                        {
+                            Utils.log.Error (" LoadGcc - get 5 short ints", e);
+                            break;
+                        }
 
                         // check if this is a special record
                         // battery: z_int = 1
@@ -2964,8 +3031,15 @@ namespace GpsCycleComputer
                             AddPlotData((float)out_lat, (float)out_long, z_int, t_int, v_int);
                             Counter++;
 
-                            try { rd.PeekChar(); }
-                            catch (Exception /*e*/) { break; }
+                            try
+                            {
+                                rd.PeekChar ();
+                            }
+                            catch (Exception e)
+                            {
+                                Utils.log.Error (" LoadGcc - PeekChar ", e);
+                                break;
+                            }
                         }
                     }
 
@@ -2984,7 +3058,10 @@ namespace GpsCycleComputer
                     // for maps, fill x/y values realtive to the starting point
                     ResetMapPosition();
                 }
-                catch (Exception /*e*/) { }
+                catch (Exception e)
+                {
+                    Utils.log.Error (" LoadGcc ", e);
+                }
             } while (false);
             Cursor.Current = Cursors.Default;
 
@@ -3023,8 +3100,14 @@ namespace GpsCycleComputer
                 // close and open GPS, if searching to too long - this might revive it!
                 if ((GpsDataOk == false) && (GpsSearchCount > 120))
                 {
-                    if (gps.Opened) { gps.Close(); } // first we close it
-                    else            { gps.Open(); GpsSearchCount = 0; } // then we open it, and reset count
+                    if (gps.Opened)
+                    {
+                        gps.Close ();
+                    } // first we close it
+                    else
+                    {
+                        gps.Open (); GpsSearchCount = 0;
+                    } // then we open it, and reset count
                     LockGpsTick = false; 
                     return; 
                 }
@@ -3207,7 +3290,11 @@ namespace GpsCycleComputer
                 wr.Close();
                 fs.Close();
 
-            } catch (Exception /*e*/) { }
+            }
+            catch (Exception ee)
+            {
+                Utils.log.Error (" buttonSaveKML_Click", ee);
+            }
             Cursor.Current = Cursors.Default;
 
             // refill listBox, to indicate that KML was saved
@@ -3321,7 +3408,10 @@ namespace GpsCycleComputer
                 fs.Close();
 
             }
-            catch (Exception /*e*/) { }
+            catch (Exception ee)
+            {
+                Utils.log.Error (" buttonSaveGPX_Click ", ee);
+            }
             Cursor.Current = Cursors.Default;
 
             // refill listBox, to indicate that GPX was saved
@@ -3415,7 +3505,10 @@ namespace GpsCycleComputer
                 fs.Close();
 
             }
-            catch (Exception /*e*/) { }
+            catch (Exception e)
+            {
+                Utils.log.Error (" saveCsvLog ", e);
+            }
         }
 
         private void comboGpsPoll_SelectedIndexChanged(object sender, EventArgs e)
@@ -4467,6 +4560,8 @@ namespace GpsCycleComputer
             {
                 isLandscape = true;
 
+                // TODO  Rotate Buttons
+
                 // store original buttons location
                 LandscapeX1 = buttonStart.Left;     LandscapeX2 = buttonStop.Left;
                 LandscapeY1 = buttonPicSaveKML.Top; LandscapeY2 = buttonStart.Top;
@@ -4817,7 +4912,10 @@ namespace GpsCycleComputer
                 fs.Close();
             }
 
-            catch (Exception /*e*/) { }
+            catch (Exception e)
+            {
+                Utils.log.Error (" DebugPrintout ", e);
+            }
         }
 
     }
