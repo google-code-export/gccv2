@@ -35,6 +35,11 @@ namespace GpsCycleComputer
         FileStream fstream;
         BinaryWriter writer;
 
+        // checkpoints file
+        FileStream fsCheckpoints;
+        StreamWriter wrCheckpoints;
+
+
         // custom buttons
         PictureButton buttonMain = new PictureButton();
         PictureButton buttonGraph = new PictureButton();
@@ -75,6 +80,12 @@ namespace GpsCycleComputer
         // button on EnterFileName tab
         PictureButton buttonEnterFileName = new PictureButton();
 
+        // button on EnterCheckpoint tab
+        PictureButton buttonEnterCheckpoint = new PictureButton ();
+
+        // button on EnterCheckpoint tab
+        PictureButton buttonCheckpointPause = new PictureButton ();
+        
         // button to load track to follow
         PictureButton buttonLoadTrack2Follow = new PictureButton();
         PictureButton buttonLoad2Clear = new PictureButton();
@@ -142,6 +153,9 @@ namespace GpsCycleComputer
         double Distance = 0.0;
         double OldX = 0.0, OldY = 0.0;
         int OldT = 0;
+
+        // last logged lat/lon, for checkpoint saving
+        double lastLat = 0.0, lastLon = 0.0;
 
         // Current time, X/Y relative to starting point, abs height Z and current speed
         int CurrentTimeSec = 0;
@@ -239,6 +253,7 @@ namespace GpsCycleComputer
         private Panel tabBlank;
         private Panel tabBlank1;
         private Panel tabEnterFileName;
+        private Panel tabEnterCheckpoint;
         private Panel tabOpenFile;
         private Timer timerGps;
         private ComboBox comboGpsPoll;
@@ -257,6 +272,8 @@ namespace GpsCycleComputer
         private CheckBox checkKmlAlt;
         private TextBox textBoxEnterFileName;
         private Label labelEnterFileName;
+        private TextBox textBoxEnterCheckpoint;
+        private Label labelEnterCheckpoint;
         private Microsoft.WindowsCE.Forms.InputPanel inputPanel;
         private CheckBox checkEditFileName;
         private CheckBox checkShowBkOff;
@@ -390,6 +407,12 @@ namespace GpsCycleComputer
             textBoxEnterFileName.BackColor = bkColor; textBoxEnterFileName.ForeColor = foColor;
             labelEnterFileName.BackColor = bkColor; labelEnterFileName.ForeColor = foColor;
             buttonEnterFileName.BackColor = bkColor; buttonEnterFileName.ForeColor = foColor;
+            tabEnterCheckpoint.BackColor = bkColor;
+            textBoxEnterCheckpoint.BackColor = bkColor; textBoxEnterCheckpoint.ForeColor = foColor;
+            labelEnterCheckpoint.BackColor = bkColor; labelEnterCheckpoint.ForeColor = foColor;
+            buttonEnterCheckpoint.BackColor = bkColor; buttonEnterCheckpoint.ForeColor = foColor;
+            buttonCheckpointPause.BackColor = bkColor; buttonCheckpointPause.ForeColor = foColor;
+
             checkEditFileName.BackColor = bkColor; checkEditFileName.ForeColor = foColor;
             checkShowBkOff.BackColor = bkColor; checkShowBkOff.ForeColor = foColor;
             checkRelativeAlt.BackColor = bkColor; checkRelativeAlt.ForeColor = foColor;
@@ -714,6 +737,22 @@ namespace GpsCycleComputer
             buttonEnterFileName.Font = new System.Drawing.Font("Tahoma", 10F, System.Drawing.FontStyle.Regular);
             buttonEnterFileName.align = 3;
 
+            // button to set Checkpoint
+            buttonEnterCheckpoint.Parent = this.tabEnterCheckpoint;
+            buttonEnterCheckpoint.Bounds = new Rectangle (252, 100, 220, 80);
+            buttonEnterCheckpoint.Text = "Save & Pause";
+            buttonEnterCheckpoint.Click += new System.EventHandler (this.buttonEnterCheckpoint_Click);
+            buttonEnterCheckpoint.Font = new System.Drawing.Font ("Tahoma", 10F, System.Drawing.FontStyle.Regular);
+            buttonEnterCheckpoint.align = 3;
+
+            // button to Pause
+            buttonCheckpointPause.Parent = this.tabEnterCheckpoint;
+            buttonCheckpointPause.Bounds = new Rectangle (32, 100, 220, 80);
+            buttonCheckpointPause.Text = "Pause";
+            buttonCheckpointPause.Click += new System.EventHandler (this.buttonCheckpointPause_Click);
+            buttonCheckpointPause.Font = new System.Drawing.Font ("Tahoma", 10F, System.Drawing.FontStyle.Regular);
+            buttonCheckpointPause.align = 3;
+
             // buttons on CW page
             buttonCWShowKeyboard.Parent = this.tabPageLiveLog;
             buttonCWShowKeyboard.Bounds = new Rectangle(202, 0, 270, 40);
@@ -840,6 +879,11 @@ namespace GpsCycleComputer
             ScaleControl((Control)textBoxEnterFileName);
             ScaleControl((Control)labelEnterFileName);
             ScaleControl((Control)buttonEnterFileName);
+            ScaleControl ((Control) tabEnterCheckpoint);
+            ScaleControl ((Control) textBoxEnterCheckpoint);
+            ScaleControl ((Control) labelEnterCheckpoint);
+            ScaleControl ((Control) buttonEnterCheckpoint);
+            ScaleControl ((Control) buttonCheckpointPause);
             ScaleControl((Control)checkEditFileName);
             ScaleControl((Control)checkShowBkOff);
             ScaleControl((Control)checkRelativeAlt);
@@ -967,6 +1011,9 @@ namespace GpsCycleComputer
             this.tabEnterFileName = new System.Windows.Forms.Panel();
             this.textBoxEnterFileName = new System.Windows.Forms.TextBox();
             this.labelEnterFileName = new System.Windows.Forms.Label();
+            this.tabEnterCheckpoint = new System.Windows.Forms.Panel ();
+            this.textBoxEnterCheckpoint = new System.Windows.Forms.TextBox ();
+            this.labelEnterCheckpoint = new System.Windows.Forms.Label ();
             this.labelRevision = new System.Windows.Forms.Label();
             this.tabOpenFile = new System.Windows.Forms.Panel();
             this.listBoxFiles = new System.Windows.Forms.ListBox();
@@ -1043,6 +1090,7 @@ namespace GpsCycleComputer
             this.tabPageLaps = new System.Windows.Forms.TabPage();
             this.tabPageAbout = new System.Windows.Forms.TabPage();
             this.tabEnterFileName.SuspendLayout();
+            this.tabEnterCheckpoint.SuspendLayout ();            
             this.tabOpenFile.SuspendLayout();
             this.tabControl.SuspendLayout();
             this.tabPageOptions.SuspendLayout();
@@ -1076,6 +1124,29 @@ namespace GpsCycleComputer
             this.labelEnterFileName.Name = "labelEnterFileName";
             this.labelEnterFileName.Size = new System.Drawing.Size(463, 40);
             this.labelEnterFileName.Text = "Enter file name (without extension):";
+            // 
+            // tabEnterCheckpoint
+            // 
+            this.tabEnterCheckpoint.Controls.Add (this.textBoxEnterCheckpoint);
+            this.tabEnterCheckpoint.Controls.Add (this.labelEnterCheckpoint);
+            this.tabEnterCheckpoint.Location = new System.Drawing.Point (0, 0);
+            this.tabEnterCheckpoint.Name = "tabEnterCheckpoint";
+            this.tabEnterCheckpoint.Size = new System.Drawing.Size (480, 507);
+            // 
+            // textBoxEnterCheckpoint
+            // 
+            this.textBoxEnterCheckpoint.Location = new System.Drawing.Point (2, 54);
+            this.textBoxEnterCheckpoint.Name = "textBoxEnterCheckpoint";
+            this.textBoxEnterCheckpoint.Size = new System.Drawing.Size (474, 41);
+            this.textBoxEnterCheckpoint.TabIndex = 1;
+            // 
+            // labelEnterCheckpoint
+            // 
+            this.labelEnterCheckpoint.Location = new System.Drawing.Point (9, 15);
+            this.labelEnterCheckpoint.Name = "labelEnterCheckpoint";
+            this.labelEnterCheckpoint.Size = new System.Drawing.Size (463, 40);
+            this.labelEnterCheckpoint.Text = "Enter Checkpoint:";
+          
             // 
             // labelRevision
             // 
@@ -1901,6 +1972,7 @@ namespace GpsCycleComputer
             this.Controls.Add(this.tabBlank);
             this.Controls.Add(this.tabBlank1);
             this.Controls.Add(this.tabEnterFileName);
+            this.Controls.Add (this.tabEnterCheckpoint);
             this.Controls.Add(this.tabOpenFile);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Location = new System.Drawing.Point(0, 52);
@@ -1911,6 +1983,7 @@ namespace GpsCycleComputer
             this.Closing += new System.ComponentModel.CancelEventHandler(this.Form1_Closing);
             this.Resize += new System.EventHandler(this.Form1_Resize);
             this.tabEnterFileName.ResumeLayout(false);
+            this.tabEnterCheckpoint.ResumeLayout (false);
             this.tabOpenFile.ResumeLayout(false);
             this.tabControl.ResumeLayout(false);
             this.tabPageOptions.ResumeLayout(false);
@@ -2365,6 +2438,9 @@ namespace GpsCycleComputer
         // Write record. Position must be valid
         private void WriteRecord(GpsPosition pos)
         {
+            lastLat = pos.Latitude;
+            lastLon = pos.Longitude;
+
             double x;
             double y;
             utmUtil.getXY(pos.Latitude, pos.Longitude, out x, out y);
@@ -2617,7 +2693,10 @@ namespace GpsCycleComputer
             writer = new BinaryWriter(fstream, Encoding.ASCII);
 
             writer.Write((char)'G'); writer.Write((char)'C'); writer.Write((char)'C'); writer.Write((Byte)1);
-                             
+
+                // checkpoints file                
+                fsCheckpoints = new FileStream (CurrentFileName.Replace (".gcc", "_CheckPoints.xml"), FileMode.Create);
+                wrCheckpoints = new StreamWriter (fsCheckpoints);
             }
             catch (Exception e)
             {
@@ -2655,6 +2734,26 @@ namespace GpsCycleComputer
             inputPanel.Enabled = false;
 
             DoStart();
+        }
+
+        private void buttonEnterCheckpoint_Click (object sender, EventArgs e)
+        {
+            wrCheckpoints.WriteLine ("<wpt lat=\"" + lastLat + "\" lon=\"" + lastLon + "\" >");
+            wrCheckpoints.WriteLine ("   <name>" + textBoxEnterCheckpoint.Text + "</name>");
+            wrCheckpoints.WriteLine ("   <desc>" + textBoxEnterCheckpoint.Text + "</desc>");
+            wrCheckpoints.WriteLine ("   <url>http://localhost</url>\r\n"); // dummy url
+            wrCheckpoints.WriteLine ("   <urlname>" + textBoxEnterCheckpoint.Text + "</urlname>n"); // trick in order for Googke Earth to display the popup box
+            wrCheckpoints.WriteLine ("</wpt>");
+            wrCheckpoints.Flush ();
+
+            buttonCheckpointPause_Click (sender, e);
+        }
+
+        private void buttonCheckpointPause_Click (object sender, EventArgs e)
+        {
+            tabEnterCheckpoint.SendToBack ();
+            tabEnterCheckpoint.Height = this.Height;
+            inputPanel.Enabled = false;
         }
 
         private void buttonStart_Click()
@@ -2762,6 +2861,8 @@ namespace GpsCycleComputer
             writer.Close();
             fstream.Close();
 
+                fsCheckpoints.Close ();
+                wrCheckpoints.Close ();
             }
             catch (Exception e)
             {
@@ -2820,6 +2921,16 @@ namespace GpsCycleComputer
 
                 if (timerGps.Enabled == false)
                 {
+                    //Add CheckPoint
+                    if (lastLat != 0 && lastLon != 0)
+                    {
+                        textBoxEnterCheckpoint.Text = ("");
+                        tabEnterCheckpoint.Height = this.Height;
+                        tabEnterCheckpoint.BringToFront ();
+                        inputPanel.Enabled = true;
+                        textBoxEnterCheckpoint.Focus ();
+                    }
+
                     // if always-on, stop GPS
                     if (comboGpsPoll.SelectedIndex == 0)
                     {
