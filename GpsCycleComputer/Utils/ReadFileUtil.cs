@@ -66,7 +66,11 @@ namespace GpsUtils
                             if (rd.PeekChar() != -1) { v_int = rd.ReadUInt16(); } else { break; }
                             if (rd.PeekChar() != -1) { t_int = rd.ReadUInt16(); } else { break; }
                         }
-                        catch (Exception /*e*/) { break; }
+                        catch (Exception e) 
+                        {
+                            Utils.log.Error (" LoadGcc - get 5 short ints ", e);
+                            break; 
+                        }
 
                         // check if this is a special record
                         // battery: z_int = 1
@@ -111,8 +115,15 @@ namespace GpsUtils
                             dataT[Counter] = t_int;
                             Counter++;
 
-                            try { rd.PeekChar(); }
-                            catch (Exception /*e*/) { break; }
+                            try 
+                            { 
+                                rd.PeekChar(); 
+                            }
+                            catch (Exception e)
+                            {
+                                Utils.log.Error (" LoadGcc -  PeekChar", e);
+                                break; 
+                            }
                         }
                     }
 
@@ -122,7 +133,10 @@ namespace GpsUtils
                     data_size = Counter;
                     Status = true;
                 }
-                catch (Exception /*e*/) { }
+                catch (Exception e) 
+                {
+                    Utils.log.Error (" LoadGcc ", e);
+                }
             } while (false);
             Cursor.Current = Cursors.Default;
 
@@ -148,7 +162,10 @@ namespace GpsUtils
                     }
                 }
             }
-            catch (Exception /*e*/) { }
+            catch (Exception e)
+            {
+                Utils.log.Error (" LoadWord ", e);
+            }
 
             return word;
         }
@@ -240,7 +257,10 @@ namespace GpsUtils
                 data_size = Counter;
                 Status = true;
             }
-            catch (Exception /*e*/) { }
+            catch (Exception e)
+            {
+                Utils.log.Error (" LoadKml ", e);
+            }
             Cursor.Current = Cursors.Default;
             return Status;
         }
@@ -402,7 +422,10 @@ namespace GpsUtils
                 data_size = Counter;
                 Status = true;
             }
-            catch (Exception /*e*/) { }
+            catch (Exception e)
+            {
+                Utils.log.Error (" LoadGpx ", e);
+            }
             Cursor.Current = Cursors.Default;
             return Status;
         }

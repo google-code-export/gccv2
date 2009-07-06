@@ -160,7 +160,10 @@ namespace GpsUtils
                     fs.Close();
                 }
             }
-            catch (Exception /*e*/) { }
+            catch (Exception e)
+            {
+                Utils.log.Error (" LoadCustomOsmServer ", e);
+            }
         }
         public void DownloadOsmTile(string tile_name)
         {
@@ -197,7 +200,12 @@ User-defined server (read server name from osm_server.txt)
 
                 HttpWebResponse httpResponse = (HttpWebResponse)httpRequest.GetResponse();
 
-                if (httpResponse.StatusCode != HttpStatusCode.OK) { MapErrors = __MapErrorDownload; return; }
+                if (httpResponse.StatusCode != HttpStatusCode.OK) 
+                {
+                    Utils.log.Debug ("Map download error - " + forecastAdress + " HTTPResponse = " + httpResponse.StatusCode + " - " + httpResponse.StatusDescription);
+                    MapErrors = __MapErrorDownload; 
+                    return; 
+                }
 
                 System.IO.Stream dataStream = httpResponse.GetResponseStream();
 
@@ -219,8 +227,9 @@ User-defined server (read server name from osm_server.txt)
                 dataStream.Close();
                 httpResponse.Close();
             }
-            catch (Exception /*e*/)
+            catch (Exception e)
             {
+                Utils.log.Error (" DownloadOsmTile ", e);
                 MapErrors = __MapErrorDownload;
             }
         }
@@ -533,8 +542,9 @@ User-defined server (read server name from osm_server.txt)
                         fs.Close();
                     }
                 }
-                catch (Exception /*e*/)
+                catch (Exception e)
                 {
+                    Utils.log.Error (" LoadMaps - Cannot load data for map " + jpg_name + ", map loading cancelled", e);
                     MessageBox.Show("Cannot load data for map " + jpg_name + ", map loading cancelled", "Error reading map info",
                                     MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
                     break;
@@ -892,8 +902,9 @@ User-defined server (read server name from osm_server.txt)
                         {
                             Maps[i].bmp = new Bitmap(Maps[i].fname);
                         }
-                        catch (Exception /*e*/)
+                        catch (Exception e)
                         {
+                            Utils.log.Error (" DrawJpeg - new Bitmap", e);
                             Maps[i].bmp = null;
                             MapErrors = __MapErrorReading;
                         }
@@ -1236,8 +1247,16 @@ User-defined server (read server name from osm_server.txt)
                 }
             }
 
-            if      (MapErrors == __MapErrorReading)  { str_map = "Read Error"; }
-            else if (MapErrors == __MapErrorDownload) { str_map = "Download Error"; }
+            if      (MapErrors == __MapErrorReading)  
+            {
+                str_map = "Read Error";
+                Utils.log.Debug ("Map ERROR " + str_map);
+            }
+            else if (MapErrors == __MapErrorDownload) 
+            { 
+                str_map = "Download Error";
+                Utils.log.Debug ("Map ERROR " + str_map);
+            }
 
             return str_map;
         }
@@ -1448,7 +1467,10 @@ User-defined server (read server name from osm_server.txt)
                 fs.Close();
 
             }
-            catch (Exception /*e*/) { }
+            catch (Exception e)
+            {
+                Utils.log.Error (" PrintMapInfo ", e);
+            }
         }
     }
 }

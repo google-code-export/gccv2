@@ -8,6 +8,7 @@ using System.Text;
 using System.IO;
 using System.Drawing;
 
+using Log;
 #endregion
 
 namespace GpsUtils
@@ -42,6 +43,8 @@ namespace GpsUtils
 
     public class Utils
     {
+        public static Logger log = new Logger (Path.GetDirectoryName (System.Reflection.Assembly.GetExecutingAssembly ().GetName ().CodeBase)); // current dir
+
         public Utils() {}
 
         public static IntPtr LocalAlloc(int byteCount)
@@ -220,7 +223,11 @@ namespace GpsUtils
                 wr.Close();
                 fs.Close();
             }
-            catch (Exception /*e*/) { return 4; }
+            catch (Exception e)
+            {
+                log.Error (" GetJpegSize ", e);
+                return 4;
+            }
 
             return return_status;
         }
