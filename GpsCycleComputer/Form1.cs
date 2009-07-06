@@ -224,7 +224,7 @@ namespace GpsCycleComputer
         int LandscapeX1, LandscapeX2, LandscapeY1, LandscapeY2;
 
         // Hashed password for CrossingWays, as the text edit will display ***, so we cannot read it from there
-        string CwHashPassword;
+        string CwHashPassword = "";
         DateTime LastLiveLogging;
         int[] LiveLoggingTimeMin = new int[7] { 0, 1, 5, 10, 20, 30, 60 };
         string CurrentLiveLoggingString = "";
