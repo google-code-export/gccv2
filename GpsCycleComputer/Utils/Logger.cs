@@ -53,7 +53,7 @@ namespace Log
             DateTime now = System.DateTime.Now;
             wr.WriteLine (now.Year + "." + now.Month + "." + now.Day + "_" +
                 now.Hour + ":" + now.Minute + ":" + now.Second + "::" +
-                now.Millisecond + " DEBUG " + message);
+                now.Millisecond + " ERROR " + message);
             wr.WriteLine (e.ToString ());
             wr.Flush ();
         }
