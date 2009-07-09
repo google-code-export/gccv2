@@ -507,25 +507,33 @@ User-defined server (read server name from osm_server.txt)
                             minY.i = Maps[NumMaps].sizeY; maxY.i = 0; minY.f = 0; maxY.f = 0;
 
                             string line = "";
-                            while (sr.Peek() != -1)
+                            try
                             {
-                                line = sr.ReadLine().Trim();
-                                string[] words = line.Split(';');
-                                if (words.Length != 4) { continue; }
+                                while (sr.Peek() != -1)
+                                {
+                                    line = sr.ReadLine().Trim();
+                                    string[] words = line.Split(';');
+                                    if (words.Length != 4) { continue; }
 
-                                // read X and long (0th and 2nd words)
-                                int tmp_i = Convert.ToInt32(words[0].Trim());
-                                double tmp_f = Convert.ToDouble(words[2].Trim().Replace(",", "."), number_info);
-                                if (tmp_i <= minX.i) { minX.i = tmp_i; minX.f = tmp_f; }
-                                if (tmp_i >= maxX.i) { maxX.i = tmp_i; maxX.f = tmp_f; }
+                                    // read X and long (0th and 2nd words)
+                                    int tmp_i = Convert.ToInt32(words[0].Trim());
+                                    double tmp_f = Convert.ToDouble(words[2].Trim().Replace(",", "."), number_info);
+                                    if (tmp_i <= minX.i) { minX.i = tmp_i; minX.f = tmp_f; }
+                                    if (tmp_i >= maxX.i) { maxX.i = tmp_i; maxX.f = tmp_f; }
 
-                                // read Y and lat (1st and 3rd words). Move the Y origin to the bottom of the picture (from the top)
-                                tmp_i = Maps[NumMaps].sizeY - Convert.ToInt32(words[1].Trim());
-                                tmp_f = Convert.ToDouble(words[3].Trim().Replace(",", "."), number_info);
-                                if (tmp_i <= minY.i) { minY.i = tmp_i; minY.f = tmp_f; }
-                                if (tmp_i >= maxY.i) { maxY.i = tmp_i; maxY.f = tmp_f; }
+                                    // read Y and lat (1st and 3rd words). Move the Y origin to the bottom of the picture (from the top)
+                                    tmp_i = Maps[NumMaps].sizeY - Convert.ToInt32(words[1].Trim());
+                                    tmp_f = Convert.ToDouble(words[3].Trim().Replace(",", "."), number_info);
+                                    if (tmp_i <= minY.i) { minY.i = tmp_i; minY.f = tmp_f; }
+                                    if (tmp_i >= maxY.i) { maxY.i = tmp_i; maxY.f = tmp_f; }
 
-                                num_ref_points++;
+                                    num_ref_points++;
+                                }
+                            }
+                            catch (FormatException e)
+                            {
+                                // It's OK. 
+                                // We ignore the extra info after the ref points.
                             }
 
                             if ((num_ref_points > 1) && (minX.i != maxX.i) && (minY.i != maxY.i))
