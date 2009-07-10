@@ -10,52 +10,89 @@ namespace Log
         private String filePath = "";
         private FileStream fs;
         private StreamWriter wr;
+        private bool logFileLocked = false;
 
         public Logger (String path)
-        {
-
-            DateTime now = System.DateTime.Now.Date;
-            this.filePath = path + "/gcc" /*+
-                now.Year + now.Month + now.Day + "_" +
-                now.Hour + now.Minute + now.Second +
-                now.Millisecond */+ ".log";
+        {   
+            this.filePath = path + "/gcc.log";
             try
             {
-                fs = new FileStream (filePath, FileMode.Append);
-                wr = new StreamWriter (fs);
+                fs = new FileStream(filePath, FileMode.Append);
+                wr = new StreamWriter(fs);
             }
-            catch (Exception e)
+            catch (Exception /*e*/)
             {
-                MessageBox.Show ("Loger Creation Exception:\r\n" + filePath + "\r\n" + e.ToString (), "ERROR");
+                MessageBox.Show("Loger Creation Exception:\r\n" + filePath , "ERROR");
             }
-
-
+            logFileLocked = false;
         }
 
-        public void Debug (String message)
+        public void Debug(String message)
         {
-            DateTime now = System.DateTime.Now;
-            wr.WriteLine (now.Year + "." + now.Month + "." + now.Day + "_" +
-                now.Hour + ":" + now.Minute + ":" + now.Second + "::" +
-                now.Millisecond + " DEBUG " + message);
-            wr.Flush ();
+            checkFileLengh();
+            while (logFileLocked) { }
+            logFileLocked = true;
+            wr.WriteLine(now() + " DEBUG " + message);
+            wr.Flush();
+            logFileLocked = false;
+
         }
-        public void Info (String message)
+        public void Info(String message)
         {
-            DateTime now = System.DateTime.Now;
-            wr.WriteLine (now.Year + "." + now.Month + "." + now.Day + "_" +
-                now.Hour + ":" + now.Minute + ":" + now.Second + "::" +
-                now.Millisecond + " INFO " + message);
-            wr.Flush ();
+            checkFileLengh();
+            while (logFileLocked) { }
+            logFileLocked = true;
+            wr.WriteLine(now() + " INFO " + message);
+            wr.Flush();
+            logFileLocked = false;
+
         }
-        public void Error (String message, Exception e)
+        public void Error(String message, Exception e)
+        {
+            checkFileLengh();
+            while (logFileLocked) { }
+
+            logFileLocked = true;
+            wr.WriteLine(now() + " ERROR " + message);
+            wr.WriteLine(e.ToString());
+            wr.Flush();
+            logFileLocked = false;
+
+        }
+        private  String now()
         {
             DateTime now = System.DateTime.Now;
-            wr.WriteLine (now.Year + "." + now.Month + "." + now.Day + "_" +
+            return (now.Year + "." + now.Month + "." + now.Day + "_" +
                 now.Hour + ":" + now.Minute + ":" + now.Second + "::" +
-                now.Millisecond + " ERROR " + message);
-            wr.WriteLine (e.ToString ());
-            wr.Flush ();
+                now.Millisecond);
+        }
+        private void checkFileLengh()
+        {
+            while (logFileLocked) { }
+            logFileLocked = true;
+            DateTime now = System.DateTime.Now;
+            try
+            {
+
+                FileInfo fi = new FileInfo(filePath);
+                if (fi.Length > 500000) // file size is in bytes (=500KB)
+                {
+
+                    fs.Close();
+                    wr.Close();
+                    File.Move(filePath, filePath + now.Year + now.Month + now.Day + "_" +
+                                now.Hour + now.Minute + now.Second + now.Millisecond + ".log");
+                    fs = new FileStream(filePath, FileMode.Create);
+                    wr = new StreamWriter(fs);
+
+                }
+                fi = null;
+            }
+            catch (Exception /*e*/)
+            {
+                MessageBox.Show("Loger Creation Exception:\r\n" + filePath, "ERROR");
+            }
+            logFileLocked = false;
         }
         ~Logger ()
         {
@@ -69,6 +106,5 @@ namespace Log
                 /*really do nothing*/
             }
         }
-
     }
 }

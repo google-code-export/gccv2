@@ -503,8 +503,8 @@ User-defined server (read server name from osm_server.txt)
                             // need to extract points with min and max X/Y coordinates (if we have more than 2 ref points)
                             int num_ref_points = 0;
                             RefPointInfo minX, maxX, minY, maxY;
-                            minX.i = Maps[NumMaps].sizeX; maxX.i = 0; minX.f = 0; maxX.f = 0;
-                            minY.i = Maps[NumMaps].sizeY; maxY.i = 0; minY.f = 0; maxY.f = 0;
+                            minX.i = int.MaxValue; maxX.i = int.MinValue; minX.f = 0; maxX.f = 0;
+                            minY.i = int.MaxValue; maxY.i = int.MinValue; minY.f = 0; maxY.f = 0;
 
                             string line = "";
                             try
@@ -530,7 +530,7 @@ User-defined server (read server name from osm_server.txt)
                                     num_ref_points++;
                                 }
                             }
-                            catch (FormatException e)
+                            catch (FormatException /*e*/)
                             {
                                 // It's OK. 
                                 // We ignore the extra info after the ref points.
@@ -1445,13 +1445,7 @@ User-defined server (read server name from osm_server.txt)
         {
             try
             {
-                string log_file = "\\Storage Card\\debug_map_info.txt";
-             //   if (File.Exists(Maps[0].fname)) { log_file = Path.GetDirectoryName(Maps[0].fname) + "\\debug_map_info.txt"; }
-
-                FileStream fs = new FileStream(log_file, FileMode.Create);
-                StreamWriter wr = new StreamWriter(fs);
-
-                wr.WriteLine("-----------------------------");
+                Utils.log.Debug("--------------------------------------------------------------------------------------------------------------------");
 
                 for (int i = 0; i < NumMaps; i++)
                 {
@@ -1462,22 +1456,25 @@ User-defined server (read server name from osm_server.txt)
                     str_map = str_map_zm + "/" + str_map_y + "/" + str_map_x;
                     while (str_map.Length < 30) { str_map += " "; }
 
-                    wr.WriteLine(str_map + " scr_sizeX " +
-                                (Maps[i].scrX2 - Maps[i].scrX1).ToString("0000000") + " zoom_l " +
-                                Maps[i].zoom_level.ToString("0000.000") + " qf " +
-                                Maps[i].qfactor.ToString("0.0000") + " ovr " +
-                                Maps[i].overlap.ToString("0.000") +
-                                (Maps[i].bmp == null ? " no  " : " yes ") +
+                    Utils.log.Debug(str_map +
+                                 " scr_sizeX = " + (Maps[i].scrX2 - Maps[i].scrX1).ToString("0000000") +
+                                 " scr_sizeY = " + (Maps[i].scrY2 - Maps[i].scrY1).ToString("0000000") +
+                                 " lat1 = " + Maps[i].lat1.ToString("00.000000") + " lon1 = " + Maps[i].lon1.ToString("00.000000") +
+                                 " lat2 = " + Maps[i].lat2.ToString("00.000000") + "lon2 = " + Maps[i].lon2.ToString("00.000000") +
+                                 " zoom_level = " + Maps[i].zoom_level.ToString("0000.000") +
+                                 " q_factor = " + Maps[i].qfactor.ToString("0.0000") +
+                                 " overlap = " + Maps[i].overlap.ToString("0.000") +
+                                 " bitmap==null = " + (Maps[i].bmp == null ? " no  " : " yes ") +
                                 (Maps[i].was_removed ? " <-removed " : "  "));
                 }
-
-                wr.Close();
-                fs.Close();
-
             }
             catch (Exception e)
             {
                 Utils.log.Error (" PrintMapInfo ", e);
+            }
+            finally
+            {
+                Utils.log.Debug("--------------------------------------------------------------------------------------------------------------------");
             }
         }
     }
