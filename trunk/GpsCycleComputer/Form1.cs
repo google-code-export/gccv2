@@ -2855,7 +2855,8 @@ namespace GpsCycleComputer
 
         private void buttonEnterCheckpoint_Click (object sender, EventArgs e)
         {
-            wrCheckpoints.WriteLine (CurrentLat+"|"+CurrentLong+"|"+textBoxEnterCheckpoint.Text);
+            wrCheckpoints.WriteLine(CurrentLat + "|" + CurrentLong + "|" 
+                + textBoxEnterCheckpoint.Text.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;").Replace("\"", "&quot;").Replace("'", "&apos;"));
             wrCheckpoints.Flush ();
             buttonCheckpointPause_Click (sender, e);
             ChkPtCount++;
