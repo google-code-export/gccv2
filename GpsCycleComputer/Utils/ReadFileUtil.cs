@@ -87,6 +87,15 @@ namespace GpsUtils
                         else if ((v_int == 0xFFFF) && (t_int == 0xFFFF) && (z_int == 2))
                         {
                         }
+                        // checkpoint
+                        else if ((v_int == 0xFFFF) && (t_int == 0xFFFF) && (z_int == 3))
+                        {
+                            // read checkpoint name, if not blank
+                            for (int i = 0; i < x_int; i++)
+                            {
+                                if (rd.PeekChar() != -1) { rd.ReadUInt16(); }
+                            }
+                        }
                         // "normal" record
                         else
                         {

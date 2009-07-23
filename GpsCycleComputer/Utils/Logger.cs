@@ -14,7 +14,7 @@ namespace Log
 
         public Logger (String path)
         {   
-            this.filePath = path + "/gcc.log";
+            this.filePath = path + "/GpsCycleComputer.log";
             try
             {
                 fs = new FileStream(filePath, FileMode.Append);
