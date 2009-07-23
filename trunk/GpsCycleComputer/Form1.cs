@@ -17,7 +17,7 @@ using LiveTracker;
  1 nautical mile per hour (exactly), 
  1.852 kilometres per hour (exactly),[5] 
 
- 1 mile  = 1.609344 kilometers
+ 1 mile  =  1.609344 kilometers
  1 foot =.30480 of a meter 
   
  http://utrack.crempa.net/ - for GPX plots
@@ -34,11 +34,6 @@ namespace GpsCycleComputer
 
         FileStream fstream;
         BinaryWriter writer;
-
-        // checkpoints file
-        FileStream fsCheckpoints;
-        StreamWriter wrCheckpoints;
-
 
         // custom buttons
         PictureButton buttonMain = new PictureButton();
@@ -163,8 +158,6 @@ namespace GpsCycleComputer
         double CurrentLat = 0.0, CurrentLong = 0.0, CurrentZ = 0.0;
         double CurrentSpeed = 0.0;
         string CurrentFileName = "";
-        string CurrentChkPtFileName = "";
-        int ChkPtCount = 0;
         string CurrentStatusString = "gps off";
         Color CurrentGpsLedColor = Color.Gray;
         int CurrentBattery = -1;
@@ -184,6 +177,20 @@ namespace GpsCycleComputer
         Int16[] PlotZ = new Int16[PlotDataSize];
         UInt16[] PlotT = new UInt16[PlotDataSize];
         UInt16[] PlotS = new UInt16[PlotDataSize];
+
+        // check-points
+        const int CheckPointDataSize = 128;
+        public struct CheckPointInfo // structure to store CheckPoint data
+        {
+            public string name;
+            public float lat;
+            public float lon;
+            public float interval_time;     // time in sec from prev checkpoint
+            public float stoppage_time;     // stoppage time in sec from prev checkpoint
+            public float interval_distance; // distance in m from prev checkpoint
+        };
+        CheckPointInfo[] CheckPoints = new CheckPointInfo[CheckPointDataSize];
+        int CheckPointCount = 0;
 
         // data for plotting 2nd line (track to follow)
         float[] Plot2ndLat = new float[PlotDataSize];
@@ -268,6 +275,7 @@ namespace GpsCycleComputer
         private Label labelGeoID;
         private NumericUpDown numericGeoID;
         private CheckBox checkGpxRte;
+        private CheckBox checkGpxSpeedMs;
         private CheckBox checkKmlAlt;
         private TextBox textBoxEnterFileName;
         private Label labelEnterFileName;
@@ -405,6 +413,7 @@ namespace GpsCycleComputer
             labelGeoID.BackColor = bkColor; labelGeoID.ForeColor = foColor;
             numericGeoID.BackColor = bkColor; numericGeoID.ForeColor = foColor;
             checkGpxRte.BackColor = bkColor; checkGpxRte.ForeColor = foColor;
+            checkGpxSpeedMs.BackColor = bkColor; checkGpxSpeedMs.ForeColor = foColor;
             checkKmlAlt.BackColor = bkColor; checkKmlAlt.ForeColor = foColor;
             buttonShowViewSelector.BackColor = bkColor; buttonShowViewSelector.ForeColor = foColor;
 
@@ -745,7 +754,7 @@ namespace GpsCycleComputer
             // button to set Checkpoint
             buttonEnterCheckpoint.Parent = this.tabEnterCheckpoint;
             buttonEnterCheckpoint.Bounds = new Rectangle (252, 100, 220, 80);
-            buttonEnterCheckpoint.Text = "Save & Pause";
+            buttonEnterCheckpoint.Text = "Save & Pause ...";
             buttonEnterCheckpoint.Click += new System.EventHandler (this.buttonEnterCheckpoint_Click);
             buttonEnterCheckpoint.Font = new System.Drawing.Font ("Tahoma", 10F, System.Drawing.FontStyle.Regular);
             buttonEnterCheckpoint.align = 3;
@@ -753,7 +762,7 @@ namespace GpsCycleComputer
             // button to Pause
             buttonCheckpointPause.Parent = this.tabEnterCheckpoint;
             buttonCheckpointPause.Bounds = new Rectangle (32, 100, 220, 80);
-            buttonCheckpointPause.Text = "Pause";
+            buttonCheckpointPause.Text = "Pause ...";
             buttonCheckpointPause.Click += new System.EventHandler (this.buttonCheckpointPause_Click);
             buttonCheckpointPause.Font = new System.Drawing.Font ("Tahoma", 10F, System.Drawing.FontStyle.Regular);
             buttonCheckpointPause.align = 3;
@@ -880,6 +889,7 @@ namespace GpsCycleComputer
 
             ScaleControl((Control)numericGeoID);
             ScaleControl((Control)checkGpxRte);
+            ScaleControl((Control)checkGpxSpeedMs);
             ScaleControl((Control)checkKmlAlt);
 
             ScaleControl((Control)tabEnterFileName);
@@ -1021,9 +1031,9 @@ namespace GpsCycleComputer
             this.tabEnterFileName = new System.Windows.Forms.Panel();
             this.textBoxEnterFileName = new System.Windows.Forms.TextBox();
             this.labelEnterFileName = new System.Windows.Forms.Label();
-            this.tabEnterCheckpoint = new System.Windows.Forms.Panel ();
-            this.textBoxEnterCheckpoint = new System.Windows.Forms.TextBox ();
-            this.labelEnterCheckpoint = new System.Windows.Forms.Label ();
+            this.tabEnterCheckpoint = new System.Windows.Forms.Panel();
+            this.textBoxEnterCheckpoint = new System.Windows.Forms.TextBox();
+            this.labelEnterCheckpoint = new System.Windows.Forms.Label();
             this.labelRevision = new System.Windows.Forms.Label();
             this.tabOpenFile = new System.Windows.Forms.Panel();
             this.listBoxFiles = new System.Windows.Forms.ListBox();
@@ -1092,8 +1102,8 @@ namespace GpsCycleComputer
             this.tabControl = new System.Windows.Forms.TabControl();
             this.tabPageOptions = new System.Windows.Forms.TabPage();
             this.tabPageGps = new System.Windows.Forms.TabPage();
-            this.comboDropFirst = new System.Windows.Forms.ComboBox ();
-            this.labelDropFirst = new System.Windows.Forms.Label ();
+            this.comboDropFirst = new System.Windows.Forms.ComboBox();
+            this.labelDropFirst = new System.Windows.Forms.Label();
             this.tabPageMainScr = new System.Windows.Forms.TabPage();
             this.tabPageMapScr = new System.Windows.Forms.TabPage();
             this.tabPageKmlGpx = new System.Windows.Forms.TabPage();
@@ -1101,8 +1111,9 @@ namespace GpsCycleComputer
             this.checkUploadGpx = new System.Windows.Forms.CheckBox();
             this.tabPageLaps = new System.Windows.Forms.TabPage();
             this.tabPageAbout = new System.Windows.Forms.TabPage();
+            this.checkGpxSpeedMs = new System.Windows.Forms.CheckBox();
             this.tabEnterFileName.SuspendLayout();
-            this.tabEnterCheckpoint.SuspendLayout ();            
+            this.tabEnterCheckpoint.SuspendLayout();
             this.tabOpenFile.SuspendLayout();
             this.tabControl.SuspendLayout();
             this.tabPageOptions.SuspendLayout();
@@ -1139,26 +1150,25 @@ namespace GpsCycleComputer
             // 
             // tabEnterCheckpoint
             // 
-            this.tabEnterCheckpoint.Controls.Add (this.textBoxEnterCheckpoint);
-            this.tabEnterCheckpoint.Controls.Add (this.labelEnterCheckpoint);
-            this.tabEnterCheckpoint.Location = new System.Drawing.Point (0, 0);
+            this.tabEnterCheckpoint.Controls.Add(this.textBoxEnterCheckpoint);
+            this.tabEnterCheckpoint.Controls.Add(this.labelEnterCheckpoint);
+            this.tabEnterCheckpoint.Location = new System.Drawing.Point(0, 0);
             this.tabEnterCheckpoint.Name = "tabEnterCheckpoint";
-            this.tabEnterCheckpoint.Size = new System.Drawing.Size (480, 507);
+            this.tabEnterCheckpoint.Size = new System.Drawing.Size(480, 507);
             // 
             // textBoxEnterCheckpoint
             // 
-            this.textBoxEnterCheckpoint.Location = new System.Drawing.Point (2, 54);
+            this.textBoxEnterCheckpoint.Location = new System.Drawing.Point(2, 54);
             this.textBoxEnterCheckpoint.Name = "textBoxEnterCheckpoint";
-            this.textBoxEnterCheckpoint.Size = new System.Drawing.Size (474, 41);
+            this.textBoxEnterCheckpoint.Size = new System.Drawing.Size(474, 41);
             this.textBoxEnterCheckpoint.TabIndex = 1;
             // 
             // labelEnterCheckpoint
             // 
-            this.labelEnterCheckpoint.Location = new System.Drawing.Point (9, 15);
+            this.labelEnterCheckpoint.Location = new System.Drawing.Point(9, 15);
             this.labelEnterCheckpoint.Name = "labelEnterCheckpoint";
-            this.labelEnterCheckpoint.Size = new System.Drawing.Size (463, 40);
+            this.labelEnterCheckpoint.Size = new System.Drawing.Size(463, 40);
             this.labelEnterCheckpoint.Text = "Enter Checkpoint:";
-          
             // 
             // labelRevision
             // 
@@ -1298,7 +1308,7 @@ namespace GpsCycleComputer
             // 
             this.checkStopOnLow.Checked = true;
             this.checkStopOnLow.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkStopOnLow.Location = new System.Drawing.Point (5, 105);
+            this.checkStopOnLow.Location = new System.Drawing.Point(5, 105);
             this.checkStopOnLow.Name = "checkStopOnLow";
             this.checkStopOnLow.Size = new System.Drawing.Size(477, 40);
             this.checkStopOnLow.TabIndex = 16;
@@ -1336,7 +1346,7 @@ namespace GpsCycleComputer
             // 
             // checkBoxUseGccDll
             // 
-            this.checkBoxUseGccDll.Location = new System.Drawing.Point (5, 155);
+            this.checkBoxUseGccDll.Location = new System.Drawing.Point(5, 155);
             this.checkBoxUseGccDll.Name = "checkBoxUseGccDll";
             this.checkBoxUseGccDll.Size = new System.Drawing.Size(312, 40);
             this.checkBoxUseGccDll.TabIndex = 24;
@@ -1350,7 +1360,7 @@ namespace GpsCycleComputer
             this.comboBoxUseGccDllRate.Items.Add("38400");
             this.comboBoxUseGccDllRate.Items.Add("57600");
             this.comboBoxUseGccDllRate.Items.Add("115200");
-            this.comboBoxUseGccDllRate.Location = new System.Drawing.Point (324, 205);
+            this.comboBoxUseGccDllRate.Location = new System.Drawing.Point(324, 205);
             this.comboBoxUseGccDllRate.Name = "comboBoxUseGccDllRate";
             this.comboBoxUseGccDllRate.Size = new System.Drawing.Size(156, 41);
             this.comboBoxUseGccDllRate.TabIndex = 32;
@@ -1371,21 +1381,21 @@ namespace GpsCycleComputer
             this.comboBoxUseGccDllCom.Items.Add("COM12:");
             this.comboBoxUseGccDllCom.Items.Add("COM13:");
             this.comboBoxUseGccDllCom.Items.Add("COM14:");
-            this.comboBoxUseGccDllCom.Location = new System.Drawing.Point (324, 155);
+            this.comboBoxUseGccDllCom.Location = new System.Drawing.Point(324, 155);
             this.comboBoxUseGccDllCom.Name = "comboBoxUseGccDllCom";
             this.comboBoxUseGccDllCom.Size = new System.Drawing.Size(156, 41);
             this.comboBoxUseGccDllCom.TabIndex = 31;
             // 
             // labelGpsBaudRate
             // 
-            this.labelGpsBaudRate.Location = new System.Drawing.Point (184, 205);
+            this.labelGpsBaudRate.Location = new System.Drawing.Point(184, 205);
             this.labelGpsBaudRate.Name = "labelGpsBaudRate";
             this.labelGpsBaudRate.Size = new System.Drawing.Size(134, 40);
             this.labelGpsBaudRate.Text = "Baud rate:";
             // 
             // numericGeoID
             // 
-            this.numericGeoID.Location = new System.Drawing.Point (324, 255);
+            this.numericGeoID.Location = new System.Drawing.Point(324, 255);
             this.numericGeoID.Maximum = new decimal(new int[] {
             300,
             0,
@@ -1402,7 +1412,7 @@ namespace GpsCycleComputer
             // 
             // labelGeoID
             // 
-            this.labelGeoID.Location = new System.Drawing.Point (5, 255);
+            this.labelGeoID.Location = new System.Drawing.Point(5, 255);
             this.labelGeoID.Name = "labelGeoID";
             this.labelGeoID.Size = new System.Drawing.Size(379, 40);
             this.labelGeoID.Text = "Manual altitude correction, m";
@@ -1545,7 +1555,7 @@ namespace GpsCycleComputer
             // 
             // numericGpxTimeShift
             // 
-            this.numericGpxTimeShift.Location = new System.Drawing.Point(320, 105);
+            this.numericGpxTimeShift.Location = new System.Drawing.Point(320, 155);
             this.numericGpxTimeShift.Maximum = new decimal(new int[] {
             12,
             0,
@@ -1562,7 +1572,7 @@ namespace GpsCycleComputer
             // 
             // labelGpxTimeShift
             // 
-            this.labelGpxTimeShift.Location = new System.Drawing.Point(2, 105);
+            this.labelGpxTimeShift.Location = new System.Drawing.Point(2, 155);
             this.labelGpxTimeShift.Name = "labelGpxTimeShift";
             this.labelGpxTimeShift.Size = new System.Drawing.Size(341, 40);
             this.labelGpxTimeShift.Text = "GPX time adjustment, hours";
@@ -1833,7 +1843,7 @@ namespace GpsCycleComputer
             // 
             // timerStartDelay
             // 
-            this.timerStartDelay.Interval = 2000;
+            this.timerStartDelay.Interval = 1000;
             this.timerStartDelay.Tick += new System.EventHandler(this.timerStartDelay_Tick);
             // 
             // tabControl
@@ -1870,8 +1880,8 @@ namespace GpsCycleComputer
             // 
             // tabPageGps
             // 
-            this.tabPageGps.Controls.Add (this.comboDropFirst);
-            this.tabPageGps.Controls.Add (this.labelDropFirst);
+            this.tabPageGps.Controls.Add(this.comboDropFirst);
+            this.tabPageGps.Controls.Add(this.labelDropFirst);
             this.tabPageGps.Controls.Add(this.checkStopOnLow);
             this.tabPageGps.Controls.Add(this.comboGpsPoll);
             this.tabPageGps.Controls.Add(this.labelGpsActivity);
@@ -1883,30 +1893,29 @@ namespace GpsCycleComputer
             this.tabPageGps.Controls.Add(this.labelGeoID);
             this.tabPageGps.Location = new System.Drawing.Point(0, 0);
             this.tabPageGps.Name = "tabPageGps";
-            this.tabPageGps.Size = new System.Drawing.Size (480, 463);
+            this.tabPageGps.Size = new System.Drawing.Size(480, 463);
             this.tabPageGps.Text = "GPS";
             // 
             // comboDropFirst
             // 
-            this.comboDropFirst.Enabled = false;
-            this.comboDropFirst.Items.Add ("none");
-            this.comboDropFirst.Items.Add ("1   point");
-            this.comboDropFirst.Items.Add ("2   points");
-            this.comboDropFirst.Items.Add ("4   points");
-            this.comboDropFirst.Items.Add ("8   points");
-            this.comboDropFirst.Items.Add ("16 points");
-            this.comboDropFirst.Items.Add ("32 points");
-            this.comboDropFirst.Location = new System.Drawing.Point (153, 52);
+            this.comboDropFirst.Items.Add("none");
+            this.comboDropFirst.Items.Add("1   point");
+            this.comboDropFirst.Items.Add("2   points");
+            this.comboDropFirst.Items.Add("4   points");
+            this.comboDropFirst.Items.Add("8   points");
+            this.comboDropFirst.Items.Add("16 points");
+            this.comboDropFirst.Items.Add("32 points");
+            this.comboDropFirst.Location = new System.Drawing.Point(153, 52);
             this.comboDropFirst.Name = "comboDropFirst";
-            this.comboDropFirst.Size = new System.Drawing.Size (323, 41);
+            this.comboDropFirst.Size = new System.Drawing.Size(323, 41);
             this.comboDropFirst.TabIndex = 36;
-            this.comboDropFirst.SelectedIndexChanged += new System.EventHandler (this.comboDropFirst_SelectedIndexChanged);
+            this.comboDropFirst.SelectedIndexChanged += new System.EventHandler(this.comboGpsPoll_SelectedIndexChanged);
             // 
             // labelDropFirst
             // 
-            this.labelDropFirst.Location = new System.Drawing.Point (1, 54);
+            this.labelDropFirst.Location = new System.Drawing.Point(1, 54);
             this.labelDropFirst.Name = "labelDropFirst";
-            this.labelDropFirst.Size = new System.Drawing.Size (219, 40);
+            this.labelDropFirst.Size = new System.Drawing.Size(219, 40);
             this.labelDropFirst.Text = "Drop first:";
             // 
             // tabPageMainScr
@@ -1919,7 +1928,7 @@ namespace GpsCycleComputer
             this.tabPageMainScr.Controls.Add(this.checkRelativeAlt);
             this.tabPageMainScr.Location = new System.Drawing.Point(0, 0);
             this.tabPageMainScr.Name = "tabPageMainScr";
-            this.tabPageMainScr.Size = new System.Drawing.Size(472, 469);
+            this.tabPageMainScr.Size = new System.Drawing.Size(480, 463);
             this.tabPageMainScr.Text = "Main screen";
             // 
             // tabPageMapScr
@@ -1941,18 +1950,19 @@ namespace GpsCycleComputer
             this.tabPageMapScr.Controls.Add(this.comboMapDownload);
             this.tabPageMapScr.Location = new System.Drawing.Point(0, 0);
             this.tabPageMapScr.Name = "tabPageMapScr";
-            this.tabPageMapScr.Size = new System.Drawing.Size(472, 469);
+            this.tabPageMapScr.Size = new System.Drawing.Size(480, 463);
             this.tabPageMapScr.Text = "Map screen";
             // 
             // tabPageKmlGpx
             // 
+            this.tabPageKmlGpx.Controls.Add(this.checkGpxSpeedMs);
             this.tabPageKmlGpx.Controls.Add(this.numericGpxTimeShift);
             this.tabPageKmlGpx.Controls.Add(this.labelGpxTimeShift);
             this.tabPageKmlGpx.Controls.Add(this.checkKmlAlt);
             this.tabPageKmlGpx.Controls.Add(this.checkGpxRte);
             this.tabPageKmlGpx.Location = new System.Drawing.Point(0, 0);
             this.tabPageKmlGpx.Name = "tabPageKmlGpx";
-            this.tabPageKmlGpx.Size = new System.Drawing.Size (472, 469);
+            this.tabPageKmlGpx.Size = new System.Drawing.Size(480, 463);
             this.tabPageKmlGpx.Text = "Kml/Gpx";
             // 
             // tabPageLiveLog
@@ -1968,7 +1978,7 @@ namespace GpsCycleComputer
             this.tabPageLiveLog.Controls.Add(this.panelCwLogo);
             this.tabPageLiveLog.Location = new System.Drawing.Point(0, 0);
             this.tabPageLiveLog.Name = "tabPageLiveLog";
-            this.tabPageLiveLog.Size = new System.Drawing.Size (472, 469);
+            this.tabPageLiveLog.Size = new System.Drawing.Size(480, 463);
             this.tabPageLiveLog.Text = "Live log";
             // 
             // checkUploadGpx
@@ -1989,7 +1999,7 @@ namespace GpsCycleComputer
             this.tabPageLaps.Controls.Add(this.numericLapOptionsT);
             this.tabPageLaps.Location = new System.Drawing.Point(0, 0);
             this.tabPageLaps.Name = "tabPageLaps";
-            this.tabPageLaps.Size = new System.Drawing.Size(472, 469);
+            this.tabPageLaps.Size = new System.Drawing.Size(480, 463);
             this.tabPageLaps.Text = "Lap stats";
             // 
             // tabPageAbout
@@ -1997,9 +2007,17 @@ namespace GpsCycleComputer
             this.tabPageAbout.Controls.Add(this.labelRevision);
             this.tabPageAbout.Location = new System.Drawing.Point(0, 0);
             this.tabPageAbout.Name = "tabPageAbout";
-            this.tabPageAbout.Size = new System.Drawing.Size(472, 469);
+            this.tabPageAbout.Size = new System.Drawing.Size(480, 463);
             this.tabPageAbout.Text = "About";
             this.tabPageAbout.Paint += new System.Windows.Forms.PaintEventHandler(this.tabAbout_Paint);
+            // 
+            // checkGpxSpeedMs
+            // 
+            this.checkGpxSpeedMs.Location = new System.Drawing.Point(2, 105);
+            this.checkGpxSpeedMs.Name = "checkGpxSpeedMs";
+            this.checkGpxSpeedMs.Size = new System.Drawing.Size(469, 40);
+            this.checkGpxSpeedMs.TabIndex = 21;
+            this.checkGpxSpeedMs.Text = "Save GPX speed in m/s";
             // 
             // Form1
             // 
@@ -2009,18 +2027,18 @@ namespace GpsCycleComputer
             this.Controls.Add(this.tabBlank);
             this.Controls.Add(this.tabBlank1);
             this.Controls.Add(this.tabEnterFileName);
-            this.Controls.Add (this.tabEnterCheckpoint);
+            this.Controls.Add(this.tabEnterCheckpoint);
             this.Controls.Add(this.tabOpenFile);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Location = new System.Drawing.Point(0, 52);
             this.Name = "Form1";
             this.Text = "GPS Cycle Computer";
-            this.Load += new System.EventHandler(this.Form1_Load);
             this.Closed += new System.EventHandler(this.Form1_Closed);
-            this.Closing += new System.ComponentModel.CancelEventHandler(this.Form1_Closing);
             this.Resize += new System.EventHandler(this.Form1_Resize);
+            this.Closing += new System.ComponentModel.CancelEventHandler(this.Form1_Closing);
+            this.Load += new System.EventHandler(this.Form1_Load);
             this.tabEnterFileName.ResumeLayout(false);
-            this.tabEnterCheckpoint.ResumeLayout (false);
+            this.tabEnterCheckpoint.ResumeLayout(false);
             this.tabOpenFile.ResumeLayout(false);
             this.tabControl.ResumeLayout(false);
             this.tabPageOptions.ResumeLayout(false);
@@ -2072,16 +2090,6 @@ namespace GpsCycleComputer
                 BinaryReader wr = new BinaryReader(fs, Encoding.ASCII);
 
                 if (wr.PeekChar() != -1) { comboGpsPoll.SelectedIndex = wr.ReadInt32(); }
-                if (comboGpsPoll.SelectedIndex != 0)
-                {
-                    comboDropFirst.Enabled = true;
-                }
-                else
-                {
-                    comboDropFirst.SelectedIndex = 0;
-                    comboDropFirst.Enabled = false;
-                }
-                if (wr.PeekChar () != -1) { comboDropFirst.SelectedIndex = wr.ReadInt32 (); }
                 if (wr.PeekChar() != -1) { comboUnits.SelectedIndex = wr.ReadInt32(); }
                 if (wr.PeekChar() != -1) { wr.ReadInt32(); }  // not used anymore
                 if (wr.PeekChar() != -1) { int i = wr.ReadInt32(); checkExStopTime.Checked = (i == 1); }
@@ -2182,6 +2190,9 @@ namespace GpsCycleComputer
                 if (wr.PeekChar() != -1) { int i = wr.ReadInt32(); checkOptMain.Checked = (i == 1); }
                 if (wr.PeekChar() != -1) { int i = wr.ReadInt32(); checkUploadGpx.Checked = (i == 1); }
 
+                if (wr.PeekChar() != -1) { comboDropFirst.SelectedIndex = wr.ReadInt32(); }
+                if (wr.PeekChar() != -1) { int i = wr.ReadInt32(); checkGpxSpeedMs.Checked = (i == 1); }
+
                 wr.Close();
                 fs.Close();
             }
@@ -2280,7 +2291,6 @@ namespace GpsCycleComputer
             BinaryWriter wr = new BinaryWriter(fs, Encoding.ASCII);
 
             wr.Write((int)comboGpsPoll.SelectedIndex);
-            wr.Write ((int) comboDropFirst.SelectedIndex);
             wr.Write((int)comboUnits.SelectedIndex);
             wr.Write((int)0); // not used anymore
             wr.Write((int)(checkExStopTime.Checked ? 1 : 0));
@@ -2355,6 +2365,9 @@ namespace GpsCycleComputer
             wr.Write((int)comboMapDownload.SelectedIndex);
             wr.Write((int)(checkOptMain.Checked ? 1 : 0));
             wr.Write((int)(checkUploadGpx.Checked ? 1 : 0));
+
+            wr.Write((int)comboDropFirst.SelectedIndex);
+            wr.Write((int)(checkGpxSpeedMs.Checked ? 1 : 0));
 
             wr.Close();
             fs.Close();
@@ -2464,17 +2477,18 @@ namespace GpsCycleComputer
             // indication that value was not set ...
             if (!GpsDataOk)
             {
-                CurrentStatusString = "searching " +
-                                          (dropFirst [comboDropFirst.SelectedIndex] > 0
-                                          && (FirstSampleValidCount <= dropFirst [comboDropFirst.SelectedIndex]) ? ("D" + FirstSampleValidCount) : "");
+                CurrentStatusString = "searching ";
                 if (position != null)
                 {
+                    CurrentStatusString += (dropFirst [comboDropFirst.SelectedIndex] > 0
+                                            && (FirstSampleValidCount <= dropFirst [comboDropFirst.SelectedIndex]) 
+                                            ? ("D" + FirstSampleValidCount) : "");
+
                     CurrentStatusString += (position.LatitudeValid ? "P" : "") +
                                            (position.SpeedValid ? "S" : "") +
                                            (position.TimeValid ? "T" : "") +
                                            (time_check_passed ? "T+" : "") +
                                            " ";
-
                 }
                 CurrentStatusString += GpsSearchCount;
 
@@ -2786,8 +2800,6 @@ namespace GpsCycleComputer
             else { file_name = IoFilesDirectory + "\\" + file_name; }
 
             CurrentFileName = file_name;
-            CurrentChkPtFileName = Path.GetDirectoryName (CurrentFileName) + "/" +
-                        Path.GetFileNameWithoutExtension (CurrentFileName) + "_chkpt.gccc";
 
             return file_name;
         }
@@ -2806,10 +2818,6 @@ namespace GpsCycleComputer
                 fstream = new FileStream(CurrentFileName, FileMode.Create);
                 writer = new BinaryWriter(fstream, Encoding.ASCII);
                 writer.Write((char)'G'); writer.Write((char)'C'); writer.Write((char)'C'); writer.Write((Byte)1);
-
-                // checkpoints file                
-                fsCheckpoints = new FileStream (CurrentChkPtFileName, FileMode.Create);
-                wrCheckpoints = new StreamWriter (fsCheckpoints);
             }
             catch (Exception e)
             {
@@ -2831,6 +2839,7 @@ namespace GpsCycleComputer
             OldT = 0;
 
             Counter = 0;
+            CheckPointCount = 0;
             Decimation = 1;
             FirstSampleValidCount = 1;
 
@@ -2853,13 +2862,63 @@ namespace GpsCycleComputer
             DoStart();
         }
 
+        private void WriteCheckPoint(string name)
+        {
+            // store new checkpoint
+            CheckPoints[CheckPointCount].name = name;
+            CheckPoints[CheckPointCount].lat = (float)CurrentLat;
+            CheckPoints[CheckPointCount].lon = (float)CurrentLong;
+            if (CheckPointCount != 0)
+            {
+                CheckPoints[CheckPointCount].interval_time = CurrentTimeSec - CheckPoints[CheckPointCount].interval_time;
+                CheckPoints[CheckPointCount].stoppage_time = CurrentStoppageTimeSec - CheckPoints[CheckPointCount].stoppage_time;
+                CheckPoints[CheckPointCount].interval_distance = (float) (Distance - CheckPoints[CheckPointCount].interval_distance);
+            }
+            else
+            {
+                CheckPoints[CheckPointCount].interval_time = CurrentTimeSec;
+                CheckPoints[CheckPointCount].stoppage_time = CurrentStoppageTimeSec;
+                CheckPoints[CheckPointCount].interval_distance = (float) Distance;
+            }
+
+            if (CheckPointCount < (CheckPointDataSize - 1))
+            {
+                CheckPointCount++;
+            }
+
+            try
+            {
+                Int16 text_length = (Int16)name.Length;
+
+                writer.Write((Int16)text_length);
+                writer.Write((Int16)0);
+                writer.Write((Int16)3);         // this is check-point record (3)
+                writer.Write((UInt16)0xFFFF);   // status record (0xFFFF/0xFFFF)
+                writer.Write((UInt16)0xFFFF);
+
+                if (text_length != 0)
+                {
+                    for (int i = 0; i < text_length; i++)
+                    {
+                        writer.Write((UInt16)name[i]);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Utils.log.Error(" WriteCheckPoint ", e);
+            }
+            finally
+            {
+                writer.Flush();
+            }
+        }
+
         private void buttonEnterCheckpoint_Click (object sender, EventArgs e)
         {
-            wrCheckpoints.WriteLine(CurrentLat + "|" + CurrentLong + "|" 
-                + textBoxEnterCheckpoint.Text.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;").Replace("\"", "&quot;").Replace("'", "&apos;"));
-            wrCheckpoints.Flush ();
+            WriteCheckPoint(textBoxEnterCheckpoint.Text);
+
             buttonCheckpointPause_Click (sender, e);
-            ChkPtCount++;
         }
 
         private void buttonCheckpointPause_Click (object sender, EventArgs e)
@@ -2973,14 +3032,6 @@ namespace GpsCycleComputer
             {
                 writer.Close ();
                 fstream.Close ();
-
-                fsCheckpoints.Close ();
-                wrCheckpoints.Close ();
-                if (ChkPtCount == 0) // no need to keep an empty file
-                {
-                    File.Delete (CurrentChkPtFileName);
-                }
-
             }
             catch (Exception e)
             {
@@ -3010,8 +3061,20 @@ namespace GpsCycleComputer
 
             labelFileName.SetText("");
 
-            // copy file into "permanent place", only if any records
+            // Delete log files, if no records
             if (Counter == 0)
+            {
+                try
+                {
+                    File.Delete(CurrentFileName);
+                }
+                catch (Exception ex)
+                {
+                    Utils.log.Error(" timerStartDelay_Tick - delete empty log ", ex);
+                }
+            }
+            // Save Csv log
+            else  
             {
                 saveCsvLog ();
             }
@@ -3019,7 +3082,7 @@ namespace GpsCycleComputer
             Cursor.Current = Cursors.Default;
         }
 
-        // Switch Off backlight, set flag to flash stream
+        // Switch Off backlight
         private void buttonBklitOff_Click(object sender, EventArgs e)
         {
             Utils.SwitchBacklight();
@@ -3039,9 +3102,9 @@ namespace GpsCycleComputer
                 if (timerGps.Enabled == false)
                 {
                     //Add CheckPoint
-                    if (CurrentLat != 0 && CurrentLong != 0)
+                    if (CurrentLat != 0.0 && CurrentLong != 0.0)
                     {
-                        textBoxEnterCheckpoint.Text = ("");
+                        textBoxEnterCheckpoint.Text = "";
                         tabEnterCheckpoint.Height = this.Height;
                         tabEnterCheckpoint.BringToFront ();
                         inputPanel.Enabled = true;
@@ -3153,6 +3216,7 @@ namespace GpsCycleComputer
         {
             // reset vars for computation
             Counter = 0;
+            CheckPointCount = 0;
             Decimation = 1;
             MaxSpeed = 0.0; Distance = 0.0; CurrentStoppageTimeSec = 0;
             OldX = 0.0; OldY = 0.0; OldT = 0;
@@ -3161,8 +3225,6 @@ namespace GpsCycleComputer
             int gps_poll_sec = 0;
 
             CurrentFileName = filename;
-            CurrentChkPtFileName = Path.GetDirectoryName (CurrentFileName) + "/" +
-                                   Path.GetFileNameWithoutExtension (CurrentFileName) + "_chkpt.gccc";
              
             // preset label text for errors
             CurrentStatusString = "File has errors or blank";
@@ -3235,6 +3297,38 @@ namespace GpsCycleComputer
                         {
                             gps_poll_sec = x_int;
                         }
+                        // checkpoint
+                        else if ((v_int == 0xFFFF) && (t_int == 0xFFFF) && (z_int == 3))
+                        {
+                            // read checkpoint name, if not blank
+                            string name = "";
+                            for (int i = 0; i < x_int; i++)
+                            {
+                                if (rd.PeekChar() != -1) { name += (char)(rd.ReadUInt16()); }
+                            }
+
+                            // store new checkpoint
+                            CheckPoints[CheckPointCount].name = name;
+                            CheckPoints[CheckPointCount].lat = (float)CurrentLat;
+                            CheckPoints[CheckPointCount].lon = (float)CurrentLong;
+                            if (CheckPointCount != 0)
+                            {
+                                CheckPoints[CheckPointCount].interval_time = CurrentTimeSec - CheckPoints[CheckPointCount].interval_time;
+                                CheckPoints[CheckPointCount].stoppage_time = CurrentStoppageTimeSec - CheckPoints[CheckPointCount].stoppage_time;
+                                CheckPoints[CheckPointCount].interval_distance = (float)(Distance - CheckPoints[CheckPointCount].interval_distance);
+                            }
+                            else
+                            {
+                                CheckPoints[CheckPointCount].interval_time = CurrentTimeSec;
+                                CheckPoints[CheckPointCount].stoppage_time = CurrentStoppageTimeSec;
+                                CheckPoints[CheckPointCount].interval_distance = (float)Distance;
+                            }
+
+                            if (CheckPointCount < (CheckPointDataSize - 1))
+                            {
+                                CheckPointCount++;
+                            }
+                        }
                         // "normal" record
                         else
                         {
@@ -3261,6 +3355,13 @@ namespace GpsCycleComputer
                             AddPlotData((float)out_lat, (float)out_long, z_int, t_int, v_int);
                             Counter++;
 
+                            // store point (used to update checkpoint data
+                            CurrentTimeSec = t_int;
+                            CurrentLat = out_lat;
+                            CurrentLong = out_long;
+                            CurrentZ = z_int;
+                            CurrentSpeed = v_int / 10.0;
+
                             try
                             {
                                 rd.PeekChar ();
@@ -3272,13 +3373,6 @@ namespace GpsCycleComputer
                             }
                         }
                     }
-
-                    // store last point
-                    CurrentTimeSec = t_int;
-                    CurrentLat = out_lat;
-                    CurrentLong = out_long;
-                    CurrentZ = z_int;
-                    CurrentSpeed = v_int / 10.0;
 
                     rd.Close();
                     fs.Close();
@@ -3465,35 +3559,23 @@ namespace GpsCycleComputer
                 wr.WriteLine(" <Document>");
                 wr.WriteLine ("  <name><![CDATA[" + StartTime.ToString () + "]]></name>");
 
-                // Get the checkpoints
-                if (File.Exists(CurrentChkPtFileName))
+                // Write the checkpoints
+                if(CheckPointCount != 0)
                 {
-                    try
+                    wr.WriteLine("  <Folder> <name>Waypoints</name>");
+                    for (int chk = 0; chk < CheckPointCount; chk++)
                     {
-                        wr.WriteLine ("  <Folder> <name>Waypoints</name>");
+                        // need to replave chars not supported by XML
+                        string chk_name = CheckPoints[chk].name.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;").Replace("\"", "&quot;").Replace("'", "&apos;");
 
-                        StreamReader re = File.OpenText (CurrentChkPtFileName);
-
-                        string line = re.ReadLine ();
-                        string [] tokens = line != null ? line.Split ('|') : null;
- 
-                        while (tokens!=null && tokens.Length == 3)
-                        {
-                            wr.WriteLine ("  <Placemark><name>" + tokens [2] 
-                                        + "</name><Point><altitudeMode>clampToGround</altitudeMode><coordinates>" + tokens [1] 
-                                        + "," + tokens[0] + ",0.000000</coordinates></Point></Placemark>");
-                            
-                            line = re.ReadLine ();
-                            tokens = line != null ? line.Split ('|') : null;
-                        }
-
-                        re.Close ();
-                        wr.WriteLine ("  </Folder>");
+                        wr.WriteLine("  <Placemark><name>" + chk_name
+                                    + "</name><Point><altitudeMode>clampToGround</altitudeMode><coordinates>" 
+                                    + replaceCommas(CheckPoints[chk].lon)
+                                    + "," 
+                                    + replaceCommas(CheckPoints[chk].lat) 
+                                    + ",0.000000</coordinates></Point></Placemark>");
                     }
-                    catch (Exception eee)
-                    {
-                        Utils.log.Error (" buttonSaveKML_Click load checkpoints", eee);
-                    }
+                    wr.WriteLine("  </Folder>");
                 }
 
                 wr.WriteLine (" <Folder> <name>Tracks</name>");
@@ -3647,35 +3729,20 @@ namespace GpsCycleComputer
                 wr.WriteLine(" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd\">");
                 wr.WriteLine("");
 
-                // Get the checkpoints
-                
-                if (File.Exists (CurrentChkPtFileName))
+                // Write the checkpoints
+                if (CheckPointCount != 0)
                 {
-
-                    try
+                    for (int chk = 0; chk < CheckPointCount; chk++)
                     {
-                        StreamReader re = File.OpenText (CurrentChkPtFileName);
+                        // need to replave chars not supported by XML
+                        string chk_name = CheckPoints[chk].name.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;").Replace("\"", "&quot;").Replace("'", "&apos;");
 
-                        string line = re.ReadLine ();
-                        string [] tokens = line != null ? line.Split ('|') : null;
-                        while (tokens != null && tokens.Length == 3)
-                        {
-                            wr.WriteLine ("<wpt lat=\"" + tokens [0]
-                                        + "\" lon=\"" + tokens [1]
-                                        + "\" ><name>" + tokens [2]
-                                        + "</name></wpt>");
-                            line = re.ReadLine ();
-                            tokens = line!=null?line.Split ('|'):null;
-                        }
-                        re.Close ();
-                        wr.WriteLine ("");
+                        wr.WriteLine("<wpt lat=\"" + replaceCommas(CheckPoints[chk].lat)
+                                    + "\" lon=\"" + replaceCommas(CheckPoints[chk].lon)
+                                    + "\" ><name>" + chk_name
+                                    + "</name></wpt>");
                     }
-                    catch (Exception eee)
-                    {
-                        Utils.log.Error (" buttonSaveGPX_Click load checkpoints", eee);
-                    }
-                }
-
+                }                
 
                 if (checkGpxRte.Checked) 
                 { 
@@ -3720,7 +3787,14 @@ namespace GpsCycleComputer
                     run_time_str = run_time_str.Replace(" ", "T");
                     wr.WriteLine("<time>" + run_time_str + "</time>");
 
-                    wr.WriteLine("<speed>" + replaceCommas(PlotS[i] * 0.1) + "</speed>");
+                    if (checkGpxSpeedMs.Checked) // speed in m/s instead of km/h
+                    {
+                        wr.WriteLine("<speed>" + replaceCommas(PlotS[i] * 0.1 / 3.6) + "</speed>");
+                    }
+                    else
+                    {
+                        wr.WriteLine("<speed>" + replaceCommas(PlotS[i] * 0.1) + "</speed>");
+                    }
 
                     if (checkGpxRte.Checked) 
                     { 
@@ -3845,17 +3919,6 @@ namespace GpsCycleComputer
 
         private void comboGpsPoll_SelectedIndexChanged(object sender, EventArgs e)
         {
-         
-            if (comboGpsPoll.SelectedIndex != 0)
-            {
-                comboDropFirst.Enabled = true;
-            }
-            else
-            {
-                comboDropFirst.SelectedIndex = 0;
-                comboDropFirst.Enabled = false;
-            }
-
             if (DoNotSaveSettingsFlag)
             {
                 return;
@@ -5264,17 +5327,6 @@ namespace GpsCycleComputer
                 Utils.log.Error (" DebugPrintout ", e);
             }
         }
-
-        private void comboDropFirst_SelectedIndexChanged (object sender, EventArgs e)
-        {
-            if (DoNotSaveSettingsFlag)
-            {
-                return;
-            }
-
-            SaveSettings ();
-        }
-
     }
 
     // button-like control that has a background image.

@@ -145,11 +145,11 @@ content="text/html; charset=iso-8859-1">
                 Letters + Number&#148; &#150; gps is searching.
                 Number is the time in seconds since the start of
                 the search, reset after 180 secs. D &#150;
-                dropped points followed by the number of points dropped, P &#150;
-                position record found, T &#150; time record found, S
-                &#150; speed record found (need P and T to start
-                loggin. Also a check is made that time is
-                increasing, so data is fresh). </font></li>
+                dropped points followed by the number of points
+                dropped, P &#150; position record found, T &#150;
+                time record found, S &#150; speed record found
+                (need P and T to start loggin. Also a check is
+                made that time is increasing, so data is fresh). </font></li>
         </ul>
         <p><font size="2" face="Arial">If you have number of
         satellites 0, or &quot;no gps data&quot; for some time,
@@ -163,17 +163,16 @@ content="text/html; charset=iso-8859-1">
         it works!) , let us proceed with the desciption of the
         main screen.</font></p>
         <p><font size="2" face="Arial">When running, Start button
-        changes to Pause - to pause GPS and / or add a checkpoint. 
-		Press Pause button again
-        to continue logging. The File button changes to Stop - to
-        stop the log and save it into a file. The Options button
-        changes to Maps - which shows you track. When logging is
-        on, you can switch between Main and Maps screens only. On
-        the Maps screen, you can use Zoom in / Zoom out buttons,
-        and move track line with your finger (like in GoogleMaps
-        for Mobile). Also you can plot a &quot;map&quot; as a
-        background for the track - see section &quot;Maps&quot;
-        how to do that.</font></p>
+        changes to Pause - to pause GPS and / or add a
+        checkpoint. Press Pause button again to continue logging.
+        The File button changes to Stop - to stop the log and
+        save it into a file. The Options button changes to Maps -
+        which shows you track. When logging is on, you can switch
+        between Main and Maps screens only. On the Maps screen,
+        you can use Zoom in / Zoom out buttons, and move track
+        line with your finger (like in GoogleMaps for Mobile).
+        Also you can plot a &quot;map&quot; as a background for
+        the track - see section &quot;Maps&quot; how to do that.</font></p>
         <p><font size="2" face="Arial">Note the the clock is only
         updated when logging is active. Also when logging, the
         tool will prevent your phone going into standby mode
@@ -320,6 +319,10 @@ content="text/html; charset=iso-8859-1">
                 : choose how often you would like to run GPS
                 (always on, or switch it on/off at given
                 intervals) </font></li>
+            <li><font size="2" face="Arial"><strong>Drop first:</strong>:
+                ignores the first &quot;x&quot; points after GPS
+                gets a lock. The first points might have a low
+                precision, so you might want to skip them.</font></li>
             <li><font size="2" face="Arial"><strong>Stop GPS if
                 battery &lt; 20%</strong> : is a safety feature,
                 to avoid completely draining the battery. Default
@@ -475,6 +478,10 @@ content="text/html; charset=iso-8859-1">
                 files with this option on or off if you have
                 problems reading GPX file with another
                 application. Default off.</font></li>
+            <li><font size="2" face="Arial"><strong>Save GPX
+                speed in m/s</strong> - save speed in m/s instead
+                of km/h (which seems a default for GPX). Default
+                off.</font></li>
             <li><font size="2" face="Arial"><strong>GPX time
                 adjustment, hours </strong>- by default, the time
                 saved into GPX file is the &quot;local time&quot;

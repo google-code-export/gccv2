@@ -64,6 +64,7 @@
     </Compile>
     <Compile Include="GPS.cs" />
     <Compile Include="GpsPosition.cs" />
+    <Compile Include="Utils\Logger.cs" />
     <Compile Include="Utils\MapUtil.cs" />
     <Compile Include="Utils\ReadFileUtil.cs" />
     <Compile Include="Utils\Utils.cs" />
