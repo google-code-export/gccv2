@@ -1,0 +1,1093 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type"
+content="text/html; charset=iso-8859-1">
+<meta name="GENERATOR" content="Microsoft FrontPage Express 2.0">
+<title>GPS Cycle Computer</title>
+</head>
+
+<body bgcolor="#FFFFFF">
+<div align="left">
+
+<table border="0" width="450">
+    <tr>
+        <td><h1><font face="Arial">GPS Cycle Computer</font></h1>
+        <h2><font size="3" face="Arial">1. General Description</font></h2>
+        <p><font size="2" face="Arial">This is a GPS tracing
+        application for Windows Mobile. You do not need any other
+        GPS software to be installed, i.e. it works directly with
+        Windows GPS driver. You do not need any data network
+        connection to record a log, although there is an option
+        to activate Live Logging (provided by </font><a
+        href="http://www.crossingways.com"><font size="2"
+        face="Arial">www.crossingways.com</font></a><font
+        size="2" face="Arial">), so you position is uploaded to
+        the web site as well.</font></p>
+        <p><font size="2" face="Arial">The tool logs GPS data
+        into binary files with .gcc extension (binary files are
+        much smaller than the text files to store the same
+        information). gcc files then can be loaded back for
+        viewing, or saved into .kml or .gpx format, to view in
+        e.g. GoogleEarth. With the latest version of GoogleMaps,
+        you can view kml files on your phone. Just click on a kml
+        file in File Explorer. Note there is a bug in GoogleMaps
+        installation, unless you install it into the main memory
+        - see section &quot;Useful info&quot; below how to fix
+        this.</font></p>
+        <p><font size="2" face="Arial">To save battery power, GPS
+        can be switched on/off at pre-defined intervals (5 sec
+        ... 2 hours). .</font></p>
+        <p><font size="2" face="Arial">Main display shows: trip
+        distance; trip time (including or excluding &quot;stop
+        time&quot;, i.e. when speed is zero); current / average /
+        max speed; altitude (abs or relative to starting point);
+        heading; estimated battery usage. Display units are miles
+        / nautical miles / km for distance, m / feet for
+        altitude, mph / kmh / knots / minpmile / minpkm for
+        speed.</font></p>
+        <p><font size="2" face="Arial">Map display shows your
+        track. Also you can use &#147;maps&#148; &#150; any JPEG
+        image with known coordinates of the corners as a
+        background. OpenStreetMap &quot;tiles&quot; are supported
+        - these can be downloaded automatically (if you are
+        connected to the internet), or you can download a set of
+        &quot;tiles&quot; yourself and copy them on your phone.
+        You can also load a &quot;track-to-follow&quot; from gcc,
+        kml or gpx file, which is displayed in different color.</font></p>
+        <h2><font size="3" face="Arial">2. Installation </font></h2>
+        <p><font size="2" face="Arial">Copy the
+        GpsCycleComputer.CAB file into your Windows Mobile device
+        and click on it from your phone FileExplorer to install.
+        The tool can be intalled into any folder, so probably it
+        is better to install it into &quot;Internal
+        Storage&quot;, to save main memory. The path to the tool
+        (on UK Windows) will be then \Internal Storage\Program
+        Files\GpsCycleComputer. You can also find this Readme.htm
+        file in that folder, if you want to read it on your
+        phone.</font></p>
+        <p><font size="2" face="Arial">The tool shall work on any
+        screen resolution in portrait mode. It was designed on a
+        VGA screen, so you might have small distortions on other
+        screens due to scaling. For landscape mode, the tool
+        tries to adapt the button layout, but some controls might
+        not be fully visible, i.e. that is to say that the tool
+        is usable in landscape, but better use portrait mode.</font></p>
+        <p><font size="2" face="Arial">The tool now supports
+        AppToDate, i.e. if you have AppToDate installed on your
+        phone (get it from here </font><a
+        href="http://www.apptodate.org/get"><font size="2"
+        face="Arial">http://www.apptodate.org/get</font></a><font
+        size="2" face="Arial"> , more info available here </font><a
+        href="http://forum.xda-developers.com/showthread.php?t=327990"><font
+        size="2" face="Arial">http://forum.xda-developers.com/showthread.php?t=327990</font></a><font
+        size="2" face="Arial"> ) - then you will be receiving
+        latest GpsCycleComputer version automatically.</font></p>
+        <p><font size="2" face="Arial">All CAB versions and the
+        complete source code (in C#) are currently stored at
+        Google Code project page: </font><a
+        href="http://code.google.com/p/gccv2/downloads/list"><font
+        size="2" face="Arial">http://code.google.com/p/gccv2/downloads/list</font></a><font
+        size="2" face="Arial"> </font></p>
+        <h2><font size="3" face="Arial">3. Quick start. Controls
+        on the &quot;Main&quot; screen</font></h2>
+        <p><font size="2" face="Arial">As you start the tool, you
+        see the main screen with usual &quot;cycle computer&quot;
+        info: trip time, clock, speed (current, average and max),
+        and the info you would see on a GPS device: altitude,
+        heading, latitude/longitude, plus some info about the GPS
+        status. At the bottom there are 3 buttons: Options
+        (left), Start (center) and Files (right). These 3 buttons
+        changes as you move to different screens or start/stop
+        GPS.</font></p>
+        <p><font size="2" face="Arial">In most cases you shall be
+        able just to click Start button, get GPS lock (so it is
+        better to try this outside! ) and record you first track.
+        Find an open place outside (which is not surrounded by
+        trees or buildings), click the Start button and stay
+        still (this helps to get GPS lock). You need to watch:</font></p>
+        <p><font size="2" face="Arial"><strong>GPS</strong>
+        display (bottom right of the main window) : </font></p>
+        <ul>
+            <li><font size="2" face="Arial">S - number after
+                &quot;S&quot; is number of satellites found.</font></li>
+            <li><font size="2" face="Arial">Snr - number after
+                SNR is max Signal-To-Noise ratio, i.e. the signal
+                quality. The higher, the better. Number below 20
+                is very low, and it is unlikely you will get a
+                lock in this conditions.</font></li>
+            <li><font size="2" face="Arial">T - number after T is
+                difference in seconds between current UTC time of
+                your phone and UTC time of GPS sample (from
+                satellite). Might be negative - then you phone
+                time is behind. What is important, is when the
+                number is increasing, then the GPS cannot get
+                hold on a fresh sample (i.e. searching) </font></li>
+            <li><font size="2" face="Arial">Dh - number after Dh
+                is &quot;DHOP&quot; == Horizontal Dilution Of
+                Precision. 1 is very good lat/long precision, 50
+                is very bad lat/long precision. </font></li>
+            <li><font size="2" face="Arial">Rectangle color:
+                Green - GPS has lock, sample OK and recorded; Red
+                - sample is bad/old/invalid, etc, GPS still
+                searching; Yellow - pause button pressed, GPS is
+                off.</font></li>
+        </ul>
+        <p><font size="2" face="Arial"><strong>Info</strong>
+        display (bottom left of the main window) : </font></p>
+        <ul>
+            <li><font size="2" face="Arial">&#147;gps on&#148;
+                &#150; gps data is valid and logged into file </font></li>
+            <li><font size="2" face="Arial">&#147;gps off for xx
+                sec&#148; &#150; gps is switched off for given
+                time interval, as selected in Options </font></li>
+            <li><font size="2" face="Arial">&#147;gps searching +
+                Letters + Number&#148; &#150; gps is searching.
+                Number is the time in seconds since the start of
+                the search, reset after 180 secs. D &#150;
+                dropped points followed by the number of points
+                dropped, P &#150; position record found, T &#150;
+                time record found, S &#150; speed record found
+                (need P and T to start loggin. Also a check is
+                made that time is increasing, so data is fresh). </font></li>
+        </ul>
+        <p><font size="2" face="Arial">If you have number of
+        satellites 0, or &quot;no gps data&quot; for some time,
+        then it is likely that your GPS setting are not
+        correct.You need to read further how to set GPS options
+        correctly, see section &quot;Useful info&quot;, &quot;GPS
+        setup&quot; below.</font></p>
+        <p><font size="2" face="Arial">Assuming that all works
+        (you see &quot;gps on&quot; and green rectangle) with the
+        default settings (or if you have changed the setting, and
+        it works!) , let us proceed with the desciption of the
+        main screen.</font></p>
+        <p><font size="2" face="Arial">When running, Start button
+        changes to Pause - to pause GPS and / or add a
+        checkpoint. Press Pause button again to continue logging.
+        The File button changes to Stop - to stop the log and
+        save it into a file. The Options button changes to Maps -
+        which shows you track. When logging is on, you can switch
+        between Main and Maps screens only. On the Maps screen,
+        you can use Zoom in / Zoom out buttons, and move track
+        line with your finger (like in GoogleMaps for Mobile).
+        Also you can plot a &quot;map&quot; as a background for
+        the track - see section &quot;Maps&quot; how to do that.</font></p>
+        <p><font size="2" face="Arial">Note the the clock is only
+        updated when logging is active. Also when logging, the
+        tool will prevent your phone going into standby mode
+        (note, the standby time has to be larger than 15 sec), so
+        the screen shall be always on. By default, you can use
+        the hardware &quot;power&quot; button to switch off the
+        screen &#150; GPS will continue logging. Although, this
+        might not work on some phones, so there is a option to
+        display a BkLightOff button, to let you switch off the
+        screen and continue logging (see options).</font></p>
+        <p><font size="2" face="Arial">When the logging is off,
+        the clock is not updated (but you can click on any part
+        of the main screen to get it updated), and you phone will
+        be able go into standby and switch off the screen.</font></p>
+        <p><font size="2" face="Arial">When logging, if you
+        current speed is not 0, you shall see &quot;heading&quot;
+        (blue arrow at the bottom right of the main screen). This
+        shows direction of your travel, as it looks on a map with
+        &quot;north&quot;, as usual on a map, pointing up. Do not
+        be confised - the arrow shows direction of your travel,
+        not the &quot;north&quot; direction (north is up).</font></p>
+        <p><font size="2" face="Arial">Now, if you have any data
+        logged, you can stop the logging (press Stop button), and
+        see what you can do with the log file.</font></p>
+        <h2><font size="3" face="Arial">4. Working with log files</font></h2>
+        <p><font size="2" face="Arial">A log file is
+        automatically created as you click Stop button. The
+        default name
+        &quot;year&quot;+&quot;month&quot;+&quot;day&quot;+&#148;_
+        &#147;+&#148;hour&quot;+&quot;min&quot;+&quot;sec&quot;+
+        .gcc. The files are stored in the directory which you can
+        set in Options. By default this is the directory where
+        the executable is installed. It is also possible to enter
+        a custom file name (see Options). Also a file
+        &#147;log.csv&#148;, located in the same folder as gcc
+        files, is updated with the summary of the trace (one line
+        per trace / gcc file) &#150; to give you a quick overview
+        of all your logs in that folder.</font></p>
+        <p><font size="2" face="Arial">To go into Files screen,
+        click Files button (right button on the Main screen). You
+        shall see a list of *.gcc files stored in the directory
+        you selected (note, you cannot change the directory in
+        the Files screen, you need go to Options to do that.</font></p>
+        <p><font size="2" face="Arial">The buttons on Files
+        screen are: on the right there are buttons to select
+        next/prev file. Also you can selected a file by clicking
+        on it. The center button on the bottom row - loads gcc
+        file (and automatically goes to the Maps screen to view
+        it). The left button on the bottom row - close the Files
+        screen and return to Main.</font></p>
+        <p><font size="2" face="Arial">Left and center buttons on
+        the top row save the selected gcc file into KML or GPX -
+        these are two popular formats to exchange GPS data. GCC
+        is the internal format for this tool, so you <strong>must</strong>
+        save file as KML or GPX before viewing them in other
+        applications. When you save file into KML, a
+        &quot;*&quot; is printed before the file name. If you
+        save into GPX, then a &quot;+&quot; is printed - so you
+        can quickly check which files have been converted into
+        GPX and/or KML.</font></p>
+        <p><font size="2" face="Arial">KML files can be viewed
+        with GoogleEarth. Also, with the latest version of
+        GoogleMaps, you can view KML files on your phone. Just
+        click on a kml file in File Explorer (note that bug in
+        GoogleMaps install - see Useful info, Problems with
+        GoogleMaps installation.</font></p>
+        <p><font size="2" face="Arial">To view GPX files you can
+        try http://utrack.crempa.net/ web site. Also you can view
+        GPX files in GoogleEarth (go to File | Load menu).</font></p>
+        <p><font size="2" face="Arial">GCC file are assosiated
+        with GPS Cycle Computer, so you can also open gcc file by
+        clicking on it from FileExplorer on your phone. But the
+        tool does not load the settings correctly in this case,
+        and also if you have the tool already opened, it does not
+        load another file again (i.e. you need to close it, to
+        get it load a file). If you know how to fix this - please
+        let me know. So at the moment this seems not a very
+        usable option to open gcc files (i.e. better to load them
+        from the tool, as explained above)</font></p>
+        <h2><font size="3" face="Arial">5. Options </font></h2>
+        <p><font size="2" face="Arial">Options must be selected <strong>before</strong>
+        the logging is activated, otherwise the options button is
+        hidden. If you want to change any options during logging,
+        you can press &quot;pause&quot; button (then the
+        &quot;options&quot; button is available), and resume
+        logging (press &quot;pause&quot; again) after updating
+        options. This way you can change e.g the logging
+        interval, load different maps or track-to-follow. Note
+        that even if you change the input/output file folder, the
+        currently logged file still be written in the folder you
+        set as you started the log, i.e. it will not be changed.</font></p>
+        <p><font size="2" face="Arial">There are a few option
+        pages, so press &quot;next&quot; or &quot;previous&quot;
+        (center or right buttons) on options tab to switch
+        between option pages.</font></p>
+        <p><font size="2" face="Arial"><strong><u>The first
+        options you see:</u></strong></font></p>
+        <ul>
+            <li><font size="2" face="Arial"><strong>Show/hide
+                option view selector ...</strong> - there are
+                quite a few options pages, so it is likely that
+                you might not want to scroll over all of them.
+                This option lets you choose which option pages
+                you want to see. By default, <u>all</u> pages are
+                shown.</font></li>
+            <li><font size="2" face="Arial"><strong>Set maps
+                files location ...</strong> - specify the
+                location for jpeg or OSM maps files. You can
+                select existing folders only, so please create
+                new folders with File Explorer. By default, this
+                is set to the sub-folder &quot;maps&quot; of the
+                location of the GpsCycle executable.</font></li>
+            <li><font size="2" face="Arial"><strong>Set
+                input/output files location ...</strong> -
+                specify the location for input/output files. By
+                default, this is set to the location of the
+                GpsCycle executable. You can select <u>existing
+                folders only</u>, so please create new folders
+                using File Explorer. Also you can use File
+                Explorer to rename/move/copy gcc files, if
+                required. .</font></li>
+            <li><font size="2" face="Arial">&quot;<strong>Load
+                track to follow ...</strong>&quot; - you can load
+                a track data from an existing file. The line is
+                displayed in alternative color on Maps display.
+                You can load data from &quot;gcc&quot;,
+                &quot;kml&quot; or &quot;gpx&quot; files - use
+                &quot;left/right&quot; buttons on the open file
+                page to select different file types. If you want
+                to clear the track-to-follow, press <strong>&quot;Clear...&quot;</strong>
+                button. If you have problems loading file, an
+                error message will be displayed. If you have a
+                KML or GPX file which can be loaded correctly
+                into e.g. GoogleEarth, but cannot be read by this
+                tool, please send me the file, I will try to fix
+                this. For more info about loading and viewing
+                &quot;Track-to-Follow&quot; please see a section
+                below.</font></li>
+        </ul>
+        <p><font size="2" face="Arial"><strong><u>Page &quot;GPS
+        options&quot;</u></strong><strong>:</strong></font></p>
+        <ul>
+            <li><font size="2" face="Arial"><strong>GPS activity</strong>
+                : choose how often you would like to run GPS
+                (always on, or switch it on/off at given
+                intervals) </font></li>
+            <li><font size="2" face="Arial"><strong>Drop first:</strong>:
+                ignores the first &quot;x&quot; points after GPS
+                gets a lock. The first points might have a low
+                precision, so you might want to skip them.</font></li>
+            <li><font size="2" face="Arial"><strong>Stop GPS if
+                battery &lt; 20%</strong> : is a safety feature,
+                to avoid completely draining the battery. Default
+                on.</font></li>
+            <li><font size="2" face="Arial"><strong>Read GPS data
+                directly</strong> &#150; please read &quot;Useful
+                info&quot;, &quot;GPS setup&quot; section. If
+                &#147;off&#148;, the Windows &#147;parsed&#148;
+                GPS driver is used, which does not require any
+                options to be entered by the user - but this does
+                not always work well, also you cannot use
+                hardware power button to switch off the phone,
+                leaving GPS running. So the <strong>default/recommended
+                is &quot;on&#148;</strong>, COM4, 4800 baud rate
+                (works fine on most phones with WinMobile 6.1).
+                In this case the tool reads and parses the GPS
+                data directly, and the &quot;raw&quot; Windows
+                driver is used. The functions from
+                &#147;own&#148; GccGPS.dll are called, which, I
+                think, might work a bit better than the Windows
+                &#147;parsed&#148; driver.</font></li>
+            <li><font size="2" face="Arial"><strong>Manual
+                altitude correction, m</strong> - if your GPS
+                hardware does not do this for you (e.g. on
+                Diamond), then you can manually enter the value
+                to display correct height above the sea level.
+                The correcton values (called GEOID) for your
+                location can be computed here: </font><a
+                href="http://earth-info.nga.mil/GandG/wgs84/gravitymod/wgs84_180/intptW.html"><font
+                size="2" face="Arial">http://earth-info.nga.mil/GandG/wgs84/gravitymod/wgs84_180/intptW.html</font></a><font
+                size="2" face="Arial">? </font></li>
+        </ul>
+        <p><font size="2" face="Arial"><strong><u>Page &quot;Main
+        screen options&quot;</u></strong><strong>:</strong></font></p>
+        <ul>
+            <li><font size="2" face="Arial"><strong>Units</strong>
+                : select units for the display and graphs. </font></li>
+            <li><font size="2" face="Arial"><strong>Exclude stop
+                time</strong> : if activated, the points with
+                zero speed are removed from &quot;trip time&quot;
+                and &quot;average speed&quot; calculations. This
+                is useful to see the &quot;net time&quot; when
+                you e.g. cycling and make breaks during the trip,
+                without the need to switch off the logger.</font></li>
+            <li><font size="2" face="Arial"><strong>Ask for log
+                file name</strong> &#150; show an edit box, so
+                you can enter a custom log file name before
+                starting logging. Default off (the file name
+                generated automatically).</font></li>
+            <li><font size="2" face="Arial"><strong>Show
+                BkLightOff button</strong> - by default, you
+                shall be able to switch your phone off by the
+                hardware power button, and the GPS will continue
+                logging. If this does not work on your phone (or
+                you do NOT want to use &quot;read GPS data
+                directly&quot; settings) - then you shall display
+                &quot;BkLightOff&quot; button and use it to
+                switch off the screen during logging. The button
+                is displayed instead of &quot;Pause&quot; button,
+                the center button on the Main screen when
+                logging. <strong>Note</strong> that In this mode,
+                if you press the hardware power off button, the
+                GPS stops - so you will not get any log. I.e. be
+                carefull, and use BkLightOff button for the
+                logging to continue. Default off.</font></li>
+            <li><font size="2" face="Arial"><strong>Show relative
+                altitude</strong> - when &quot;on&quot;, on Main
+                screen, show altitude relative to the starting
+                point, instead of the absolute altitude. Default
+                off.</font></li>
+        </ul>
+        <p><font size="2" face="Arial"><strong><u>Page &quot;Maps
+        screen options&quot;</u></strong><strong>:</strong></font></p>
+        <ul>
+            <li><font size="2" face="Arial"><strong>Plot track as
+                dots</strong> - plot each track point as dot, or
+                connect them with lines.</font></li>
+            <li><font size="2" face="Arial"><strong>Track </strong>&#150;
+                let you change the color and width of the track.
+                The same line width and color settings are also
+                used for the <u>line saved into KML file</u>.</font></li>
+            <li><font size="2" face="Arial"><strong>Plot 2nd line
+                as dots</strong> - for
+                &quot;track-to-follow&quot; line: plot each
+                track-to-follow point as dot, or connect them
+                with lines.</font></li>
+            <li><font size="2" face="Arial"><strong>&quot;2nd
+                line&quot;</strong> - for
+                &quot;track-to-follow&quot; line: let you change
+                the color and width.</font></li>
+            <li><font size="2" face="Arial"><strong>White
+                background</strong> - By default, the tool
+                background color is used on the map page to plot
+                background. If you want to make the maps
+                background always white (regardless of tool
+                background) - set this on.</font></li>
+            <li><font size="2" face="Arial"><strong>Multi-maps</strong>
+                - option to plot multiple jpeg images at the same
+                time. This takes more memory and is slower, but
+                gives a better picture. Default is off (i.e. a
+                single, the best, map is plotted) - this is good
+                if you have just a few large map images. For OSM
+                maps (as these a small, 256x256 images) it is
+                better to plot multiple maps. With this option,
+                you can select how many maps to plot at the same
+                time (up to 8), and also which map scale
+                considered as &quot;the best&quot; - this is used
+                to decide in which order to overlay maps on the
+                top of each other (you can have 1x zoom, 2x zoom
+                or 4x zoom). Try to experiment with different
+                setting, to see which one works best for you.</font></li>
+            <li><font size="2" face="Arial"><strong>Download</strong>
+                - automatic OpenStreetMap download (make sure you
+                have internet connection on your phone, and
+                remember about the network charges!). Default is
+                OFF (i.e. only the maps which are already stored
+                on your phone will be used). Otherwise you can
+                choose which maps server to use. Note that
+                different OSM servers have maps in different
+                &quot;styles&quot; (e.g. &quot;cycle map&quot; or
+                &quot;osmarender&quot;), so you <u>need to set
+                different folders</u> for different maps. A good
+                idea is to create a new empty folder for each map
+                style (i.e. each server) using FileExplorer. To
+                specify the map folder, click &quot;Set maps
+                files location&quot; button on the first page of
+                &quot;Options&quot;. For more information see
+                section 6, &quot;Maps&quot; below.</font></li>
+        </ul>
+        <p><font size="2" face="Arial"><strong><u>Page
+        &quot;KML/GPX options&quot;</u></strong><strong>:</strong></font></p>
+        <ul>
+            <li><font size="2" face="Arial"><strong>Save altitude
+                to KML</strong> - save altitude data to KML file,
+                and set &lt;altitudeMode&gt; tag to
+                &quot;absolute&quot;. With this option on, you
+                shall see a 3D line above terrain. When this
+                options is off, then the track line just follows
+                the terrain. Note the the absolute value for the
+                altitude is offset by GEOID value (see option
+                below), so you can move the line up/down, if
+                required, by changing the GEOID setting before
+                saving the KML file. But often, due to unaccurate
+                altitude reporting by GPS, the track line goes
+                underground and dissapears on GoogleEarth
+                display. So if you are on the ground (not e.g.
+                flying, etc), then it is better to keep this
+                option off, and just let the line to follow
+                terrain. Default off.</font></li>
+            <li><font size="2" face="Arial"><strong>Save GPX with
+                rte tag</strong> - use &lt;rte&gt; tag instead of
+                &quot;&lt;trk&gt;&quot; tag - try to save GPX
+                files with this option on or off if you have
+                problems reading GPX file with another
+                application. Default off.</font></li>
+            <li><font size="2" face="Arial"><strong>Save GPX
+                speed in m/s</strong> - save speed in m/s instead
+                of km/h (which seems a default for GPX). Default
+                off.</font></li>
+            <li><font size="2" face="Arial"><strong>GPX time
+                adjustment, hours </strong>- by default, the time
+                saved into GPX file is the &quot;local time&quot;
+                when the track was recorded (this is what is
+                saved into .gcc file). But some tools (and the
+                GPX spec, actually), needs the &quot;UTC
+                time&quot;. So you can use this option to do the
+                corresponding time adjustment. &quot;+1&quot;
+                means that 1 hour will be <u>added</u> to every
+                time sample before saving into GPX file.</font></li>
+        </ul>
+        <p><font size="2" face="Arial"><strong><u>Page &quot;Live
+        logging options&quot;:</u></strong><strong> </strong></font></p>
+        <ul>
+            <li><font size="2" face="Arial">&quot;<strong>Live
+                logging</strong> options&quot; page, provided by </font><a
+                href="http://www.crossingways.com"><font size="2"
+                face="Arial">www.crossingways.com</font></a><font
+                size="2" face="Arial">.You need to create an
+                account at that web site, to be able to use this
+                feature. Please visit web site for all info ( I
+                am afraid I cannot answer your questions about
+                this feature, but I will try to arrange for
+                someone from crossingways to help)</font></li>
+            <li><font size="2" face="Arial">&quot;<strong>Hide/show
+                keyboard ...&quot; - </strong>click to show
+                keyboard, if you need it to type username and
+                password.</font></li>
+            <li><font size="2" face="Arial">&quot;<strong>User
+                name&quot; and &quot;Password&quot;</strong> - as
+                used to log into crossingways web site. You need
+                to enter this only once, then it is stored on
+                your phone (in encrypted form). After you typed
+                these information, make sure you have a data
+                connection on you phone (or connected with
+                ActiveSync or WiFi), and click <strong>&quot;Verify
+                login ...&quot;</strong> - to check that you can
+                login OK to the web site. If you have a message
+                that it has been verified, than your
+                name/password is stored, and you can proceed with
+                live logging. If you have an error message, then
+                you need to check your data connection, and/or
+                check if you have your name/password correct
+                (e.g. make sure that you can log into
+                crossingways web site).</font></li>
+            <li><font size="2" face="Arial">&quot;<strong>Live
+                logging</strong>&quot;: select &quot;off&quot; to
+                disable this feature, or set a time interval to
+                upload your position to the web site.</font></li>
+        </ul>
+        <p><font size="2" face="Arial">When live logging is
+        activated, you will be asked each time you click
+        &quot;Start&quot; button, if you want to proceed. Also in
+        the &quot;info&quot; box you will see messages
+        &quot;livelog ok&quot; or &quot;livelog error!&quot; -
+        which tells you the status of last log attempt..</font></p>
+        <p><font size="2" face="Arial"><strong><u>and finally: </u></strong></font></p>
+        <ul>
+            <li><font size="2" face="Arial">&quot;<strong>About</strong>&quot;
+                page, where you can check the current tool
+                version and see other important info.</font></li>
+        </ul>
+        <h2><font size="3" face="Arial">6. &#147;Maps&#148; </font></h2>
+        <p><font size="2" face="Arial">A &#147;map&#148; is any
+        JPEG image with known coordinates of the corners. It is
+        plotted as a background on &#147;Maps&#148; page. Maps
+        are automatically selected &#150; the map which has
+        better coverage of the picture (in % of the picture area)
+        and higher resolution (lower km per pixel) is selected.
+        Also there is a option to plot multiple maps at the same
+        time - read below how it is implemented.</font></p>
+        <p><font size="2" face="Arial">So first you need a jpeg
+        image, the file must have .jpg or .jpeg extension, e.g.
+        &#147;MyTown.jpg&#148;. Do not create very large images,
+        as it takes long time to load and plot them - a good size
+        is about 1000x1000 max. </font></p>
+        <p><font size="2" face="Arial">To specify the map
+        coordinates, you can use 3 methods described below. Also
+        you can use &quot;OpenStreetMap tiles&quot; - these are
+        specially created PNG images, so the image coordinates
+        can be derived from the file names. I.e. you do not need
+        to specify the coordinates for OpenStreetMap tiles - just
+        download them.</font></p>
+        <p><font size="2" face="Arial"><strong><u>6.1 txt + jpeg:
+        first method</u></strong> is to create a text file (with
+        .txt extension and the same name as the image, e.g.
+        &#147;MyTown.txt&#148;) which contains 4 lines: 1st line
+        - latitude of the bottom left corner, 2nd line &#150;
+        longitude of the bottom left corner, 3rd line - latitude
+        of top right corner, 4th line &#150; longitude of the top
+        right corner. The lat/long must be in decimal format,
+        e.g. 55.976598, just the decimal number, no degrees
+        character, etc. </font></p>
+        <p><font size="2" face="Arial">You need to place the <strong>jpg
+        and txt</strong> files into folder with your maps. By
+        default, this is the &#147;maps&#148; subfolder where
+        GpsCycleComputer executable is installed on your phone,
+        e.g. if you install into &#147;Internal Storage&#148;,
+        then the default location (on English Windows) will be:
+        &#147;\Internal Storage\Program
+        Files\GpsCycleComputer\maps&#148;. This folder is created
+        during CAB installation and has a text file
+        &#147;maps_folder.txt&#148; inside, so you shall be able
+        to identify it easily. Note that you can change the maps
+        location in Options. The tool supports up to 512
+        &#147;maps&#148; per folder.</font></p>
+        <p><font size="2" face="Arial"><strong><u>6.2 kml + jpeg:
+        second method</u></strong> is to use GoogleEarth to
+        create maps, it is quick and accurate. A very good and
+        detailed description how to create such a map is given in
+        the RunGps manual, section 5.2.2 (look at
+        http://www.rungps.net/wiki/DownloadsEN). The only
+        difference is that you need to save location as
+        &#147;.kml&#148; file, not as &#147;.kmz&#148; file used
+        by RunGps. If you already have a .kmz file, then it is
+        easy to convert it to .kml: simple change the .kmz
+        extension into .zip (this is a zip file), and unzip it
+        &#150; the unzipped file will be the .kml.</font></p>
+        <p><font size="2" face="Arial">So here are the main
+        steps: </font></p>
+        <ul>
+            <li><font size="2" face="Arial">Start GoogleEarth and
+                select the area to be used as a map. </font></li>
+            <li><font size="2" face="Arial">Make sure that the
+                &#147;Terrain&#148; layer is OFF, otherwise the
+                map will be distorted (the layers are shown in
+                the side bar) </font></li>
+            <li><font size="2" face="Arial">Make sure the map is
+                not rotated, i.e. the north is up. Press
+                &#147;r&#148; (in English version) to
+                &#147;reset&#148; any rotations. </font></li>
+            <li><font size="2" face="Arial">You can also switch
+                on grid (Ctrl-L), to check that the map is not
+                rotated &#150; but better to save picture without
+                grid. </font></li>
+            <li><font size="2" face="Arial">Save the image
+                (Ctrl-Alt-S) as a jpeg file. </font></li>
+            <li><font size="2" face="Arial">Now add a placemark
+                (Ctrl-Shift-P), do not move/edit it, just press
+                OK to put it in the centre of the image. </font></li>
+            <li><font size="2" face="Arial">Save this location
+                (Ctrl-S), select &#147;.kml&#148; file, and give
+                it the same name as the .jpg file for the map. </font></li>
+        </ul>
+        <p><font size="2" face="Arial">This is it! As with the
+        txt files, you need to place the <strong>jpg and kml</strong>
+        files into folder with your maps (by default, this is the
+        &#147;maps&#148; subfolder where GpsCycleComputer
+        executable is installed).</font></p>
+        <p><font size="2" face="Arial">Here is my interpretation
+        how this works for kml files: The .kml file is just a
+        text file. It contains the coordinate of the map centre
+        (LookAt point) and the height of the &#147;eye&#148; This
+        is a single point, but as I understand, the default angle
+        of view along the horizontal (x-axis) is 60 degrees, so
+        knowing the height of the &#147;eye&#148; and this view
+        angle allows to determine the map size along x-axis. As
+        we know the picture size in pixels, then we can determine
+        the y-size of the map. </font></p>
+        <p><font size="2" face="Arial"><strong><u>6.3 gmi + jpeg:
+        third method</u></strong> is to use GpsTuner' <strong>gmi</strong>
+        files. Instead of the coordinates of the map' corners,
+        you can supply coordinates of a few reference points
+        (e.g. a bridge or road intersection). gmi file is a text
+        file which contains the following lines:</font></p>
+        <p><font size="1" face="Courier New">Map Calibration data
+        file v3.0<br>
+        Image1.jpg<br>
+        1025<br>
+        1859<br>
+        879;1153;8.96395330;45.50307600<br>
+        685;332;8.94953370;45.54786704</font></p>
+        <p><font size="2" face="Arial">First line is the header
+        (must be present, otherwise an error dialog is shown).
+        Second line is the image file name. It is not used by
+        GpsCycleComputer, as the gmi and jpg file <u>must</u>
+        have the same name. Lines 3-4 are the image width/height
+        - these must match the image size, otherwise an error
+        dialog is shown. This is an important check, as if the
+        image size does not match these values, then the lines
+        below will be incorrect, as they give location of the
+        reference point on the image. </font></p>
+        <p><font size="2" face="Arial">The format of these lines
+        with reference points is: 4 values separated by
+        &quot;;&quot; - the x and y point location on the image
+        (in pixels), then longitude and latitude of the point.
+        You could have a few reference points/lines, but not less
+        than 2. Note that the &quot;y&quot; coordinate in pixels
+        is calculated from the image top, not from the bottom -
+        e.g. if you load your image into Windows Paint, and move
+        mouse over it watching the mouse position display, you
+        will see that the image origin is the top left corner,
+        not the bottom left. </font></p>
+        <p><font size="2" face="Arial">Note that the map must not
+        be rotated, i.e. the north must be up (as with all other
+        maps used by GpsCycleComputer).</font></p>
+        <p><font size="2" face="Arial">As with the txt and kml
+        files, you need to place the <strong>jpg and gmi</strong>
+        files into folder with your maps (by default, this is the
+        &#147;maps&#148; subfolder where GpsCycleComputer
+        executable is installed).</font></p>
+        <p><font size="2" face="Arial">A similar idea to set the
+        map coordinates is used in OziExplorer map files and
+        CompeGps imp files. To convert these files into gmi files
+        you can use this web site: </font><a
+        href="http://www.map-imp-gmi-converter.com/index.php"><font
+        size="2" face="Arial">http://www.map-imp-gmi-converter.com/index.php</font></a><font
+        size="2" face="Arial"> </font></p>
+        <p><font size="2" face="Arial"><strong><u>6.4 Using
+        OpenStreeMap tiles</u></strong> - these are PNG images,
+        arranged into a special directory structure based on
+        &quot;zoom level&quot; (0 to 18), and the tile X
+        coordinate within this zoom level. The image Y coordinate
+        is the file name. More info is here: </font><a
+        href="http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames"><font
+        size="2" face="Arial">http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames</font></a><font
+        size="2" face="Arial">. All images are 256x256 size. </font></p>
+        <p><font size="2" face="Arial">As an example, assume that
+        you have a directory &quot;tiles&quot;, then first you
+        will see sub-folders with names &quot;0&quot; to
+        &quot;18&quot; (this is the zoom level, not all
+        directories will be there, i.e. you will see the level
+        which you have downloaded). Then inside each sub-folder
+        you will see more sub-folders, each has name as a number
+        - these are the X-coordinates of the tiles. And fnally,
+        you will see the .PNG files itself - the file name is the
+        Y-coordinate. </font></p>
+        <p><font size="2" face="Arial">To use tile files in
+        GpsCycleComputer, you need to select the top folder, i.e.
+        the folder &quot;tiles&quot; in the above example, the
+        one which have sub-directories 0 to 18. Note that you <u>should
+        not change the directory structure</u> (then you will get
+        incorrect tile coordinates), or to <u>place any other
+        files there</u> (they will not be loaded, i.e. only the
+        PNG files will be used). </font></p>
+        <p><font size="2" face="Arial">There is no limit on the
+        number of tiles (just the size of you phone's storage
+        card!). The large number of tiles will not slow the tool
+        or increase the memory usage - as only the tiles which
+        are required are loaded for plotting.</font></p>
+        <p><font size="2" face="Arial">There are a few tool to
+        download tiles, I tried &quot;JTileDownloader&quot; which
+        is available from here: </font><a
+        href="http://wiki.openstreetmap.org/wiki/JTileDownloader"><font
+        size="2" face="Arial">http://wiki.openstreetmap.org/wiki/JTileDownloader</font></a><font
+        size="2" face="Arial">.This is a Java tool
+        (&quot;jar&quot; file), so if you click on it and nothing
+        happens (on a PC), then you will need to download and
+        install &quot;Jave runtime&quot; from Sun (just seach for
+        it in Google). As you start JTileDownloader, on the
+        &quot;Main&quot; page you can select zoom level(s) and
+        the area you want to download. As the tiles are
+        downloaded, they are automatically arranged in the
+        directory tree described above - so all you need is to
+        copy it to your mobile, and point GpsCycleComputer to the
+        top folder (e.g. &quot;tiles&quot;). </font></p>
+        <p><font size="2" face="Arial">For more info visit </font><a
+        href="http://www.openstreetmap.org"><font size="2"
+        face="Arial">www.openstreetmap.org</font></a><font
+        size="2" face="Arial">.</font></p>
+        <p><font size="2" face="Arial"><strong><u>6.5 Automatic
+        OpenStreetMap download</u></strong> - if you have an
+        internet connection on your phone, then you can select an
+        option to automatically download OSM tiles which do not
+        exist on your phone, and are required for the current
+        display. To enable this option, select a server name to
+        be used from &quot;Download&quot; combo-box. Note that
+        different server have maps in different
+        &quot;styles&quot;, so you need to select different
+        folders for different maps. If you are using this option
+        for a first time, just create a new blank folder with
+        FileExplorer, and use &quot;Set maps files location&quot;
+        button to select this folder.</font></p>
+        <p><font size="2" face="Arial">If you already downloaded
+        tiles from a server (using e.g. JTileDownloader), then
+        select that server name and select the folder you already
+        created to download the tiles, so the tiles which are
+        missing and requried for display will be downloaded
+        there. This way your &quot;tile collection&quot; will
+        grow. Note that if a tile file already exist, then it
+        will not be downloaded, so if you want to download a tile
+        again, select a new blank folder, or delete files from
+        existing folder.</font></p>
+        <p><font size="2" face="Arial">There is 10 second timeout
+        for a tile download, so if a server does not reply within
+        this time, you will see &quot;Download Error&quot; on the
+        map display. This could happen if a server is busy, so
+        you can try again - just move the map with your finger or
+        press zoom buttons - the map update will trigger
+        download.</font></p>
+        <p><font size="2" face="Arial">The predefined list of
+        servers are:</font></p>
+        <ul>
+            <li><font size="2" face="Arial">Osmarender </font><a
+                href="http://tah.openstreetmap.org/Tiles/tile/"><font
+                size="2" face="Arial">http://tah.openstreetmap.org/Tiles/tile/</font></a></li>
+            <li><font size="2" face="Arial">Mapnik </font><a
+                href="http://tile.openstreetmap.org/mapnik/"><font
+                size="2" face="Arial">http://tile.openstreetmap.org/mapnik/</font></a><font
+                size="2" face="Arial"> </font></li>
+            <li><font size="2" face="Arial">Cyclemap (CloudMade) </font><a
+                href="http://c.andy.sandbox.cloudmade.com/tiles/cycle/"><font
+                size="2" face="Arial">http://c.andy.sandbox.cloudmade.com/tiles/cycle/</font></a></li>
+            <li><font size="2" face="Arial">OpenPisteMap </font><a
+                href="http://openpistemap.org/tiles/contours/"><font
+                size="2" face="Arial">http://openpistemap.org/tiles/contours/</font></a></li>
+            <li><font size="2" face="Arial">CloudMade Web style </font><a
+                href="http://tile.cloudmade.com/8bafab36916b5ce6b4395ede3cb9ddea/1/256/"><font
+                size="2" face="Arial">http://tile.cloudmade.com/8bafab36916b5ce6b4395ede3cb9ddea/1/256/</font></a></li>
+            <li><font size="2" face="Arial">CloudMade Mobile
+                style </font><a
+                href="http://tile.cloudmade.com/8bafab36916b5ce6b4395ede3cb9ddea/2/256/CloudMade"><font
+                size="2" face="Arial">http://tile.cloudmade.com/8bafab36916b5ce6b4395ede3cb9ddea/2/256/</font></a></li>
+            <li><font size="2" face="Arial">CloudMade NoNames
+                style </font><a
+                href="http://tile.cloudmade.com/8bafab36916b5ce6b4395ede3cb9ddea/3/256/"><font
+                size="2" face="Arial">http://tile.cloudmade.com/8bafab36916b5ce6b4395ede3cb9ddea/3/256/</font></a></li>
+        </ul>
+        <p><font size="2" face="Arial">You can specify any OSM
+        server, if requred - just edit a file called
+        &quot;osm_server.txt&quot;, which is created in the same
+        folder as GpsCycleComputer.exe, then restart the tool
+        (the file is re-loaded when the tool starts), and select
+        &quot;User-defined&quot; in the &quot;Download&quot;
+        combo-box. The osm_server.txt shall contain a single
+        line, which is the name of the server to use. The server
+        address shall finish with &quot;/&quot;, as the required
+        zoom, X coordinates and PNG file name will be appended
+        after the &quot;/&quot;, e.g an example address could be </font><a
+        href="http://tah.openstreetmap.org/Tiles/tile/10/12/33.PNG"><font
+        size="2" face="Arial">http://tah.openstreetmap.org/Tiles/tile/10/12/33.PNG</font></a><font
+        size="2" face="Arial"> for a server </font><a
+        href="http://tah.openstreetmap.org/Tiles/tile/"><font
+        size="2" face="Arial">http://tah.openstreetmap.org/Tiles/tile/</font></a><font
+        size="2" face="Arial">. Is is a good idea to try to
+        access such a sample address using a web browser, to
+        check that you can see PNG images at that server, i.e.the
+        server is working.</font></p>
+        <p><font size="2" face="Arial"><strong><u>6.6 Map
+        selection.</u></strong> The maps are automatically
+        selected - as you touch and lift you finger from the
+        screen or press zoom-in/zoom-out buttons. The best map
+        name is displayed at the top of the screen. If a folder
+        with OpenStreetMap tiles is detected, then you will see
+        zoom level, x and y coordinates of the best tile. If no
+        maps covers the view area, then no map is used, and the
+        display says &#147;no map&#148;. If there were errors
+        during map download from web or loading from storage
+        card, then the display says &#147;Download Error&#148; or
+        &quot;Read Error&quot;. You will also see &quot;Read
+        Error&quot; if there is not enough free memory to display
+        a map (e.g. if an image file it too large, or you try to
+        load too many images at the same time).</font></p>
+        <p><font size="2" face="Arial">Note that you can see the
+        map <strong>only</strong> as a background for your
+        existing track, you cannot just browse any maps you
+        created without having a track recorded for that location
+        (well, if you want to see the map jpeg image - just click
+        on it in File Explorer - this is just a jpeg!)</font></p>
+        <p><font size="2" face="Arial">Note that you can select a
+        folder with jpeg file <strong><u>or</u></strong> a top
+        folder with OpenStreetMap tiles - i.e. you <u>cannot</u>
+        store both type of maps in the same folder.</font></p>
+        <p><font size="2" face="Arial"><strong><u>6.7 Multi-maps
+        plotting algorithm</u></strong> - tries to plot multiple
+        jpeg maps (instead of a single, the best, map). The maps
+        a simply plotted on the top of each other, so the trick
+        is to decide in which order to plot the maps. Well, I
+        have an idea to plot the maps in order of &quot;map
+        quality&quot;- starting from the worst, and finishing
+        with the best, so we have the best map on top. There are
+        two factors which determine &quot;map quality&quot; -
+        first is how much area of the screen is covered by the
+        map (the best map will cover 100%). Second factor is what
+        is map zoom level - clearly, there is a zoom level at
+        which the map is best readable on the phone screen - this
+        is selectable in options (you can choose 1x zoom, 2x zoom
+        or 4x zoom). If the zoom level is different (i.e. if you
+        zoom-in or zoom-out) - the map quality will drop (details
+        are too fine and not possible to read, when you zoom-out,
+        or, details dissappear as you zoom in more and more). So
+        the map quality is defined as combination of map coverage
+        and zoom quality factor. Well - this is probably too
+        complicated to explain - but all you need is to
+        experiment with different settings and see which one
+        works best for you. Note that the more maps you use, the
+        more memory requirements.</font></p>
+        <p><font size="2" face="Arial">Regarding what set of maps
+        to create - I think the best idea to create maps for the
+        same area at different zoom level (like OpenStreetMap
+        tiles) - e.g. a overview map, then maps which cover some
+        part in more and more details. Then the tool will try to
+        select the best (or the best set of) maps for you. Do not
+        create very large or very small images, the size is about
+        1000x1000 max.</font></p>
+        <h2><font size="3" face="Arial">7. Track-to-follow </font></h2>
+        <p><font size="2" face="Arial">Use &quot;<strong>Load
+        track to follow ...</strong>&quot; button on the first
+        page of &quot;Options&quot; to load a track data from an
+        existing file. You can load data from &quot;gcc&quot;,
+        &quot;kml&quot; or &quot;gpx&quot; files - use
+        &quot;left/right&quot; buttons on the open file dialog to
+        see files with different extension. If you have the 1st
+        (main) track (i.e. if you have logging active, or loaded
+        any .gcc files on the &quot;Main&quot; page), then you
+        shall be able to see both tracks plotted on the Maps page
+        - note that you can set line style (color, width and plot
+        as line/dots) for each track separatelly. </font></p>
+        <p><font size="2" face="Arial">To clear
+        &quot;track-to-follow&quot; press &quot;Clear...&quot;
+        button. You shall see message at the bottom of the screen
+        which says &quot;Track to follow cleared&quot;. Then you
+        will see only &quot;main&quot; track plotted on the Maps
+        page. If you want to do opposite (i.e. to clear the main
+        track, and view only track-to-follow, then you need to
+        clear the main track as well - press &quot;Clear ...
+        &quot; button twice. You shall see message &quot;All
+        tracks cleared&quot;. Now you can load the
+        track-to-follow, and only the 2nd line will be displayed.
+        Note that you can clear the main track only if the
+        logging is not active.</font></p>
+        <h2><font size="3" face="Arial">8. Custom button skins
+        and custom back / fore color </font></h2>
+        <p><font size="2" face="Arial">You can set your own
+        background / text color and images for all buttons. All
+        what required is to edit jpeg files which are supplied
+        with the source code (look into
+        GpsCycleComputerSource.zip) and copy the new images into
+        the folder with GpsCycleComputer.exe on your WinMobile,
+        then re-start GpsCycleComputer. The new images will be
+        loaded at the startup. If you want to change just a
+        single button, just copy the files for that button, all
+        files are not required. For example, if you want the
+        change &#147;Maps&#148; button for bottom menu, edit
+        files &#147;map.jpg&#148; and &#147;map_p.jpg&#148;
+        (there are two images, as button has two states,
+        &quot;normal&quot; and &quot;pressed&quot;). Better do
+        not change the image sizes, to avoid image distortions.
+        To change the background color, edit file
+        &#147;bk_color.jpg&#148;. The image shall be filled with
+        a single color. For the font (fore) color, edit
+        fore_color.jpg (and place then with
+        GpsCycleComputer.exe). </font></p>
+        <h2><font size="3" face="Arial">9. Source code </font></h2>
+        <p><font size="2" face="Arial">A complete source code (in
+        C#) is provided. For GCC file format see file Form1.cs,
+        function &quot;LoadGcc&quot; which loads a gcc file.
+        Basically after a header with general data, the data is
+        written as 5 short int (short int = 16 bits = 2 bytes)
+        which are : x, y, z (in metres, relative to starting
+        point), speed (in kmh*10) and time (sec, relative to
+        start). Also there are a few special records (also as 5
+        short ints) to save some control info, like battery
+        status. Feel free to change anything you like, but please
+        send me you comments/bug fixes. </font></p>
+        <p><font size="2" face="Arial">The project files for MS
+        Visual Studio 2005 are provided. The solution file
+        (*.sln) contains 3 projects: GccGPS (this is the dll to
+        work with GPS - you need to build this for PocketPC 2003
+        target, release); then GpsCycleComputer project itself
+        (to build the executable - build for Any CPU, release);
+        and the CAB project, the one which creates a CAB (build
+        this last, for Any CPU, release). If you have problems
+        you could create a project files yourself, and just add
+        the existing source files to it. If you have problems
+        building dll - I just use the Wizard to set a MFC DLL
+        project for me (so you could try to do the same), then
+        just add there GccGPS.cpp and .h. If this still does not
+        work, then you actually do not need to build DLL, just
+        copy it from the installation (after you install the
+        application on your phone).</font></p>
+        <h2><font size="3" face="Arial">10. Useful Info</font></h2>
+        <h2><font size="2" face="Arial">10.1 GPS setup</font></h2>
+        <p><font size="2" face="Arial">There are many ways for a
+        software to connect to GPS. Usually it is assumed that
+        the GPS hardware is connected to a serial port (e.g.
+        COM0..COM14), so all is requried for a software is to
+        &quot;open&quot; the required serial port and listen to
+        the GPS data. The data comes in a form of text strings in
+        so called NMEA format.</font></p>
+        <p><font size="2" face="Arial">In <strong>addition</strong>,
+        Windows provides two drivers to connect to GPS (you can
+        read about this here: </font><a
+        href="http://msdn.microsoft.com/en-us/library/bb201942.aspx"><font
+        size="2" face="Arial">http://msdn.microsoft.com/en-us/library/bb201942.aspx</font></a><font
+        size="2" face="Arial">) - Windows &quot;raw&quot; GPS
+        driver and Windows &quot;parsed&quot; driver.
+        &quot;Raw&quot; driver is also called
+        &quot;multiplexer&quot;, as it does not do any processing
+        of the GPS data, but simply forwards it to all
+        applications, i.e. multiple tools can be connected to GPS
+        at the same time. The COM port for the &quot;raw&quot;
+        driver is different from the GPS hardware port, and it is
+        set in Windows &quot;Settings&quot;, &quot;System&quot;,
+        &quot;External GPS&quot;, &quot;Programs&quot; tab - this
+        is usually COM4 (in WinMobile 6.1). The
+        &quot;parsed&quot; driver does more work for you - it
+        converts GPS data into actual latitude/longitude, etc, so
+        you can just retrieve this data without any knowledge of
+        a COM port or NMEA strings generated by GPS.</font></p>
+        <p><font size="2" face="Arial">So how all this can be set
+        in the tool? There is a check box &quot;read GPS data
+        directly&quot;, COM port and baud rate selectors on
+        Options page.</font></p>
+        <p><font size="2" face="Arial"><strong>Option 1 (default
+        and recommended)</strong>: Check (i.e. select) &quot;read
+        GPS data directly&quot;, set COM port to the multiplexer
+        value (check Windows &quot;Settings&quot;,
+        &quot;System&quot;, &quot;External GPS&quot;,
+        &quot;Programs&quot; tab - usually this is COM4), baud
+        rate does not matter (I think) for multiplexer, set to
+        e.g. 4800. This way you use Windows &quot;raw&quot;
+        driver, and let multiple apps to use GPS at the same
+        time.</font></p>
+        <p><font size="2" face="Arial"><strong>Option 2 (very
+        easy, but often GPS does not work well):</strong>
+        Un-check (un-select) &quot;read GPS data directly&quot;,
+        the COM/baud rate setting are not used in this case. This
+        way you use Window &quot;parsed&quot; driver and let
+        Windows fully manage and process GPS data for you. Note:
+        with this option you <strong>cannot</strong> use the
+        phone hardware power off button to switch the phone
+        on/off, and still have the GPS logging - you will need to
+        use BkLightOff button (center button on Main screen,
+        select appropriate option to show it) - to switch the
+        bklight off.</font></p>
+        <p><font size="2" face="Arial"><strong>Option 3:</strong>
+        Check (select) &quot;read GPS data directly&quot;, set
+        COM port and baud rate to the GPS hardware port setting
+        (you shall have some instructions from the GPS
+        manufacturer). This way you are connected to the GPS
+        directly. Not sure if this will work correctly with
+        multiple GPS applications running at the same time. </font></p>
+        <p><font size="2" face="Arial">You shall be getting at
+        least 1 satellite very quickly (see main screen display,
+        GPS section, parameter &quot;S&quot;), if the settings
+        are correct. If you have 0 satellites or &quot;no gps
+        data&quot; for some time - then something might be wrong
+        in your setup.</font></p>
+        <p><font size="2" face="Arial"><strong>Tips for a quick
+        GPS lock</strong>: 1) use QuickGPS tool (it is supplied
+        with Diamond); 2) do soft-reset for your phone, specially
+        after software updates; 3) find a place outside building
+        with clear sky view (i.e. do not stay next to a large
+        building wall); 4) do not move your phone, keep it still
+        relative to ground (not relative to your car dashboard
+        while you are driving off !). On Diamond, in this
+        conditions, usually you will get a lock in under 30 sec.</font></p>
+        <h2><font size="2" face="Arial">10.2 Location of a
+        temporary file created during logging</font></h2>
+        <p><font size="2" face="Arial">During loging, the tool
+        creates a temporary file &quot;tmp.gcc&quot; in the root
+        folder (i.e. \tmp.gcc), then copies it into the required
+        gcc file as logging is finished. Writing into a file in
+        the main memory seems make the application more stable,
+        than writing into a file located in \Internal Storage. If
+        you phone crashes (and the &quot;final&quot; gcc file was
+        not created), then you still can restore most of your log
+        (the last part might be missing, as the data is not
+        written instantly into the file by Windows). All you need
+        to do is to locate the tmp.gcc file and copy it into the
+        required location with desired name - then you shall be
+        able to open this file with the tool as usual.</font></p>
+        <h3><font size="2" face="Arial">10.3 Problems with
+        GoogleMaps installation, if you cannot open KML file</font></h3>
+        <p><font size="2" face="Arial">There is a problem with
+        some versions of GoogleMaps for Mobile - it cannot open a
+        KML file as you click on it in your phone File Explorer.
+        You need to edit registry key to fix this. If you do not
+        know how to edit a registry key, then a simple solution
+        would be to install GoogleMaps into main memory - then it
+        shall work. If you have experience with registry, then go
+        to HKEY_CLASSES_ROOT, &quot;kml&quot; key (without .
+        upfront, as there is a key called &quot;.kml&quot;).
+        Inspect the path to your GoogleMaps.exe, it could be
+        wrong - usually the part &quot;Internal Storage&quot; (on
+        UK Windows) is missing - this is what you need to add. </font></p>
+        <p><font size="2" face="Arial">Note that you shall <strong>not</strong>
+        use any tools to associate kml file with GoogleMaps, as
+        these tools do not know about extra command-line switches
+        (e.g. -KML_FILE) required, i.e. they create incorrect
+        association and you still will not be able to open KML
+        files.</font></p>
+        <h3><font size="2" face="Arial">10.4 Running from AC</font></h3>
+        <p><font size="2" face="Arial">I managed to tell Windows
+        do NOT switch off the screen and GPS when running from
+        battery, but seems these functions does not work when
+        running from AC adaptor. So it is recommended to set the
+        Windows setting &quot;do not switch bklight&quot; and
+        &quot;do not go into standby&quot; when running from AC.
+        Send me a message, if you know how to fix this.... (I
+        guess, set the values in registry is one option?)</font></p>
+        <h2><font size="3" face="Arial">11. Contact </font></h2>
+        <p><font size="2" face="Arial">Programming: AndyZap </font></p>
+        <p><font size="2" face="Arial">Design: expo7. Special
+        thanks to AngelGR.</font></p>
+        <p><a
+        href="http://forum.xda-developers.com/showthread.php?t=424423"><font
+        size="2" face="Arial">http://forum.xda-developers.com/showthread.php?t=424423</font></a></p>
+        <p><a
+        href="http://code.google.com/p/gccv2/downloads/list"><font
+        size="2" face="Arial">http://code.google.com/p/gccv2/downloads/list</font></a></p>
+        <p><font size="2" face="Arial">Good luck! </font></p>
+        </td>
+    </tr>
+</table>
+</div>
+</body>
+</html>
