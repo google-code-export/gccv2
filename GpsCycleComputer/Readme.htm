@@ -2,8 +2,8 @@
 
 <head>
 <meta http-equiv="Content-Type"
-content="text/html; charset=iso-8859-1">
-<meta name="GENERATOR" content="Microsoft FrontPage Express 2.0">
+content="text/html; charset=iso-8859-1"/>
+<meta name="GENERATOR" content="Microsoft FrontPage Express 2.0"/>
 <title>GPS Cycle Computer</title>
 </head>
 
@@ -12,7 +12,7 @@ content="text/html; charset=iso-8859-1">
 
 <table border="0" width="450">
     <tr>
-        <td><h1><font face="Arial">GPS Cycle Computer</font></h1>
+        <td style="width: 536px"><h1><font face="Arial">GPS Cycle Computer</font></h1>
         <h2><font size="3" face="Arial">1. General Description</font></h2>
         <p><font size="2" face="Arial">This is a GPS tracing
         application for Windows Mobile. You do not need any other
@@ -22,7 +22,7 @@ content="text/html; charset=iso-8859-1">
         to activate Live Logging (provided by </font><a
         href="http://www.crossingways.com"><font size="2"
         face="Arial">www.crossingways.com</font></a><font
-        size="2" face="Arial">), so you position is uploaded to
+        size="2" face="Arial">), so your position is uploaded to
         the web site as well.</font></p>
         <p><font size="2" face="Arial">The tool logs GPS data
         into binary files with .gcc extension (binary files are
@@ -37,11 +37,14 @@ content="text/html; charset=iso-8859-1">
         this.</font></p>
         <p><font size="2" face="Arial">To save battery power, GPS
         can be switched on/off at pre-defined intervals (5 sec
-        ... 2 hours). .</font></p>
+        ... 1 hours). This has a drawback because the first
+            samples from GPS after switch on are usually not very precise. Therfore there is
+            an option to "Drop first: none .. 32 points".</font></p>
         <p><font size="2" face="Arial">Main display shows: trip
         distance; trip time (including or excluding &quot;stop
         time&quot;, i.e. when speed is zero); current / average /
-        max speed; altitude (abs or relative to starting point);
+        max speed; altitude (abs or relative to starting point and altitude gain, that
+            means increasing altitude is summarized);
         heading; estimated battery usage. Display units are miles
         / nautical miles / km for distance, m / feet for
         altitude, mph / kmh / knots / minpmile / minpkm for
@@ -67,12 +70,10 @@ content="text/html; charset=iso-8859-1">
         file in that folder, if you want to read it on your
         phone.</font></p>
         <p><font size="2" face="Arial">The tool shall work on any
-        screen resolution in portrait mode. It was designed on a
+        screen resolution in portrait or in landscape mode. It was designed on a
         VGA screen, so you might have small distortions on other
-        screens due to scaling. For landscape mode, the tool
-        tries to adapt the button layout, but some controls might
-        not be fully visible, i.e. that is to say that the tool
-        is usable in landscape, but better use portrait mode.</font></p>
+        screens due to scaling. For landscape mode, the buttons are moved to the
+            right to save space in order to keep the layout basically the same.</font></p>
         <p><font size="2" face="Arial">The tool now supports
         AppToDate, i.e. if you have AppToDate installed on your
         phone (get it from here </font><a
@@ -110,7 +111,7 @@ content="text/html; charset=iso-8859-1">
         display (bottom right of the main window) : </font></p>
         <ul>
             <li><font size="2" face="Arial">S - number after
-                &quot;S&quot; is number of satellites found.</font></li>
+                &quot;S&quot; is number of satellites in use and satellites in view.</font></li>
             <li><font size="2" face="Arial">Snr - number after
                 SNR is max Signal-To-Noise ratio, i.e. the signal
                 quality. The higher, the better. Number below 20
@@ -128,27 +129,30 @@ content="text/html; charset=iso-8859-1">
                 Precision. 1 is very good lat/long precision, 50
                 is very bad lat/long precision. </font></li>
             <li><font size="2" face="Arial">Rectangle color:
-                Green - GPS has lock, sample OK and recorded; Red
+                Green - GPS has lock, sample OK; Red
                 - sample is bad/old/invalid, etc, GPS still
-                searching; Yellow - pause button pressed, GPS is
-                off.</font></li>
+                searching; Yellow - GPS valid, but first
+                samples dropped to get better precision (useful in start/stop mode); Grey - GPS
+                suspended to save battery (start/stop mode).</font></li>
         </ul>
         <p><font size="2" face="Arial"><strong>Info</strong>
         display (bottom left of the main window) : </font></p>
         <ul>
             <li><font size="2" face="Arial">&#147;gps on&#148;
-                &#150; gps data is valid and logged into file </font></li>
-            <li><font size="2" face="Arial">&#147;gps off for xx
-                sec&#148; &#150; gps is switched off for given
+                &#150; gps data is valid </font></li>
+            <li><font size="2" face="Arial">&#147;gps 
+                sec&#148; &#150; suspended for xs? gps is switched off for given
                 time interval, as selected in Options </font></li>
-            <li><font size="2" face="Arial">&#147;gps searching +
-                Letters + Number&#148; &#150; gps is searching.
-                Number is the time in seconds since the start of
-                the search, reset after 180 secs. D &#150;
-                dropped points followed by the number of points
-                dropped, P &#150; position record found, T &#150;
-                time record found, S &#150; speed record found
-                (need P and T to start loggin. Also a check is
+            <li><font size="2" face="Arial">&#147;gps Number&#148; &#150; state + Letters1 Number1
+                [blank] Letters2 Number2?.<br />
+                Letters1: L: logging; P: pause; d and Number1: dropped points.<br />
+                Letters2: capital letters means OK, small letters means not OK.<br />
+                T: time; L: latitude; L: longitude; A: altitude; H: heading; S=speed.<br />
+                Number2 is the time in seconds since the start of
+                the search for valid signal, reset after &#150;
+                &#150; position record found, T &#150;
+                time record found, S &#150; 180s
+                (need T and LL to get lock. Also a check is
                 made that time is increasing, so data is fresh). </font></li>
         </ul>
         <p><font size="2" face="Arial">If you have number of
@@ -165,41 +169,41 @@ content="text/html; charset=iso-8859-1">
         <p><font size="2" face="Arial">When running, Start button
         changes to Pause - to pause GPS and / or add a
         checkpoint. Press Pause button again to continue logging.
-        The File button changes to Stop - to stop the log and
-        save it into a file. The Options button changes to Maps -
+        The GPS button changes to Stop - to stop the log. The Options button changes to Maps -
         which shows you track. When logging is on, you can switch
         between Main and Maps screens only. On the Maps screen,
         you can use Zoom in / Zoom out buttons, and move track
         line with your finger (like in GoogleMaps for Mobile).
         Also you can plot a &quot;map&quot; as a background for
         the track - see section &quot;Maps&quot; how to do that.</font></p>
-        <p><font size="2" face="Arial">Note the the clock is only
-        updated when logging is active. Also when logging, the
+        <p><font size="2" face="Arial">When GPS is on, the
         tool will prevent your phone going into standby mode
         (note, the standby time has to be larger than 15 sec), so
         the screen shall be always on. By default, you can use
         the hardware &quot;power&quot; button to switch off the
-        screen &#150; GPS will continue logging. Although, this
-        might not work on some phones, so there is a option to
-        display a BkLightOff button, to let you switch off the
-        screen and continue logging (see options).</font></p>
-        <p><font size="2" face="Arial">When the logging is off,
-        the clock is not updated (but you can click on any part
-        of the main screen to get it updated), and you phone will
-        be able go into standby and switch off the screen.</font></p>
-        <p><font size="2" face="Arial">When logging, if you
+        screen &#150; GPS will continue logging. On some devices
+            this switches off also the GPS receiver, so track logging is no more possible. Then
+            you can try to check the option "GPS | use alternate method to keep GPS on". This modifies
+            some values in the registry while gps is on. If this doesn't solve the problem you
+            can enable the option "Main screen | Show BKLight Off button" and use this button
+            to switch off backlight instead of the power button.</font></p>
+        <p><font size="2" face="Arial">When logging, if your
         current speed is not 0, you shall see &quot;heading&quot;
-        (blue arrow at the bottom right of the main screen). This
+        (blue arrow at the bottom right of the main screen or in
+            center of map screen). This
         shows direction of your travel, as it looks on a map with
         &quot;north&quot;, as usual on a map, pointing up. Do not
         be confised - the arrow shows direction of your travel,
-        not the &quot;north&quot; direction (north is up).</font></p>
+        not the &quot;north&quot; direction (north is up).<br />
+            If you rotate your device so that the arrow points in direction of your movement,
+            the device top points to north.</font></p>
         <p><font size="2" face="Arial">Now, if you have any data
         logged, you can stop the logging (press Stop button), and
         see what you can do with the log file.</font></p>
         <h2><font size="3" face="Arial">4. Working with log files</font></h2>
         <p><font size="2" face="Arial">A log file is
-        automatically created as you click Stop button. The
+        automatically created as you click Start
+            button. The
         default name
         &quot;year&quot;+&quot;month&quot;+&quot;day&quot;+&#148;_
         &#147;+&#148;hour&quot;+&quot;min&quot;+&quot;sec&quot;+
@@ -212,7 +216,8 @@ content="text/html; charset=iso-8859-1">
         per trace / gcc file) &#150; to give you a quick overview
         of all your logs in that folder.</font></p>
         <p><font size="2" face="Arial">To go into Files screen,
-        click Files button (right button on the Main screen). You
+        click Files button (Options
+            | Load GCC / Save KML- GPX-file ...). You
         shall see a list of *.gcc files stored in the directory
         you selected (note, you cannot change the directory in
         the Files screen, you need go to Options to do that.</font></p>
@@ -311,6 +316,11 @@ content="text/html; charset=iso-8859-1">
                 this. For more info about loading and viewing
                 &quot;Track-to-Follow&quot; please see a section
                 below.</font></li>
+            <li><span style="font-family: Arial"><span style="font-size: 10pt"><strong>Graph ...</strong> - display graph of altitude or speed over time. You can
+                zoom the axes by dragging a point at the axis (outline) of the drawing in either direction. Dragging
+                inside the drawing moves the graph. A double click does autoscale to fit the whole
+                data. &nbsp; </span></span>
+            </li>
         </ul>
         <p><font size="2" face="Arial"><strong><u>Page &quot;GPS
         options&quot;</u></strong><strong>:</strong></font></p>
@@ -343,7 +353,8 @@ content="text/html; charset=iso-8859-1">
                 driver is used. The functions from
                 &#147;own&#148; GccGPS.dll are called, which, I
                 think, might work a bit better than the Windows
-                &#147;parsed&#148; driver.</font></li>
+                &#147;parsed&#148; driver. For test purposes you can select "\nmea.txt" instead of COMx. Then the raw
+                NMEA data are read from that file (in root directory) instead from the GPS receiver.</font> </li>
             <li><font size="2" face="Arial"><strong>Manual
                 altitude correction, m</strong> - if your GPS
                 hardware does not do this for you (e.g. on
@@ -353,7 +364,18 @@ content="text/html; charset=iso-8859-1">
                 location can be computed here: </font><a
                 href="http://earth-info.nga.mil/GandG/wgs84/gravitymod/wgs84_180/intptW.html"><font
                 size="2" face="Arial">http://earth-info.nga.mil/GandG/wgs84/gravitymod/wgs84_180/intptW.html</font></a><font
-                size="2" face="Arial">? </font></li>
+                size="2" face="Arial">?</font></li>
+            <li><span style="font-family: Arial"><span style="font-size: 10pt"><strong>Beep on GPS
+                fix</strong> - if checked, beeps on GPS fix and loose.</span></span></li>
+            <li><span style="font-family: Arial"><span style="font-size: 10pt"><strong>AVG</strong>
+                - averaging of the GPS data. This feature is experimental. Set to 1 disables averaging.
+                I don't recommend to set the average factor</span><span><span style="font-size: 10pt"><font
+                    face="Arial" size="2"> higher than 3 (at current implementation).</font></span></span></span></li>
+            <li><span><span><span style="font-size: 10pt"><font face="Arial" size="2"></font></span>
+            </span></span><span style="font-size: 10pt"><span style="font-family: Arial"><strong>
+                use alternate method to keep GPS on</strong> - check this option if GPS goes off when you
+                switch off the screen (see also Main screen options, Show BKLightOff button). In
+                this case some registry values are modified to keep GPS on.</span></span></li>
         </ul>
         <p><font size="2" face="Arial"><strong><u>Page &quot;Main
         screen options&quot;</u></strong><strong>:</strong></font></p>
@@ -510,7 +532,10 @@ content="text/html; charset=iso-8859-1">
                 keyboard ...&quot; - </strong>click to show
                 keyboard, if you need it to type username and
                 password.</font></li>
-            <li><font size="2" face="Arial">&quot;<strong>User
+            <li><font size="2" face="Arial">&quot;<strong>Server URL</strong>"
+             - default is "http://www.crossingways.com". This Textbox allows you to specify an alternate server which must be compatible
+                to crossingways.</font>&nbsp;</li>
+            <li><font face="Arial" size="2">"<strong>User
                 name&quot; and &quot;Password&quot;</strong> - as
                 used to log into crossingways web site. You need
                 to enter this only once, then it is stored on
@@ -526,7 +551,7 @@ content="text/html; charset=iso-8859-1">
                 you need to check your data connection, and/or
                 check if you have your name/password correct
                 (e.g. make sure that you can log into
-                crossingways web site).</font></li>
+                crossingways web site).</font> </li>
             <li><font size="2" face="Arial">&quot;<strong>Live
                 logging</strong>&quot;: select &quot;off&quot; to
                 disable this feature, or set a time interval to
@@ -542,7 +567,8 @@ content="text/html; charset=iso-8859-1">
         <ul>
             <li><font size="2" face="Arial">&quot;<strong>About</strong>&quot;
                 page, where you can check the current tool
-                version and see other important info.</font></li>
+                version and see other important info including a button to
+                display this readme file..</font></li>
         </ul>
         <h2><font size="3" face="Arial">6. &#147;Maps&#148; </font></h2>
         <p><font size="2" face="Arial">A &#147;map&#148; is any
@@ -944,8 +970,10 @@ content="text/html; charset=iso-8859-1">
         target, release); then GpsCycleComputer project itself
         (to build the executable - build for Any CPU, release);
         and the CAB project, the one which creates a CAB (build
-        this last, for Any CPU, release). If you have problems
-        you could create a project files yourself, and just add
+        this last, for Any CPU, release). If
+            you have problems with missing "Platform ID" you can open GpsCycleComputer.csproj
+            in an editor and change the GUID of &lt;PlatformID&gt; to the GUID from a self created
+            project. If you have further problems you could create a project yourself, and just add
         the existing source files to it. If you have problems
         building dll - I just use the Wizard to set a MFC DLL
         project for me (so you could try to do the same), then
@@ -954,11 +982,11 @@ content="text/html; charset=iso-8859-1">
         copy it from the installation (after you install the
         application on your phone).</font></p>
         <h2><font size="3" face="Arial">10. Useful Info</font></h2>
-        <h2><font size="2" face="Arial">10.1 GPS setup</font></h2>
+        <h3><font size="2" face="Arial">10.1 GPS setup</font></h3>
         <p><font size="2" face="Arial">There are many ways for a
         software to connect to GPS. Usually it is assumed that
         the GPS hardware is connected to a serial port (e.g.
-        COM0..COM14), so all is requried for a software is to
+            COM0..COM12), so all is requried for a software is to
         &quot;open&quot; the required serial port and listen to
         the GPS data. The data comes in a form of text strings in
         so called NMEA format.</font></p>
@@ -1030,22 +1058,7 @@ content="text/html; charset=iso-8859-1">
         relative to ground (not relative to your car dashboard
         while you are driving off !). On Diamond, in this
         conditions, usually you will get a lock in under 30 sec.</font></p>
-        <h2><font size="2" face="Arial">10.2 Location of a
-        temporary file created during logging</font></h2>
-        <p><font size="2" face="Arial">During loging, the tool
-        creates a temporary file &quot;tmp.gcc&quot; in the root
-        folder (i.e. \tmp.gcc), then copies it into the required
-        gcc file as logging is finished. Writing into a file in
-        the main memory seems make the application more stable,
-        than writing into a file located in \Internal Storage. If
-        you phone crashes (and the &quot;final&quot; gcc file was
-        not created), then you still can restore most of your log
-        (the last part might be missing, as the data is not
-        written instantly into the file by Windows). All you need
-        to do is to locate the tmp.gcc file and copy it into the
-        required location with desired name - then you shall be
-        able to open this file with the tool as usual.</font></p>
-        <h3><font size="2" face="Arial">10.3 Problems with
+        <h3><font size="2" face="Arial">10.2 Problems with
         GoogleMaps installation, if you cannot open KML file</font></h3>
         <p><font size="2" face="Arial">There is a problem with
         some versions of GoogleMaps for Mobile - it cannot open a
@@ -1065,17 +1078,20 @@ content="text/html; charset=iso-8859-1">
         (e.g. -KML_FILE) required, i.e. they create incorrect
         association and you still will not be able to open KML
         files.</font></p>
-        <h3><font size="2" face="Arial">10.4 Running from AC</font></h3>
-        <p><font size="2" face="Arial">I managed to tell Windows
-        do NOT switch off the screen and GPS when running from
-        battery, but seems these functions does not work when
-        running from AC adaptor. So it is recommended to set the
-        Windows setting &quot;do not switch bklight&quot; and
-        &quot;do not go into standby&quot; when running from AC.
-        Send me a message, if you know how to fix this.... (I
-        guess, set the values in registry is one option?)</font></p>
-        <h2><font size="3" face="Arial">11. Contact </font></h2>
-        <p><font size="2" face="Arial">Programming: AndyZap </font></p>
+        <h3><font size="3" face="Arial"> <span style="font-size: 10pt">10.3 Updating from older
+            versions to version 4.x</span></font></h3>
+        <p><font size="2" face="Arial">If you are updating from older versions (3.x) to version
+            4.x it is very likely that you must correct your setting for GPS COM-port. Due to
+            the introduction of COM0 this setting has changed by one step.<br />
+            In most cases you will get a warning that EOF has reached and default settings are
+            used for the remainder. This is absolutely normal due to new options and only for
+            the new options default settings are used.</font></p>
+            <p>
+                <font face="Arial" size="2"></font>&nbsp;</p>
+            <h2>
+                <font face="Arial" size="3">11. Contact </font>
+            </h2>
+        <p><font size="2" face="Arial">Programming: AndyZap&nbsp;</font></p>
         <p><font size="2" face="Arial">Design: expo7. Special
         thanks to AngelGR.</font></p>
         <p><a

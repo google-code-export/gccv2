@@ -31,9 +31,9 @@ namespace GpsUtils
         UInt32 BackupBatteryLifeTime;
         UInt32 BackupBatteryFullLifeTime;
         UInt32 BatteryVoltage;
-        UInt32 BatteryCurrent;
-        UInt32 BatteryAverageCurrent;
-        UInt32 BatteryAverageInterval;
+        public UInt32 BatteryCurrent;
+        public UInt32 BatteryAverageCurrent;
+        public UInt32 BatteryAverageInterval;
         UInt32 BatterymAHourConsumed;
         UInt32 BatteryTemperature;
         UInt32 BackupBatteryVoltage;
@@ -69,7 +69,7 @@ namespace GpsUtils
 
         public static UInt32 SwitchBacklight()
         {
-            return SetSystemPowerState(null, 0x00100000, 0);
+            return SetSystemPowerState(null, 0x00100000, 0);    //screenoff
         }
         public static Int32 GetBatteryStatus()
         {
@@ -87,16 +87,16 @@ namespace GpsUtils
             UInt32 result = GetSystemPowerStatusEx2(ptr, pwrStatSize, 0);
 
             if (result == 0)
-            { return -3; } // Failure
+            { return -300; } // Failure
 
             // native call succeeded, marshal native data to our managed data
             pwrStat = (_SYSTEM_POWER_STATUS_EX2)Marshal.PtrToStructure(ptr, typeof(_SYSTEM_POWER_STATUS_EX2));
 
             if (pwrStat.BatteryLifePercent == 0xFF)
-            { return -2; } // failure - BATTERY_PERCENTAGE_UNKNOWN
+            { return -255; } // failure - BATTERY_PERCENTAGE_UNKNOWN
 
             if (pwrStat.ACLineStatus == 0x01)
-            { return -1; } // OK, but running from AC
+            { return -(Int32)pwrStat.BatteryLifePercent; } // OK, but running from AC
 
             return (Int32)pwrStat.BatteryLifePercent;
         }
@@ -124,11 +124,13 @@ namespace GpsUtils
             h = 0;
             if (File.Exists(fname) == false) { return 1; }
 
+            FileStream fs = null;
+            BinaryReader wr = null;
             int return_status = 3;
             try
             {
-                FileStream fs = new FileStream(fname, FileMode.Open);
-                BinaryReader wr = new BinaryReader(fs,Encoding.ASCII);
+                fs = new FileStream(fname, FileMode.Open);
+                wr = new BinaryReader(fs, Encoding.ASCII);
 
                 // check that this is correct file format
                 Byte b1 = 0, b2 = 0;
@@ -157,12 +159,12 @@ namespace GpsUtils
                     while ((next_marker == 0xFF) && (wr.PeekChar() != -1));
 
 
-                    if(    (next_marker == 0xDA)    // M_SOS - Start Of Scan (begins compressed data)
+                    if ((next_marker == 0xDA)    // M_SOS - Start Of Scan (begins compressed data)
                         || (next_marker == 0xD9))   // M_EOI - End Of Image (end of datastream)
-                        { break; }
+                    { break; }
 
                     // check which marker we have
-                    if(    (next_marker == 0xC0)    // different data format
+                    if ((next_marker == 0xC0)    // different data format
                         || (next_marker == 0xC1)
                         || (next_marker == 0xC2)
                         || (next_marker == 0xC3)
@@ -187,48 +189,50 @@ namespace GpsUtils
                         b1 = wr.ReadByte();
                         b2 = wr.ReadByte();
 
-                        UInt32 hgt  = (((UInt32) b1) << 8) + ((UInt32) b2);
+                        UInt32 hgt = (((UInt32)b1) << 8) + ((UInt32)b2);
 
                         b1 = 0; b2 = 0;
                         b1 = wr.ReadByte();
                         b2 = wr.ReadByte();
 
-                        UInt32 wid  = (((UInt32) b1) << 8) + ((UInt32) b2);
+                        UInt32 wid = (((UInt32)b1) << 8) + ((UInt32)b2);
 
-                        w = (int) wid;
-                        h = (int) hgt;
+                        w = (int)wid;
+                        h = (int)hgt;
                         return_status = 0;
 
                         // image dimention found, break the loop
                         break;
                     }
-                    
+
                     // skip variable length marker which we are not interested in   -----------
                     b1 = 0; b2 = 0;
                     b1 = wr.ReadByte();
                     b2 = wr.ReadByte();
-                    UInt32 length  = (((UInt32) b1) << 8) + ((UInt32) b2);
+                    UInt32 length = (((UInt32)b1) << 8) + ((UInt32)b2);
 
                     // Length includes itself, so must be at least 2
                     if (length < 2) { break; }
                     length -= 2;
                     // Skip over the remaining bytes
-                    while (length > 0) 
+                    while (length > 0)
                     {
                         wr.ReadByte();
                         length--;
                     }
                 }
 
-                wr.Close();
-                fs.Close();
             }
             catch (Exception e)
             {
-                log.Error (" GetJpegSize ", e);
+                log.Error(" GetJpegSize ", e);
                 return 4;
             }
-
+            finally
+            {
+                if(wr != null) wr.Close();
+                if (fs != null) fs.Close();
+            }
             return return_status;
         }
 
@@ -270,9 +274,6 @@ namespace GpsUtils
         // Util to draw compass on a given graphics. Heading is in degrees, 0 is "north" == up
         public static void DrawCompass(Graphics g, Color col, int x0, int y0, int size, int heading_int)
         {
-            // this control was made from clock, so convert 0..360 deg heading into 0..60 seconds range
-            double h_as_sec = heading_int / 6.0;
-
             int rad = (size - 2) / 2;
             int tick = rad / 10;
             if (tick < 2) { tick = 2; }
@@ -289,26 +290,88 @@ namespace GpsUtils
             // draw heading - 4 points arrow
             // needle
             Point[] pa = new Point[3];
-            pa[0].X = (int)(x0 + (rad - 1 - tick / 2) * Math.Cos(Math.PI / 2.0 - (h_as_sec * Math.PI / 30.0)));
-            pa[0].Y = (int)(y0 - (rad - 1 - tick / 2) * Math.Sin(Math.PI / 2.0 - (h_as_sec * Math.PI / 30.0)));
+            pa[0].X = (int)(x0 + (rad - 1 - tick / 2) * Math.Cos(Math.PI / 2.0 - (heading_int * Math.PI / 180.0)));
+            pa[0].Y = (int)(y0 - (rad - 1 - tick / 2) * Math.Sin(Math.PI / 2.0 - (heading_int * Math.PI / 180.0)));
 
             // point just opposite (signs inverted)
-            pa[1].X = (int)(x0 - (rad - 1 - tick / 2) * 2 / 3 * Math.Cos(Math.PI / 2.0 - (h_as_sec * Math.PI / 30.0)));
-            pa[1].Y = (int)(y0 + (rad - 1 - tick / 2) * 2 / 3 * Math.Sin(Math.PI / 2.0 - (h_as_sec * Math.PI / 30.0)));
+            pa[1].X = (int)(x0 - (rad - 1 - tick / 2) * 2 / 3 * Math.Cos(Math.PI / 2.0 - (heading_int * Math.PI / 180.0)));
+            pa[1].Y = (int)(y0 + (rad - 1 - tick / 2) * 2 / 3 * Math.Sin(Math.PI / 2.0 - (heading_int * Math.PI / 180.0)));
 
-            // point A - at +25 "seconds" from current
-            pa[2].X = (int)(x0 + (rad - 1 - tick / 2) * Math.Cos(Math.PI / 2.0 - ((h_as_sec + 25) * Math.PI / 30.0)));
-            pa[2].Y = (int)(y0 - (rad - 1 - tick / 2) * Math.Sin(Math.PI / 2.0 - ((h_as_sec + 25) * Math.PI / 30.0)));
+            // point A - at +150 deg from current
+            pa[2].X = (int)(x0 + (rad - 1 - tick / 2) * Math.Cos(Math.PI / 2.0 - ((heading_int + 150) * Math.PI / 180.0)));
+            pa[2].Y = (int)(y0 - (rad - 1 - tick / 2) * Math.Sin(Math.PI / 2.0 - ((heading_int + 150) * Math.PI / 180.0)));
 
-            br.Color = Color.FromArgb(30, 86, 169);
+            br.Color = heading_int == 720 ? Color.DimGray : Color.FromArgb(30, 86, 169);
             g.FillPolygon(br, pa);
 
-            br.Color = Color.FromArgb(91, 133, 209);
-            // point B - at +35 "seconds" from current
-            pa[2].X = (int)(x0 + (rad - 1 - tick / 2) * Math.Cos(Math.PI / 2.0 - ((h_as_sec + 35) * Math.PI / 30.0)));
-            pa[2].Y = (int)(y0 - (rad - 1 - tick / 2) * Math.Sin(Math.PI / 2.0 - ((h_as_sec + 35) * Math.PI / 30.0)));
+            br.Color = heading_int == 720 ? Color.Gray : Color.FromArgb(91, 133, 209);
+            // point B - at +210 deg from current
+            pa[2].X = (int)(x0 + (rad - 1 - tick / 2) * Math.Cos(Math.PI / 2.0 - ((heading_int + 210) * Math.PI / 180.0)));
+            pa[2].Y = (int)(y0 - (rad - 1 - tick / 2) * Math.Sin(Math.PI / 2.0 - ((heading_int + 210) * Math.PI / 180.0)));
             g.FillPolygon(br, pa);
         }
+
+
+        public static DialogResult InputBox(string title, string promptText, ref string value)
+        {
+            Form form = new Form();
+            Label label = new Label();
+            TextBox textBox = new TextBox();
+            Button buttonOk = new Button();
+            Button buttonCancel = new Button();
+
+            form.Text = title;
+            label.Text = promptText;
+            textBox.Text = value;
+
+            buttonOk.Text = "OK";
+            buttonCancel.Text = "Cancel";
+            buttonOk.DialogResult = DialogResult.OK;
+            buttonCancel.DialogResult = DialogResult.Cancel;
+
+            int w = form.Width, h = form.Height;
+            label.Bounds = new Rectangle(w *10/480, h *40/588, w *460/480, h *36/588);      //5, 20, 230, 18);
+            textBox.Bounds = new Rectangle(w *10/480, h *80/588, w *460/480, h *36/588);    //5, 40, 230, 18);
+            buttonOk.Bounds = new Rectangle(w *160/480, h *140/588, w *150/480, h *48/588);   //80, 70, 75, 24);
+            buttonCancel.Bounds = new Rectangle(w *320/480, h *140/588, w *150/480, h *48/588);    //160, 70, 75, 24);
+
+            //label.AutoSize = true;
+            //textBox.Anchor = textBox.Anchor | AnchorStyles.Right;
+            //buttonOk.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            //buttonCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+
+            //form.ClientSize = new Size(240, 100);
+            form.Controls.Add(label);
+            form.Controls.Add(textBox);
+            form.Controls.Add(buttonOk);
+            form.Controls.Add(buttonCancel);
+            
+            form.BackColor = GpsCycleComputer.Form1.bkColor;
+            form.ForeColor = GpsCycleComputer.Form1.foColor;
+            label.BackColor = GpsCycleComputer.Form1.bkColor;
+            label.ForeColor = GpsCycleComputer.Form1.foColor;
+            textBox.BackColor = GpsCycleComputer.Form1.bkColor;
+            textBox.ForeColor = GpsCycleComputer.Form1.foColor;
+            //textBox.BorderStyle = BorderStyle.FixedSingle;
+            
+            //form.ClientSize = new Size(Math.Max(300, label.Right + 10), form.ClientSize.Height);
+            //form.FormBorderStyle = FormBorderStyle.FixedDialog;
+            //form.StartPosition = FormStartPosition.CenterScreen;
+            //form.MinimizeBox = false;
+            //form.MaximizeBox = false;
+            //form.AcceptButton = buttonOk;
+            //form.CancelButton = buttonCancel;
+            Microsoft.WindowsCE.Forms.InputPanel inputPanel = new Microsoft.WindowsCE.Forms.InputPanel();
+            inputPanel.Enabled = true;
+            DialogResult dialogResult = form.ShowDialog();
+            inputPanel.Enabled = false;
+            value = textBox.Text;
+            return dialogResult;
+        }
+
+
+
+
     }
 
     public class Win32

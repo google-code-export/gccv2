@@ -10,6 +10,7 @@ using System.Drawing.Imaging;
 using System.Globalization;
 using System.Net;
 using System.Text;
+using System.Runtime.InteropServices;
 
 #endregion
 
@@ -62,9 +63,6 @@ namespace GpsUtils
         public double ZoomValue = 1.0;    // zoom coefficient, to multiply Data2Screen
         private double DataLongMin = 1.0E9, DataLongMax = -1.0E9, DataLatMin = 1.0E9, DataLatMax = -1.0E9;
         private double Meter2Lat = 1.0, Meter2Long = 1.0, RatioMeterLatLong = 1.0;
-
-        Bitmap BlankBuffer = null;         // blank image to cover path of screen when bitmap is moving
-        Graphics BlankBufferGraphics = null;
 
         UtmUtil utmUtil = new UtmUtil();
 
@@ -146,23 +144,28 @@ namespace GpsUtils
         }
         public void LoadCustomOsmServer(string file_name)
         {
-            try
+            if (File.Exists(file_name))
             {
-                if (File.Exists(file_name))
+                FileStream fs = null;
+                StreamReader sr = null;
+                try
                 {
-                    FileStream fs = new FileStream(file_name, FileMode.Open);
-                    StreamReader sr = new StreamReader(fs);
+                    fs = new FileStream(file_name, FileMode.Open);
+                    sr = new StreamReader(fs);
                     if (sr.Peek() != -1)
                     {
                         OsmCustomServer = sr.ReadLine().Trim();
                     }
-                    sr.Close();
-                    fs.Close();
                 }
-            }
-            catch (Exception e)
-            {
-                Utils.log.Error (" LoadCustomOsmServer ", e);
+                catch (Exception e)
+                {
+                    Utils.log.Error(" LoadCustomOsmServer ", e);
+                }
+                finally
+                {
+                    if(sr != null) sr.Close();
+                    if(fs != null) fs.Close();
+                }
             }
         }
         public void DownloadOsmTile(string tile_name)
@@ -948,14 +951,10 @@ User-defined server (read server name from osm_server.txt)
                 }
             }
         }
-        public void DrawMovingImage(Graphics g, Bitmap BackBuffer)
+        public void DrawMovingImage(Graphics g, Bitmap BackBuffer, int dx, int dy)
         {
+            ScreenX = BackBuffer.Width; ScreenY = BackBuffer.Height;
             // draw back buffer on screen, take into account the shift
-            int dx = ScreenShiftX - ScreenShiftSaveX;
-            int dy = ScreenShiftY - ScreenShiftSaveY;
-            int abs_dx = (dx > 0 ? dx : -dx);
-            int abs_dy = (dy > 0 ? dy : -dy);
-
             if (dx > 0)
             {
                 if (dy > 0)
@@ -965,7 +964,7 @@ User-defined server (read server name from osm_server.txt)
                 }
                 else
                 {
-                    Rectangle src_rec = new Rectangle(0, abs_dy, ScreenX - dx, ScreenY - abs_dy);
+                    Rectangle src_rec = new Rectangle(0, -dy, ScreenX - dx, ScreenY + dy);
                     g.DrawImage(BackBuffer, dx, 0, src_rec, GraphicsUnit.Pixel);
                 }
             }
@@ -973,89 +972,41 @@ User-defined server (read server name from osm_server.txt)
             {
                 if (dy > 0)
                 {
-                    Rectangle src_rec = new Rectangle(abs_dx, 0, ScreenX - abs_dx, ScreenY - dy);
+                    Rectangle src_rec = new Rectangle(-dx, 0, ScreenX + dx, ScreenY - dy);
                     g.DrawImage(BackBuffer, 0, dy, src_rec, GraphicsUnit.Pixel);
                 }
                 else
                 {
-                    Rectangle src_rec = new Rectangle(abs_dx, abs_dy, ScreenX - abs_dx, ScreenY - abs_dy);
+                    Rectangle src_rec = new Rectangle(-dx, -dy, ScreenX + dx, ScreenY + dy);
                     g.DrawImage(BackBuffer, 0, 0, src_rec, GraphicsUnit.Pixel);
                 }
             }
 
             // draw blank parts (as image is shifted). Compute what part to draw (for speed)
-            if (dx > 0)
+            SolidBrush b = new SolidBrush(Back_Color);
+            if (dx > 0) //KB
             {
-                Rectangle src_rec = new Rectangle(0, 0, dx, ScreenY / 2);
-                g.DrawImage(BlankBuffer, 0, 0, src_rec, GraphicsUnit.Pixel);
-                g.DrawImage(BlankBuffer, 0, ScreenY / 2, src_rec, GraphicsUnit.Pixel);
-
-                if (dy > 0)
-                {
-                    Rectangle src_rec1 = new Rectangle(0, 0, ScreenX - dx, dy);
-                    g.DrawImage(BlankBuffer, dx, 0, src_rec1, GraphicsUnit.Pixel);
-                    if (dy > ScreenY / 2)
-                    {
-                        Rectangle src_rec2 = new Rectangle(0, 0, ScreenX - dx, dy - (ScreenY / 2));
-                        g.DrawImage(BlankBuffer, dx, ScreenY / 2, src_rec2, GraphicsUnit.Pixel);
-                    }
-                }
-                else if (dy < 0)
-                {
-                    Rectangle src_rec1 = new Rectangle(0, 0, ScreenX - dx, abs_dy);
-                    g.DrawImage(BlankBuffer, dx, ScreenY - abs_dy, src_rec1, GraphicsUnit.Pixel);
-                    if (abs_dy > ScreenY / 2)
-                    {
-                        Rectangle src_rec2 = new Rectangle(0, 0, ScreenX - dx, abs_dy - (ScreenY / 2));
-                        g.DrawImage(BlankBuffer, dx, (ScreenY / 2) - abs_dy, src_rec2, GraphicsUnit.Pixel);
-                    }
-                }
+                Rectangle rec = new Rectangle(0, 0, dx, ScreenY);
+                g.FillRectangle(b, rec);
             }
-            else if (dx < 0)
+            else if(dx < 0)
             {
-                Rectangle src_rec = new Rectangle(0, 0, abs_dx, ScreenY / 2);
-                g.DrawImage(BlankBuffer, ScreenX - abs_dx, 0, src_rec, GraphicsUnit.Pixel);
-                g.DrawImage(BlankBuffer, ScreenX - abs_dx, ScreenY / 2, src_rec, GraphicsUnit.Pixel);
+                Rectangle rec = new Rectangle(ScreenX + dx, 0, -dx, ScreenY);
+                g.FillRectangle(b, rec);
+            }
 
-                if (dy > 0)
-                {
-                    Rectangle src_rec1 = new Rectangle(0, 0, ScreenX - abs_dx, dy);
-                    g.DrawImage(BlankBuffer, 0, 0, src_rec1, GraphicsUnit.Pixel);
-                    if (dy > ScreenY / 2)
-                    {
-                        Rectangle src_rec2 = new Rectangle(0, 0, ScreenX - abs_dx, dy - (ScreenY / 2));
-                        g.DrawImage(BlankBuffer, 0, ScreenY / 2, src_rec2, GraphicsUnit.Pixel);
-                    }
-                }
-                else if (dy < 0)
-                {
-                    Rectangle src_rec1 = new Rectangle(0, 0, ScreenX - abs_dx, abs_dy);
-                    g.DrawImage(BlankBuffer, 0, ScreenY - abs_dy, src_rec1, GraphicsUnit.Pixel);
-                    if (abs_dy > ScreenY / 2)
-                    {
-                        Rectangle src_rec2 = new Rectangle(0, 0, ScreenX - abs_dx, abs_dy - (ScreenY / 2));
-                        g.DrawImage(BlankBuffer, 0, (ScreenY / 2) - abs_dy, src_rec2, GraphicsUnit.Pixel);
-                    }
-                }
+            if (dy > 0)
+            {
+                Rectangle rec = new Rectangle(0, 0, ScreenX, dy);
+                g.FillRectangle(b, rec);
+            }
+            else if(dy < 0)
+            {
+                Rectangle rec = new Rectangle(0, ScreenY + dy, ScreenX, -dy);
+                g.FillRectangle(b, rec);
             }
         }
 
-        private void PrepareBlankBuffer()
-        {
-            if ((BlankBuffer == null)
-                || (BlankBuffer.Width != ScreenX)
-                || (BlankBuffer.Height != ScreenY/2))
-            {
-                if (BlankBuffer != null)
-                { BlankBuffer.Dispose(); BlankBuffer = null; }
-                if (BlankBufferGraphics != null)
-                { BlankBufferGraphics.Dispose(); BlankBufferGraphics = null; }
-
-                BlankBuffer = new Bitmap(ScreenX, ScreenY/2, PixelFormat.Format16bppRgb565);
-                BlankBufferGraphics = Graphics.FromImage(BlankBuffer);
-                BlankBufferGraphics.Clear(Back_Color);
-            }
-        }
         private int ToScreenX(double x)
         {
             return (ScreenShiftX + (int)((x - DataLongMin) * Data2Screen * ZoomValue));
@@ -1080,11 +1031,45 @@ User-defined server (read server name from osm_server.txt)
             SolidBrush drawBrush = new SolidBrush(col);
             g.FillEllipse(drawBrush, x_point - size / 2, y_point - size / 2, size, size);
         }
+        //KB draw arrow   (size = radius)
+        private void DrawArrow(Graphics g, double Long, double Lat, int heading_int, int size, Color col)
+        {
+            int x0 = ToScreenX(Long);
+            int y0 = ToScreenY(Lat);
+            
+            SolidBrush br = new SolidBrush(col);
+
+            // draw heading - 4 points arrow
+            // needle
+            Point[] pa = new Point[3];
+            pa[0].X = (int)(x0 + size * Math.Cos(Math.PI / 2.0 - (heading_int * Math.PI / 180.0)));
+            pa[0].Y = (int)(y0 - size * Math.Sin(Math.PI / 2.0 - (heading_int * Math.PI / 180.0)));
+
+            // point just opposite (signs inverted)
+            pa[1].X = (int)(x0 - size * 2 / 3 * Math.Cos(Math.PI / 2.0 - (heading_int * Math.PI / 180.0)));
+            pa[1].Y = (int)(y0 + size * 2 / 3 * Math.Sin(Math.PI / 2.0 - (heading_int * Math.PI / 180.0)));
+
+            // point B - at +210 deg from current
+            pa[2].X = (int)(x0 + size * Math.Cos(Math.PI / 2.0 - ((heading_int + 210) * Math.PI / 180.0)));
+            pa[2].Y = (int)(y0 - size * Math.Sin(Math.PI / 2.0 - ((heading_int + 210) * Math.PI / 180.0)));
+            br.Color = heading_int == 720 ? Color.DeepSkyBlue : Color.Blue;
+            g.FillPolygon(br, pa);
+
+            // point A - at +150 deg from current
+            pa[2].X = (int)(x0 + size * Math.Cos(Math.PI / 2.0 - ((heading_int + 150) * Math.PI / 180.0)));
+            pa[2].Y = (int)(y0 - size * Math.Sin(Math.PI / 2.0 - ((heading_int + 150) * Math.PI / 180.0)));
+            br.Color = heading_int == 720 ? Color.CornflowerBlue : Color.DarkBlue;
+            g.FillPolygon(br, pa);
+        }
+
+/* original
         private void DrawTrackLine(Graphics g, Pen p, float[] PlotLong, float[] PlotLat, int PlotSize, bool plot_dots)
         {
             // idea is to draw max 128 points (as it is slow),
             // so first select only points with are withing the map
             // reduce further size of the points to max 128
+            int begin = Environment.TickCount;
+
             const int max_plot_size = 128;
             int max_points = PlotSize;
 
@@ -1207,7 +1192,97 @@ User-defined server (read server name from osm_server.txt)
                 if (plot_dots == false)
                     { g.DrawLines(p, points); }
             }
+            int end = Environment.TickCount;
+
+
+            Font drawFont = new Font("Arial", 8, FontStyle.Regular);
+            //g.DrawString("Length=" + points.Length, drawFont, drawBrush, 0, 20);
+            //g.DrawString("DPoints="+DrawPoints, drawFont, drawBrush, 0, 40);
+            g.DrawString("clock=" + (end-begin), drawFont, drawBrush, 0, 60);
         }
+        */
+
+
+
+        // KB-Version2
+        private void DrawTrackLine(Graphics g, Pen p, float[] PlotLong, float[] PlotLat, int PlotSize, bool plot_dots)
+        {
+            // idea is to draw max 128 points (as it is slow),
+            // so first select only points which are within the map
+            // reduce further size of the points to max 128
+            //int begin = Environment.TickCount;
+            //String str = "";// = new String("");
+
+            SolidBrush drawBrush = new SolidBrush(p.Color); // brush to draw points
+            int pen_size = (int)p.Width;
+            const int SegmentSize = 64;
+            Point[] points = new Point[SegmentSize];
+
+            // fill in data
+            bool LineStarted = false;
+            int i = 0;      //0..Plotsize
+            int d = 0;      //number of points to draw in a segment
+            while (i < PlotSize)
+            {
+                bool PointInMap = false;
+                bool IgnorePoint = false;
+                //Point point = new Point(ToScreenX(PlotLong[i]), ToScreenY(PlotLat[i]));
+                points[d].X = ToScreenX(PlotLong[i]);
+                points[d].Y = ToScreenY(PlotLat[i]);
+                i++;
+                if ((points[d].X >= 0) && (points[d].X < ScreenX) && (points[d].Y >= 0) && (points[d].Y < ScreenY))    //only points within screen
+                { PointInMap = true; LineStarted = true; }
+
+                if (d > 0)  //erster punkt auf jeden Fall
+                {
+                    if (PointInMap && (Math.Abs(points[d].X - points[d - 1].X) < 5) && (Math.Abs(points[d].Y - points[d - 1].Y) < 5))  //only points which differ significant from previous
+                    { IgnorePoint = true; }
+
+                    if (!LineStarted)   //&& !PointInMap (implizit)
+                    {
+                        points[d - 1] = points[d];    //overwrite first point (outside screen)
+                        IgnorePoint = true;
+                    }
+                }
+                if (!IgnorePoint)
+                { d++; }   //validate point; d= number of points
+                if ((LineStarted && !PointInMap && !IgnorePoint) || d >= SegmentSize || i >= PlotSize)
+                {
+                    //str += d; str += " ";
+                    //Draw Line segment
+                    if (plot_dots)
+                    {
+                        for (int j = 0; j < d; j++)
+                        {
+                            g.FillEllipse(drawBrush, points[j].X - pen_size / 2, points[j].Y - pen_size / 2, pen_size, pen_size);
+                        }
+                    }
+                    else
+                    {
+                        while (d < SegmentSize)     //DrawLines draws always complete array -> fill with last point
+                        {
+                            points[d] = points[d-1];
+                            d++;
+                        }
+                        g.DrawLines(p, points);
+                    }
+
+                    points[0] = points[d-1];    //connect segments
+                    d = 1;
+                    LineStarted = false;
+                }
+            }
+
+            //int end = Environment.TickCount;
+
+            //Font drawFont = new Font("Arial", 8, FontStyle.Regular);
+            //g.DrawString("Length=" + PlotSize, drawFont, drawBrush, 0, 20);
+            //g.DrawString("d=" + str, drawFont, drawBrush, 0, 40);
+            //g.DrawString("ticks=" + (end - begin), drawFont, drawBrush, 0, 60);
+        }
+
+
+
         private void DrawTickLabel(Graphics g, Pen p, int tick_dist_screen, double tick_dist_units, string unit_name)
         {
             // draw text: Create font and brush.
@@ -1284,7 +1359,7 @@ User-defined server (read server name from osm_server.txt)
             else mant = 1.0;
             return (mant * mult);
         }
-        private void SetAutoScale(float[] PlotLong, float[] PlotLat, int PlotSize, bool isLogging)
+        private void SetAutoScale(float[] PlotLong, float[] PlotLat, int PlotSize, bool lifeview)
         {
             // compute data limits
             DataLongMin = 1.0E9; DataLongMax = -1.0E9; DataLatMin = 1.0E9; DataLatMax = -1.0E9;
@@ -1305,8 +1380,8 @@ User-defined server (read server name from osm_server.txt)
             RatioMeterLatLong = Meter2Long / Meter2Lat;
 
 
-            // during logging, set a fixed scale with current point in the middle
-            if (isLogging && (PlotSize > 0))
+            // during liveview (logging), set a fixed scale with current point in the middle
+            if (lifeview && (PlotSize > 0))
             {
                 double last_x = PlotLong[PlotSize - 1];
                 double last_y = PlotLat[PlotSize - 1];
@@ -1334,12 +1409,14 @@ User-defined server (read server name from osm_server.txt)
 
         // draw map and 2 lines (main and "to follow"). Shift is the x/y shift of the second line origin.
         public void DrawMaps(Graphics g, Bitmap BackBuffer, Graphics BackBufferGraphics, 
-                             bool MouseMoving, bool isLogging, int MapMode, 
+                             bool MouseMoving, bool lifeview, int MapMode, 
                              double unit_cff, string unit_name,
                              float[] PlotLong, float[] PlotLat, int PlotSize, Color line_color, int line_width, bool plot_dots,
-                             float[] PlotLong2, float[] PlotLat2, int PlotSize2, Color line_color2, int line_width2, bool plot_dots2)
+                             float[] PlotLong2, float[] PlotLat2, int PlotSize2, Color line_color2, int line_width2, bool plot_dots2,
+                             float[] CurLong, float[] CurLat, int heading, Color CurrentGpsLedColor)
         {
-            if ((PlotSize == 0) && (PlotSize2 == 0)) // nothing to draw
+            /*
+            if ((PlotSize == 0) && (PlotSize2 == 0)) // nothing to draw     KB: draw last position
             {
                 g.Clear(Back_Color);
 
@@ -1355,24 +1432,24 @@ User-defined server (read server name from osm_server.txt)
                 tmpStr = "If viewing file, make sure it is not empty.";
                 g.DrawString(tmpStr, tmpFont, tmpBrush, 3, 5 + size.Height*2);
                 return;
-            }
+            }*/
 
             // if back buffer exists and picture is moving - draw existing picture
             if (MouseMoving && (BackBuffer != null))
             {
-                DrawMovingImage(g, BackBuffer);
+                DrawMovingImage(g, BackBuffer, ScreenShiftX - ScreenShiftSaveX, ScreenShiftY - ScreenShiftSaveY);
                 return;
             }
 
-            // store current drawing scree size and set scale from "main" or the "track-to-follow" (of main not exist)
+            // store current drawing screen size and set scale from "main" or the "track-to-follow" (if main not exist)
             ScreenX = BackBuffer.Width; ScreenY = BackBuffer.Height;
-            if(PlotSize != 0) { SetAutoScale(PlotLong, PlotLat, PlotSize, isLogging); }
-            else              { SetAutoScale(PlotLong2, PlotLat2, PlotSize2, false); }
+            if (lifeview) { SetAutoScale( CurLong, CurLat, 1, lifeview); }  //current position (last position)
+            else if (PlotSize != 0) { SetAutoScale(PlotLong, PlotLat, PlotSize, lifeview); }
+            else if (PlotSize2 != 0) { SetAutoScale(PlotLong2, PlotLat2, PlotSize2, false); }
+            else { SetAutoScale(CurLong, CurLat, 1, false); }
 
             // need to draw the picture first into back buffer
-            PrepareBlankBuffer();
             BackBufferGraphics.Clear(Back_Color);
-            BlankBufferGraphics.Clear(Back_Color);
 
             // in OSM tile mode, required map array is created based on the current screen coordinates
             if (OsmTilesMode) { FillOsmTiles(); }
@@ -1407,13 +1484,15 @@ User-defined server (read server name from osm_server.txt)
                 pen.Color = line_color;
                 pen.Width = line_width;
                 DrawTrackLine(BackBufferGraphics, pen, PlotLong, PlotLat, PlotSize, plot_dots);
-
                 // draw last point larger by 5 points
                 DrawCurrentPoint(BackBufferGraphics, PlotLong[PlotSize - 1], PlotLat[PlotSize - 1], line_width + 5, line_color);
             }
-
-            // draw back buffer on screen
-            g.DrawImage(BackBuffer, 0, 0);
+            if (lifeview)
+            {
+                DrawArrow(BackBufferGraphics, CurLong[0], CurLat[0], heading, line_width * 2 + 5, line_color);
+                // draw gps led point
+                //DrawCurrentPoint(BackBufferGraphics, CurLong[0], CurLat[0], line_width, CurrentGpsLedColor);
+            }
 
             // draw tick label and map name
             double screen_width_units = (ScreenX / (Data2Screen * ZoomValue)) * unit_cff / Meter2Long;
@@ -1423,7 +1502,10 @@ User-defined server (read server name from osm_server.txt)
             int tick_distance_screen = (int)(tick_distance_units * (Data2Screen * ZoomValue) / unit_cff * Meter2Long);
 
             pen.Color = line_color;
-            DrawTickLabel(g, pen, tick_distance_screen, tick_distance_units, unit_name);
+            DrawTickLabel(BackBufferGraphics, pen, tick_distance_screen, tick_distance_units, unit_name);
+
+            // draw back buffer on screen
+            g.DrawImage(BackBuffer, 0, 0);
         }
 
         // make sure that the central point is stationary after zoom in / zoom out

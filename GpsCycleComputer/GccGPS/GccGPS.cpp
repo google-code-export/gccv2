@@ -4,6 +4,8 @@
 #include <vector>
 #include "GccGPS.h"
 
+//#define WRITE_LINES_TO_FILE		// debug write into file - uncomment, if required
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -32,6 +34,7 @@ BOOL CGccGPSApp::InitInstance()
 
     return TRUE;
 }
+
 
 // lock read/gps status functions, to avoid over-flooding on timer calls
 bool __read_lock = false;                  
@@ -380,12 +383,16 @@ void ChopIntoLines(std::string &str, std::vector<std::string> &lines)
 {
     lines.clear();
 
+	unsigned int strsize = str.size();
     // check if we have any <CR> or <LF> at the beginning of the string
-    while( str.size() && ((str[0] == 0x0D) || (str[0] == 0x0A)) )
-        { str = str.erase(0, 1); }
+    while( strsize && ((str[0] == 0x0D) || (str[0] == 0x0A)) )
+    { 
+		str = str.erase(0, 1);
+		strsize--;
+	}
 
-    unsigned int i = 0;
-    while(i < str.size())
+	unsigned int i = 0;
+    while(i < strsize)
     {
         // found <CR>, cut this segment and add into "lines"
         if(str[i] == 0x0D)
@@ -393,14 +400,16 @@ void ChopIntoLines(std::string &str, std::vector<std::string> &lines)
             lines.push_back( str.substr(0, i) );
 
             // check if the next char is <LF>
-            if( (i < (str.size()-1)) && (str[i+1] == 0x0A))
+            if( (i < (strsize-1)) && (str[i+1] == 0x0A))
             {
                 str = str.erase(0, i+2);
+				strsize -= i+2;
             }
             // no, or this was the end of str
             else
             {
                 str = str.erase(0, i+1);
+				strsize -= i+1;
             }
             // reset from the start of str
             i = 0;
@@ -412,25 +421,28 @@ void ChopIntoLines(std::string &str, std::vector<std::string> &lines)
     }
 
     // save the last bit
-    if(str.size()) { lines.push_back(str); }
+    if(strsize) { lines.push_back(str); }
 }
 //-----------------------------------------------------------------------------
 void ChopIntoCommaSepWords(std::string &str, std::vector<std::string> &words)
 {
     words.clear();
 
+	unsigned int strsize = str.size();
     // assumed that this is a valid string (i.e. IsLineValid was called), so need to remove 3 chars at the end
     // check that at least we have a "*" as the 3rd char from the end
-    if(str[str.size()-3] != '*') { return; }
-    str = str.erase(str.size()-3, 3);
+    if(str[strsize-3] != '*') { return; }
+    str = str.erase(strsize-3, 3);
+	strsize -= 3;
 
     unsigned int i = 0;
-    while(i < str.size())
+    while(i < strsize)
     {
         if(str[i] == ',')
         {
             words.push_back( str.substr(0, i) );
             str = str.erase(0, i+1);
+			strsize -= i+1;
             i = 0;
         }
         else
@@ -449,12 +461,14 @@ int HexCharToInt(char c)
     }
     else
     {
-        if     ((c == 'a') || (c == 'A')) return 10;
+		c &= ~0x20;
+		return (c - 0x37);
+      /*  if     ((c == 'a') || (c == 'A')) return 10;
         else if((c == 'b') || (c == 'B')) return 11;
         else if((c == 'c') || (c == 'C')) return 12;
         else if((c == 'd') || (c == 'D')) return 13;
         else if((c == 'e') || (c == 'E')) return 14;
-        else if((c == 'f') || (c == 'F')) return 15;
+        else if((c == 'f') || (c == 'F')) return 15; */
     }
     return 0;
 }
@@ -462,19 +476,21 @@ int HexCharToInt(char c)
 //-----------------------------------------------------------------------------
 bool IsLineValid(std::string &str)
 {
-    if(str.size() < 10) { return false; }
+	unsigned int strsize = str.size();
+
+    if(strsize < 10) { return false; }
     if(str[0] != '$') { return false; }
-    if(str[str.size()-3] != '*') { return false; }
+    if(str[strsize-3] != '*') { return false; }
 
     int checksum = 0;
-    for(int i = 1; i < int(str.size())-3; i++)
+    for(int i = 1; i < int(strsize)-3; i++)
     {
         checksum ^= str[i];
     }
 
-    int line_checksum = HexCharToInt( str[str.size()-2] )*16 + HexCharToInt( str[str.size()-1] );
+    int line_checksum = HexCharToInt( str[strsize-2] )*16 + HexCharToInt( str[strsize-1] );
 
-    return (line_checksum == checksum);
+	return (line_checksum == checksum);
 }
 //-----------------------------------------------------------------------------
 // check that we have digits only, to avoid conversion problems
@@ -483,7 +499,8 @@ bool CheckIntWord( std::string &word)
     if(word == "")
        { return false; }
 
-    for(int i = 0; i < int(word.size()); i++)
+	int wordsize = word.size();
+    for(int i = 0; i < wordsize; i++)
     {
         if(!isdigit(word[i])) return false;
     }
@@ -496,15 +513,17 @@ bool CheckFloatWord( std::string &word)
     if(word == "")
        { return false; }
 
+	int wordsize = word.size();
     int dot_found = false;
-    for(int i = 0; i < int(word.size()); i++)
+    for(int i = 0; i < wordsize; i++)
     {
         if(word[i] == '.')
         {
             if(dot_found) { return false; } // we have more than one dot
             else { dot_found = true; continue; }
         }
-        if(!isdigit(word[i])) return false;
+		else if(word[i] == '-') continue;
+        else if(!isdigit(word[i])) return false;
     }
 
     return true;
@@ -515,7 +534,7 @@ int ___max_snr = 0; int ___num_sat = 0;
 // var used in this function only, the next expected GPSSV rec number
 int ___expected_rec_number = 1; 
 
-void ParseGPSSV( std::vector<std::string> &words)
+void ParseGPGSV( std::vector<std::string> &words)
 {
     // check if we have enough words
     if(words.size() < 5) { return; }
@@ -530,7 +549,8 @@ void ParseGPSSV( std::vector<std::string> &words)
     if(rec_number == 1)
     { 
 	___max_snr = 0; 
-	___num_sat = 0;
+	//___num_sat = 0;
+	___num_sat = (___num_sat / 100) *100;		//clear only low part
         ___expected_rec_number = 1;
     }
 
@@ -620,7 +640,9 @@ void ParseGPGGA( std::vector<std::string> &words)
     // word 6 : fix quality - skip
     pos++;
 
-    // word 7 : num sats in use - skip
+    // word 7 : num sats in use - skip?
+	___num_sat %= 100;		//clear high part
+	___num_sat += 100 * atoi( words[pos].c_str() );
     pos++;
 
     // word 8 : hdop
@@ -652,7 +674,7 @@ void ParseGPGGA( std::vector<std::string> &words)
     if(words[pos] != "M")  { geoid = 0.0; }
 
     // FIX for some phones which reports altitude in GEOID
-    if((geoid != 0.0) && (___altitude == 0.0))
+    if((___altitude == 0.0) && (geoid != 0.0))
     {
         ___altitude = geoid; 
     }
@@ -688,17 +710,29 @@ void ParseGPRMC( std::vector<std::string> &words)
 }
 
 //-----------------------------------------------------------------------------
-// Open handle to GPS port, COM1: ... COM14:
+// Open handle to GPS port, COM0: ... COM14:
 
 HANDLE __hGpsPort = INVALID_HANDLE_VALUE;  // handle to the GPS com port
 
 std::string __save_str = "";               // buffer to store uncomplete data, which has not been parsed yet
 
-// debug write into file - uncomment, if required
-// #define WRITE_LINES_TO_FILE
 
+bool filemode = false;
 extern "C" __declspec(dllexport) int GccOpenGps(int com_port, int rate)
 {
+	wchar_t comport[10];
+	if(com_port == 13)
+	{
+		wcscpy(comport, L"\\nmea.txt");
+		filemode = true;
+	}
+	else
+	{
+		swprintf(comport, L"COM%i:", com_port);
+		filemode = false;
+	}
+	__hGpsPort = CreateFile(comport, GENERIC_READ|GENERIC_WRITE,FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
+/*
 // for some reason sprintf did not work to write all these in one line ...
 if     (com_port == 1)  __hGpsPort = CreateFile(L"COM1:", GENERIC_READ|GENERIC_WRITE,FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
 else if(com_port == 2)  __hGpsPort = CreateFile(L"COM2:", GENERIC_READ|GENERIC_WRITE,FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
@@ -714,7 +748,7 @@ else if(com_port == 11) __hGpsPort = CreateFile(L"COM11:",GENERIC_READ|GENERIC_W
 else if(com_port == 12) __hGpsPort = CreateFile(L"COM12:",GENERIC_READ|GENERIC_WRITE,FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
 else if(com_port == 13) __hGpsPort = CreateFile(L"COM13:",GENERIC_READ|GENERIC_WRITE,FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
 else if(com_port == 14) __hGpsPort = CreateFile(L"COM14:",GENERIC_READ|GENERIC_WRITE,FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
-
+*/
     if(__hGpsPort == INVALID_HANDLE_VALUE)
     {
         DWORD dwLastError = GetLastError();
@@ -733,57 +767,59 @@ else if(com_port == 14) __hGpsPort = CreateFile(L"COM14:",GENERIC_READ|GENERIC_W
         }
     }
 
-    // COM port setting
-    DCB dcb;
+	if(!filemode)
+	{
+		// COM port setting
+		DCB dcb;
 
-    if (GetCommState(__hGpsPort,&dcb) == 0)
-        { return 0; }
+		if (GetCommState(__hGpsPort,&dcb) == 0)
+			{ return 0; }
 
-    // Set baud rate and other params
-    dcb.BaudRate = (DWORD)rate;
-    dcb.Parity   = NOPARITY;
-    dcb.StopBits = ONESTOPBIT;
-    dcb.ByteSize = 8;
+		// Set baud rate and other params
+		dcb.BaudRate = (DWORD)rate;
+		dcb.Parity   = NOPARITY;
+		dcb.StopBits = ONESTOPBIT;
+		dcb.ByteSize = 8;
 
-    // use defaults for other fields (found on web)
-    dcb.fBinary         = TRUE;	
-    dcb.fParity         = FALSE;
-    dcb.fOutxCtsFlow    = FALSE;	      
-    dcb.fOutxDsrFlow    = FALSE;	      
-    dcb.fDtrControl     = DTR_CONTROL_ENABLE; 
-    dcb.fDsrSensitivity = FALSE;	      
-    dcb.fOutX           = FALSE;	      
-    dcb.fInX            = FALSE;	      
-    dcb.fNull           = FALSE;	      
-    dcb.fRtsControl     = RTS_CONTROL_ENABLE; 
-    dcb.fAbortOnError   = FALSE;	      
+		// use defaults for other fields (found on web)
+		dcb.fBinary         = TRUE;	
+		dcb.fParity         = FALSE;
+		dcb.fOutxCtsFlow    = FALSE;	      
+		dcb.fOutxDsrFlow    = FALSE;	      
+		dcb.fDtrControl     = DTR_CONTROL_ENABLE; 
+		dcb.fDsrSensitivity = FALSE;	      
+		dcb.fOutX           = FALSE;	      
+		dcb.fInX            = FALSE;	      
+		dcb.fNull           = FALSE;	      
+		dcb.fRtsControl     = RTS_CONTROL_ENABLE; 
+		dcb.fAbortOnError   = FALSE;	      
 
-    if (SetCommState(__hGpsPort,&dcb) == 0)
-        { return 0; }
+		if (SetCommState(__hGpsPort,&dcb) == 0)
+			{ return 0; }
 
-    // set mask which events to monitor 
-    SetCommMask(__hGpsPort, EV_RXCHAR);
+		// set mask which events to monitor 
+		SetCommMask(__hGpsPort, EV_RXCHAR);
 
-    // set buffer sizes (defaults in Windows)
-    SetupComm( __hGpsPort, 4096, 2048);
+		// set buffer sizes (defaults in Windows)
+		SetupComm( __hGpsPort, 4096, 2048);
 
-    // Clear all chars from COM
-    PurgeComm(__hGpsPort,PURGE_TXABORT|PURGE_RXABORT|PURGE_TXCLEAR|PURGE_RXCLEAR);
+		// Clear all chars from COM
+		PurgeComm(__hGpsPort,PURGE_TXABORT|PURGE_RXABORT|PURGE_TXCLEAR|PURGE_RXCLEAR);
 
-    // Setup the comm timeouts. This is important: MAXDWORD for ReadIntervalTimeout means return immediately.
-    COMMTIMEOUTS CommTimeOuts;
-    CommTimeOuts.ReadIntervalTimeout            = 10;
-    CommTimeOuts.ReadTotalTimeoutMultiplier     = 0;
-    CommTimeOuts.ReadTotalTimeoutConstant       = 0;
-    CommTimeOuts.WriteTotalTimeoutMultiplier    = 0;
-    CommTimeOuts.WriteTotalTimeoutConstant      = 10;
-    if (SetCommTimeouts( __hGpsPort, &CommTimeOuts ) == 0)
-        { return 0; }
+		// Setup the comm timeouts. This is important: MAXDWORD for ReadIntervalTimeout means return immediately.
+		COMMTIMEOUTS CommTimeOuts;
+		CommTimeOuts.ReadIntervalTimeout            = 10;
+		CommTimeOuts.ReadTotalTimeoutMultiplier     = 0;
+		CommTimeOuts.ReadTotalTimeoutConstant       = 200;
+		CommTimeOuts.WriteTotalTimeoutMultiplier    = 0;
+		CommTimeOuts.WriteTotalTimeoutConstant      = 10;
+		if (SetCommTimeouts( __hGpsPort, &CommTimeOuts ) == 0)
+			{ return 0; }
 
-    DWORD dwErrors;
-    COMSTAT ComStat;
-    ClearCommError(__hGpsPort,&dwErrors, &ComStat);
-
+		DWORD dwErrors;
+		COMSTAT ComStat;
+		ClearCommError(__hGpsPort,&dwErrors, &ComStat);
+	}
     // reset read buffer
     __save_str = "";
     __read_lock = false;
@@ -807,7 +843,7 @@ extern "C" __declspec(dllexport) int GccCloseGps()
     return status;
 }
 //-----------------------------------------------------------------------------
-// returns 1 it the handle to the GPS port is opened
+// returns 1 if the handle to the GPS port is opened
 extern "C" __declspec(dllexport) int GccIsGpsOpened()
 {
     if(__hGpsPort != INVALID_HANDLE_VALUE) { return 1; }
@@ -829,7 +865,7 @@ extern "C" __declspec(dllexport) int GccReadGps(int &hour, int &min, int &sec,  
                                                 double &speed, double &heading)                 // from GPRMC
 {
     if(__read_lock) { return 0; }
-
+	
     const int BUF_SIZE = 4096;
     DWORD dwBytesRead;
     char buf[BUF_SIZE+1];
@@ -854,7 +890,7 @@ extern "C" __declspec(dllexport) int GccReadGps(int &hour, int &min, int &sec,  
     __read_lock = true;
     BOOL status = ReadFile(__hGpsPort,	 // handle of file to read
                            buf,		 // address of buffer that receives data
-                           BUF_SIZE,	 // number of bytes to read
+						   filemode ? 600 : BUF_SIZE,	 // number of bytes to read
                            &dwBytesRead, // address of number of bytes read
                            NULL		 // address of structure for data
                            );
@@ -873,9 +909,8 @@ extern "C" __declspec(dllexport) int GccReadGps(int &hour, int &min, int &sec,  
         return return_status;
     }
 
-
-    // check that the size is not larger than the buffer (should not happen)
-    if(dwBytesRead > BUF_SIZE) { dwBytesRead = BUF_SIZE; }
+    // terminate string
+    buf[dwBytesRead] = '\0';
 
     // nothing read - return
     if(dwBytesRead == 0)
@@ -888,11 +923,37 @@ extern "C" __declspec(dllexport) int GccReadGps(int &hour, int &min, int &sec,  
     return_status |= READ_NO_ERRORS;
     return_status |= READ_HAS_DATA;
 
-    // terminate string
-    buf[dwBytesRead] = '\0';
+	if(filemode)
+	{
+		char* ptr = strstr(buf+1, "$GPGGA");
+		if(ptr != NULL)
+		{
+			SetFilePointer(__hGpsPort, (ptr - buf) - dwBytesRead, NULL, FILE_CURRENT);
+			dwBytesRead = ptr - buf;
+			*ptr = '\0';
+		}
+	}
 
-    // append string stored from the last read
-    __save_str += std::string(buf);
+    // too much bytes indicate lack of computing power
+    if(dwBytesRead > 600)
+	{
+		//MessageBeep(0);	//test
+#ifdef WRITE_LINES_TO_FILE
+		fprintf(file, "Warning: Too much Bytes read: %d\n", dwBytesRead);
+#endif
+		if(dwBytesRead == BUF_SIZE)
+		{
+			PurgeComm(__hGpsPort, PURGE_RXCLEAR);
+			MessageBeep(1);	//test
+		}
+		__save_str = std::string(buf);
+		__save_str = __save_str.erase(0, dwBytesRead - 600);	//remove old data (would be overwritten anyway)
+	}
+	else
+	{
+		// append to string stored from the last read
+		__save_str += std::string(buf);
+	}
 
     // chop into lines
     std::vector<std::string> lines;
@@ -901,7 +962,7 @@ extern "C" __declspec(dllexport) int GccReadGps(int &hour, int &min, int &sec,  
     ChopIntoLines(__save_str, lines);
 
     // check what to do with the last segment. If it is not complete - store.
-    if(lines.size())
+    if(lines.size() && !filemode)		//in filemode would store "----- received 7 lines ----" without CRLF!
     {
         std::string &last_line = lines[lines.size()-1];
         if(last_line.size() > 3)
@@ -938,7 +999,7 @@ extern "C" __declspec(dllexport) int GccReadGps(int &hour, int &min, int &sec,  
 
             if(words[0] == "$GPGSV")
             {
-                ParseGPSSV(words);
+                ParseGPGSV(words);
 
                 return_status |= READ_HAS_GPGSV;
 
@@ -963,6 +1024,12 @@ extern "C" __declspec(dllexport) int GccReadGps(int &hour, int &min, int &sec,  
                 speed = ___speed; heading = ___heading;
             }
         }
+#ifdef WRITE_LINES_TO_FILE
+		else
+		{
+			fprintf(file, "^invalid line\n");
+		}
+#endif
     }
 #ifdef WRITE_LINES_TO_FILE
     fclose(file);

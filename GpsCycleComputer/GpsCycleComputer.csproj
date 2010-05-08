@@ -11,7 +11,7 @@
     <AssemblyName>GpsCycleComputer</AssemblyName>
     <ProjectTypeGuids>{4D628B5B-2FBC-4AA6-8C16-197242AEB884};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <PlatformFamilyName>PocketPC</PlatformFamilyName>
-    <PlatformID>b2c48bd2-963d-4549-9169-1fa021dce484</PlatformID>
+    <PlatformID>4118C335-430C-497f-BE48-11C3316B135E</PlatformID>
     <OSVersion>5.02</OSVersion>
     <DeployDirSuffix>
     </DeployDirSuffix>
@@ -23,6 +23,7 @@
     <SignAssembly>false</SignAssembly>
     <AssemblyOriginatorKeyFile>
     </AssemblyOriginatorKeyFile>
+    <StartupObject>GpsCycleComputer.Form1</StartupObject>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -97,6 +98,7 @@
     <EmbeddedResource Include="Graphics\graph_p.jpg" />
     <EmbeddedResource Include="Graphics\blank.jpg" />
     <EmbeddedResource Include="Graphics\CW_logo.png" />
+    <EmbeddedResource Include="Graphics\blank_p.jpg" />
     <Content Include="Properties\icon2.ico" />
     <EmbeddedResource Include="Graphics\pause_mode.jpg" />
     <EmbeddedResource Include="Graphics\pause_p.jpg" />
@@ -126,6 +128,7 @@
     <EmbeddedResource Include="Graphics\zoom_in_p.jpg" />
     <EmbeddedResource Include="Graphics\zoom_out.jpg" />
     <EmbeddedResource Include="Graphics\zoom_out_p.jpg" />
+    <None Include="ClassDiagram1.cd" />
     <None Include="Web References\CW\livetracking.disco" />
     <None Include="Web References\CW\livetracking.wsdl" />
     <None Include="Web References\CW\Reference.map">
@@ -160,4 +163,7 @@
       </FlavorProperties>
     </VisualStudio>
   </ProjectExtensions>
+  <PropertyGroup>
+    <PostBuildEvent>C:\WINDOWS\system32\xcopy.exe /Y "$(TargetPath)" "C:\Dokumente und Einstellungen\Klaus\Eigene Dateien\Visual Studio 2005\EmulatorShare"</PostBuildEvent>
+  </PropertyGroup>
 </Project>

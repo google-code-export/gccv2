@@ -1,8 +1,8 @@
 <application>
 <name>GpsCycleComputer</name>
-<version>3.114</version>
+<version>4.2</version>
 <description>AndyZap GPS Cycle Computer</description>
-<versionurl>http://andyzap.50webs.com/GpsCycleComputer.xml</versionurl>
-<caburl>http://gccv2.googlecode.com/files/GpsCycleComputer_3.114.CAB</caburl>
+<versionurl>http://gccv2.googlecode.com/files/GpsCycleComputer.xml</versionurl>
+<caburl>http://gccv2.googlecode.com/files/GpsCycleComputer_4.2.CAB</caburl>
 </application>
 

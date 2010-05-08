@@ -13,8 +13,10 @@ namespace Log
         private bool logFileLocked = false;
 
         public Logger (String path)
-        {   
-            this.filePath = path + "/GpsCycleComputer.log";
+        {
+            this.filePath = path;
+            if (this.filePath != "\\") this.filePath += "\\";
+            this.filePath += "GpsCycleComputer.log";
             try
             {
                 fs = new FileStream(filePath, FileMode.Append);
