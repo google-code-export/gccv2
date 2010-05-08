@@ -34,8 +34,8 @@ namespace LiveTracker
             byte[] pwhashb = sha.ComputeHash(enc.GetBytes(password));
             return CWUtils.ByteArrayToHexString(pwhashb);
         }
-
-        /// <summary>
+        
+     /* /// <summary>
         /// Verifies the given credential on crossingways
         /// TODO: should be called async in order to prevent GUI-lockups
         /// </summary>
@@ -67,7 +67,7 @@ namespace LiveTracker
                 else
                     return "50 - Invalid credentials!";
             }
-        }
+        }*/
 
         /// <summary>
         /// Verifies the given credential on crossingways
@@ -76,7 +76,7 @@ namespace LiveTracker
         /// <param name="username">username</param>
         /// <param name="password">password in cleartext</param>
         /// <returns>status (if it starts with 00 everyting is fine)</returns>
-        public static string VerifyCredentialsOnCrossingwaysViaHTTP(string username, string password)
+        public static string VerifyCredentialsOnCrossingwaysViaHTTP(string server, string username, string password)
         {
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
                 return "50 - Please enter username and pasword!";
@@ -86,7 +86,8 @@ namespace LiveTracker
                 // Not ideal but better than sending the password in cleatext...
                 string pwhash = CWUtils.HashPassword(password);
 
-                string url = "http://www.crossingways.com/services/livetracking.asmx/VerifyCredentials";
+                //string url = "http://www.crossingways.com/services/livetracking.asmx/VerifyCredentials";
+                string url = server + "/services/livetracking.asmx/VerifyCredentials";
                 string payload = "";
                 payload += "username=" + UrlEncode(username) + "&";
                 payload += "passwordhash=" + pwhash + "&";
@@ -102,7 +103,7 @@ namespace LiveTracker
                     result = readStream.ReadToEnd();
                     result = result.Replace("<?xml version=\"1.0\" encoding=\"utf-8\"?>", "");
                     result = result.Replace("\r\n", "");
-                    result = result.Replace("<boolean xmlns=\"http://www.crossingways.com/\">", "");
+                    result = result.Replace("<boolean xmlns=\"" + server + "/\">", "");
                     result = result.Replace("</boolean>", "");
                 }
                 catch
@@ -119,7 +120,7 @@ namespace LiveTracker
             }
         }
 
-        /// <summary>
+      /*  /// <summary>
         /// Updates a single Position on Crossingways
         /// </summary>
         /// <param name="username">username</param>
@@ -169,7 +170,7 @@ namespace LiveTracker
             }
             message += DateTime.Now.ToShortTimeString() + " " + message + " \r\n";
             return message;
-        }
+        }*/
 
         /// <summary>
         /// Uploads an entire GPX file to the Server
@@ -179,9 +180,9 @@ namespace LiveTracker
         /// <param name="trackname"></param>
         /// <param name="gpx">gpx file as a string</param>
         /// <returns></returns>
-        public static string UploadGPXViaHTTP(string username, string passwordhash, string trackname, string gpx)
+        public static string UploadGPXViaHTTP(string server, string username, string passwordhash, string trackname, string gpx)
         {
-            string url = "http://www.crossingways.com/services/livetracking.asmx/UploadGPX";
+            string url = server + "/services/livetracking.asmx/UploadGPX";
             string payload = "";
             payload += "username=" + UrlEncode(username) + "&";
             payload += "password=" + passwordhash + "&";
@@ -196,7 +197,7 @@ namespace LiveTracker
                 result = readStream.ReadToEnd();
                 result = result.Replace("<?xml version=\"1.0\" encoding=\"utf-8\"?>", "");
                 result = result.Replace("\r\n", "");
-                result = result.Replace("<string xmlns=\"http://www.crossingways.com/\">", "");
+                result = result.Replace("<string xmlns=\"" + server + "/\">", "");
                 result = result.Replace("</string>", "");
             }
             catch
@@ -217,9 +218,9 @@ namespace LiveTracker
         /// <param name="heading">Heading</param>
         /// <param name="messagetext">A Message can be sent along (max. length 160)</param>
         /// <returns>status as a string</returns>
-        public static string UpdatePositionOnCrossingwaysViaHTTP(string username, string passwordhash, double lat, double lon, double ele, double heading, string messagetext)
+        public static string UpdatePositionOnCrossingwaysViaHTTP(string server, string username, string passwordhash, double lat, double lon, double ele, double heading, string messagetext)
         {
-            string url = "http://www.crossingways.com/services/livetracking.asmx/CurrentPosition"; 
+            string url = server + "/services/livetracking.asmx/CurrentPosition"; 
             string payload= "";
             payload+="username="+ UrlEncode(username) + "&";
             payload += "password=" + passwordhash + "&";
@@ -241,7 +242,7 @@ namespace LiveTracker
                 result = readStream.ReadToEnd();
                 result = result.Replace("<?xml version=\"1.0\" encoding=\"utf-8\"?>", "");
                 result = result.Replace("\r\n", "");
-                result = result.Replace("<string xmlns=\"http://www.crossingways.com/\">", "");
+                result = result.Replace("<string xmlns=\"" + server + "/\">", "");
                 result = result.Replace("</string>", "");
             }
             catch (Exception /*e*/)
@@ -300,7 +301,7 @@ namespace LiveTracker
         }
 
 
-        /// <summary>
+     /*   /// <summary>
         /// Updates multiple positions on Crossingways
         /// </summary>
         /// <param name="username">username</param>
@@ -326,7 +327,7 @@ namespace LiveTracker
             }
             message += DateTime.Now.ToShortTimeString() + " " + message + " \r\n";
             return message;
-        }
+        }*/
 
     }
 }

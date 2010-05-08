@@ -14,7 +14,7 @@ namespace GpsUtils
         // options: use GccGPS.dll or Windows gpsapi.dll
         private bool useGccDll = false;
         private int comPort = 4;
-        private int badRate = 4800;
+        private int baudRate = 4800;
 
         // -----------------------------------------------------------
         // handle to the gps device
@@ -29,13 +29,13 @@ namespace GpsUtils
         }
 
         // set the mode: use GccGPS.dll or Windows "Parsed" driver from gpsapi.dll
-        public void setOptions(bool _useGccDll, int _comPort, int _badRate)
+        public void setOptions(bool _useGccDll, int _comPort, int _baudRate)
         {
-            Close();
+            //Close();
 
             useGccDll = _useGccDll;
             comPort = _comPort;
-            badRate = _badRate;
+            baudRate = _baudRate;
         }
 
         /// True: The GPS device has been opened. False: It has not been opened
@@ -48,6 +48,13 @@ namespace GpsUtils
             }
         }
 
+        public bool Suspended = false;
+
+        public bool OpenedOrSuspended
+        {
+            get {  return Opened || Suspended; }
+        }
+
         public Gps() {}
 
         ~Gps()
@@ -57,9 +64,10 @@ namespace GpsUtils
 
         public int Open()
         {
+            Suspended = false;
             if (!Opened)
             {
-                if(useGccDll) { return GccOpenGps(comPort, badRate); }
+                if(useGccDll) { return GccOpenGps(comPort, baudRate); }
                 else          { gpsHandle = GPSOpenDevice(IntPtr.Zero, IntPtr.Zero, null, 0); }
             }
             return 1;
@@ -72,7 +80,15 @@ namespace GpsUtils
                 if(useGccDll) { GccCloseGps(); }
                 else          { GPSCloseDevice(gpsHandle); gpsHandle = IntPtr.Zero; }
             }
+            Suspended = false;
         }
+
+        public void Suspend()
+        {
+            Close();
+            Suspended = true;
+        }
+
 
         public GpsPosition GetPosition()
         {
