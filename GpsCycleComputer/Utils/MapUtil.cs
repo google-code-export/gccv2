@@ -75,7 +75,7 @@ namespace GpsUtils
         // vars to work with OpenStreetMap tiles
         public int OsmTilesWebDownload = 0;  // 0 - web download "off", or the server index from a predefined server list
         private bool OsmTilesMode = false;
-        private const int OsmNumZoomLevels = 19;
+        private const int OsmNumZoomLevels = 19;    //19  is too high - most servers do not respond
         private bool[] OsmZoomAvailable = new bool[OsmNumZoomLevels]; // if a directories for this zoom level found (true/false)
         private const int OsmTmpReadArraySize = 4096;
         private byte[] OsmTmpReadArray = new byte[OsmTmpReadArraySize];
@@ -174,18 +174,18 @@ namespace GpsUtils
 Osmarender                     http://tah.openstreetmap.org/Tiles/tile/
 Mapnik                         http://tile.openstreetmap.org/mapnik/
 Cyclemap (CloudMade)           http://c.andy.sandbox.cloudmade.com/tiles/cycle/
-OpenPisteMap                   http://openpistemap.org/tiles/contours/
+OpenPisteMap                   http://openpistemap.org/tiles/contours/     new:     http://tiles.openpistemap.org/contours/
 CloudMade Web style            http://tile.cloudmade.com/8bafab36916b5ce6b4395ede3cb9ddea/1/256/
 CloudMade Mobile style         http://tile.cloudmade.com/8bafab36916b5ce6b4395ede3cb9ddea/2/256/
 CloudMade NoNames style        http://tile.cloudmade.com/8bafab36916b5ce6b4395ede3cb9ddea/3/256/
 User-defined server (read server name from osm_server.txt)             
-             */ 
+             */
 
             string server_name = "http://tah.openstreetmap.org/Tiles/tile/";
             if      (OsmTilesWebDownload == 1) { server_name = "http://tah.openstreetmap.org/Tiles/tile/"; }
             else if (OsmTilesWebDownload == 2) { server_name = "http://tile.openstreetmap.org/mapnik/"; }
             else if (OsmTilesWebDownload == 3) { server_name = "http://c.andy.sandbox.cloudmade.com/tiles/cycle/"; }
-            else if (OsmTilesWebDownload == 4) { server_name = "http://openpistemap.org/tiles/contours/"; }
+            else if (OsmTilesWebDownload == 4) { server_name = "http://tiles.openpistemap.org/contours/"; }
             else if (OsmTilesWebDownload == 5) { server_name = "http://tile.cloudmade.com/8bafab36916b5ce6b4395ede3cb9ddea/1/256/"; }
             else if (OsmTilesWebDownload == 6) { server_name = "http://tile.cloudmade.com/8bafab36916b5ce6b4395ede3cb9ddea/2/256/"; }
             else if (OsmTilesWebDownload == 7) { server_name = "http://tile.cloudmade.com/8bafab36916b5ce6b4395ede3cb9ddea/3/256/"; }
