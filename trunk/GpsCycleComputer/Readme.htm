@@ -12,7 +12,7 @@ content="text/html; charset=iso-8859-1"/>
 
 <table border="0" width="450">
     <tr>
-        <td style="width: 536px"><h1><font face="Arial">GPS Cycle Computer</font></h1>
+        <td style="width: 536px"><h1><font face="Arial">GPS Cycle Computer 4.3</font></h1>
         <h2><font size="3" face="Arial">1. General Description</font></h2>
         <p><font size="2" face="Arial">This is a GPS tracing
         application for Windows Mobile. You do not need any other
@@ -97,10 +97,13 @@ content="text/html; charset=iso-8859-1"/>
         info: trip time, clock, speed (current, average and max),
         and the info you would see on a GPS device: altitude,
         heading, latitude/longitude, plus some info about the GPS
-        status. At the bottom there are 3 buttons: Options
-        (left), Start (center) and Files (right). These 3 buttons
+        status. At the bottom there are 3 buttons: Menu
+        (left), Start (center) and GPS (right). These 3 buttons
         changes as you move to different screens or start/stop
         GPS.</font></p>
+            <p>
+                <strong>Important:</strong> you can always come to the Menu page by long-click (hold
+                more than 0.5s) or double-click on the left button (no matter what it shows).</p>
         <p><font size="2" face="Arial">In most cases you shall be
         able just to click Start button, get GPS lock (so it is
         better to try this outside! ) and record you first track.
@@ -111,9 +114,8 @@ content="text/html; charset=iso-8859-1"/>
         display (bottom right of the main window) : </font></p>
         <ul>
             <li><font size="2" face="Arial">S - number after
-                &quot;S&quot; is number of satellites in use and satellites in view.</font></li>
-            <li><font size="2" face="Arial">Snr - number after
-                SNR is max Signal-To-Noise ratio, i.e. the signal
+                &quot;S&quot; is number of satellites in use and satellites in view (after slash).</font></li>
+            <li><font size="2" face="Arial">Snr - number after Snr is max Signal-To-Noise ratio, i.e. the signal
                 quality. The higher, the better. Number below 20
                 is very low, and it is unlikely you will get a
                 lock in this conditions.</font></li>
@@ -139,16 +141,19 @@ content="text/html; charset=iso-8859-1"/>
         display (bottom left of the main window) : </font></p>
         <ul>
             <li><font size="2" face="Arial">&#147;gps on&#148;
-                &#150; gps data is valid </font></li>
+                &#150; “GPS: Off, On, Logging or
+                Paused – self explanatory.&nbsp;</font></li>
             <li><font size="2" face="Arial">&#147;gps 
-                sec&#148; &#150; suspended for xs? gps is switched off for given
-                time interval, as selected in Options </font></li>
-            <li><font size="2" face="Arial">&#147;gps Number&#148; &#150; state + Letters1 Number1
-                [blank] Letters2 Number2?.<br />
-                Letters1: L: logging; P: pause; d and Number1: dropped points.<br />
-                Letters2: capital letters means OK, small letters means not OK.<br />
-                T: time; L: latitude; L: longitude; A: altitude; H: heading; S=speed.<br />
-                Number2 is the time in seconds since the start of
+                sec&#148; &#150; “GPS: suspended for xs" –
+                gps is switched off for given time interval to save battery, as selected in Options.</font></li>
+            <li>"<span style="font-size: 10pt; font-family: Arial">GPS: stopped on low power" –
+                gps</span><font face="Arial" size="2"> is stopped due to low battery (&lt;20%), as selected
+                    in Options (default).</font></li>
+            <li><font size="2" face="Arial">&#147;gps Number&#148; &#150; “dx” – if x &gt; 0 this
+                means data is dropped to get better precision, as selected in Options.</font></li>
+            <li><font face="Arial" size="2">"TLLAHS" –
+                T: time; L: latitude; L: longitude; A: altitude; H: heading; S=speed. Capital letters means record OK, small letters means not OK.</font></li>
+            <li><font face="Arial" size="2">Number at the end is the time in seconds since the start of
                 the search for valid signal, reset after &#150;
                 &#150; position record found, T &#150;
                 time record found, S &#150; 180s
@@ -156,22 +161,21 @@ content="text/html; charset=iso-8859-1"/>
                 made that time is increasing, so data is fresh). </font></li>
         </ul>
         <p><font size="2" face="Arial">If you have number of
-        satellites 0, or &quot;no gps data&quot; for some time,
+        satellites 0, or &quot;no data
+            from GPS" for some time,
         then it is likely that your GPS setting are not
         correct.You need to read further how to set GPS options
         correctly, see section &quot;Useful info&quot;, &quot;GPS
         setup&quot; below.</font></p>
         <p><font size="2" face="Arial">Assuming that all works
-        (you see &quot;gps on&quot; and green rectangle) with the
+        (you see "GPS: on&quot; and green rectangle) with the
         default settings (or if you have changed the setting, and
         it works!) , let us proceed with the desciption of the
         main screen.</font></p>
         <p><font size="2" face="Arial">When running, Start button
-        changes to Pause - to pause GPS and / or add a
-        checkpoint. Press Pause button again to continue logging.
-        The GPS button changes to Stop - to stop the log. The Options button changes to Maps -
-        which shows you track. When logging is on, you can switch
-        between Main and Maps screens only. On the Maps screen,
+        changes to Pause - to pause GPS. Press Pause button again to continue logging. The GPS button changes to Stop
+            - to stop the log. The Menu button changes to Maps - which shows your track. Remember
+            you can always get to the Menu by long-click (or double-click) on left button. On the Maps screen,
         you can use Zoom in / Zoom out buttons, and move track
         line with your finger (like in GoogleMaps for Mobile).
         Also you can plot a &quot;map&quot; as a background for
@@ -195,13 +199,55 @@ content="text/html; charset=iso-8859-1"/>
         &quot;north&quot;, as usual on a map, pointing up. Do not
         be confised - the arrow shows direction of your travel,
         not the &quot;north&quot; direction (north is up).<br />
-            If you rotate your device so that the arrow points in direction of your movement,
+            Hint: if you rotate your device so that the arrow points in direction of your movement,
             the device top points to north.</font></p>
         <p><font size="2" face="Arial">Now, if you have any data
         logged, you can stop the logging (press Stop button), and
         see what you can do with the log file.</font></p>
-        <h2><font size="3" face="Arial">4. Working with log files</font></h2>
-        <p><font size="2" face="Arial">A log file is
+        <h2>
+            <font face="Arial" size="3">4. Menu page</font></h2>
+            <p>
+                By clicking the Menu button or always by long-clicking or double-clicking the left
+                button you get to the Menu page. This is the central navigation point through all
+                the functions of the application. The three buttons at the bottom are fixed and
+                allow to get back to Main screen or to scroll down and up the menu items.</p>
+            <p>
+                Functions:</p>
+           <ul>
+            <li><font size="2" face="Arial"><strong>Main</strong></font></li>
+            <li><strong>Map</strong> </li>
+            <li><strong>Options</strong>: (see below)</li>
+            <li><strong>Altitude</strong>: show altitude graph over time (see Graph below)&nbsp;</li>
+            <li><strong>Speed</strong>: show speed graph over time (see Graph below)&nbsp;</li>
+            <li><strong>CheckPoint</strong> </li>
+            <li><strong>File</strong>: file operations like load GCC files and save KML or GPX files&nbsp;</li>
+            <li><strong>Track2Follow</strong>: load a track as second line in map which you can follow. Valid file
+                formats are GCC, KML and GPX.</li>
+            <li><strong>ClearTrack</strong> / <strong>Clear2Follow</strong>: clears the main track or 'track to follow'.</li>
+            <li><strong>Exit</strong> </li>
+            <li><strong>Continue</strong>: continues a previous recorded track.&nbsp;</li>
+            <li><strong>Lap</strong>: (see below)&nbsp;</li>
+            <li><font face="Arial" size="2"><strong>Recal 1</strong> .. <strong>3</strong>: with
+                these 3 buttons you can recall different option settings. At the moment it is somewhat
+                awkward to save these settings: Set the desired options for Recall 1, exit GCC,
+                then copy the file GpsCycleComputer.dat to GpsCycleComputer1.dat. Use same procedure
+                for Recall 2 and Recall 3.</font>&nbsp;</li>
+            <li><strong>BKLight</strong>: <span style="font-size: 10pt; font-family: Arial">by default, you
+                shall be able to switch your phone off by the
+                hardware power button, and the GPS will continue
+                logging. If this does not work on your phone (or
+                you do NOT want to use &quot;read GPS data
+                directly&quot; settings) - then you shall use this button
+                to switch off the screen during logging. Remark: the buttons keep enabled so
+                you can reactivate your device.</span> </li>
+            <li><strong>Input LatLon</strong>: is useful to browse map on a specific place.&nbsp;</li>
+            <li><strong>Help<font face="Arial" size="2"></font></strong> </li>
+           </ul>
+        <p><font size="2" face="Arial"></font>&nbsp;</p>
+            <h2>
+                <font face="Arial" size="2"><span style="font-size: 12pt">5. Working with log files</span></font></h2>
+            <p>
+                <font face="Arial" size="2">A log file is
         automatically created as you click Start
             button. The
         default name
@@ -257,18 +303,15 @@ content="text/html; charset=iso-8859-1"/>
         let me know. So at the moment this seems not a very
         usable option to open gcc files (i.e. better to load them
         from the tool, as explained above)</font></p>
-        <h2><font size="3" face="Arial">5. Options </font></h2>
-        <p><font size="2" face="Arial">Options must be selected <strong>before</strong>
-        the logging is activated, otherwise the options button is
-        hidden. If you want to change any options during logging,
-        you can press &quot;pause&quot; button (then the
-        &quot;options&quot; button is available), and resume
-        logging (press &quot;pause&quot; again) after updating
-        options. This way you can change e.g the logging
+        <h2><font size="3" face="Arial">6. Options </font></h2>
+        <p><font size="2" face="Arial">Options can now be reached from any state of the application
+            by means of the Menu page. This way you can change e.g the logging
         interval, load different maps or track-to-follow. Note
         that even if you change the input/output file folder, the
         currently logged file still be written in the folder you
-        set as you started the log, i.e. it will not be changed.</font></p>
+        set as you started the log, i.e. it will not be changed. If you change GPS port settings
+            while GPS is on, you must switch off GPS and switch on again to have the changes
+            take effect.</font></p>
         <p><font size="2" face="Arial">There are a few option
         pages, so press &quot;next&quot; or &quot;previous&quot;
         (center or right buttons) on options tab to switch
@@ -299,28 +342,6 @@ content="text/html; charset=iso-8859-1"/>
                 using File Explorer. Also you can use File
                 Explorer to rename/move/copy gcc files, if
                 required. .</font></li>
-            <li><font size="2" face="Arial">&quot;<strong>Load
-                track to follow ...</strong>&quot; - you can load
-                a track data from an existing file. The line is
-                displayed in alternative color on Maps display.
-                You can load data from &quot;gcc&quot;,
-                &quot;kml&quot; or &quot;gpx&quot; files - use
-                &quot;left/right&quot; buttons on the open file
-                page to select different file types. If you want
-                to clear the track-to-follow, press <strong>&quot;Clear...&quot;</strong>
-                button. If you have problems loading file, an
-                error message will be displayed. If you have a
-                KML or GPX file which can be loaded correctly
-                into e.g. GoogleEarth, but cannot be read by this
-                tool, please send me the file, I will try to fix
-                this. For more info about loading and viewing
-                &quot;Track-to-Follow&quot; please see a section
-                below.</font></li>
-            <li><span style="font-family: Arial"><span style="font-size: 10pt"><strong>Graph ...</strong> - display graph of altitude or speed over time. You can
-                zoom the axes by dragging a point at the axis (outline) of the drawing in either direction. Dragging
-                inside the drawing moves the graph. A double click does autoscale to fit the whole
-                data. &nbsp; </span></span>
-            </li>
         </ul>
         <p><font size="2" face="Arial"><strong><u>Page &quot;GPS
         options&quot;</u></strong><strong>:</strong></font></p>
@@ -355,16 +376,19 @@ content="text/html; charset=iso-8859-1"/>
                 think, might work a bit better than the Windows
                 &#147;parsed&#148; driver. For test purposes you can select "\nmea.txt" instead of COMx. Then the raw
                 NMEA data are read from that file (in root directory) instead from the GPS receiver.</font> </li>
-            <li><font size="2" face="Arial"><strong>Manual
-                altitude correction, m</strong> - if your GPS
-                hardware does not do this for you (e.g. on
+            <li><font size="2" face="Arial"><strong>WGS84 altitude</strong> - display altitude with
+                respect to WGS84 ellipsoid instead of Mean Sea Level. Some phones report altitude
+                in wrong fields, so test to check this, if your altitude reading is not correct.
+                Default off.</font>&nbsp;</li>
+            <li><font face="Arial" size="2"><strong>corr, m</strong> - if your GPS hardware does
+                not correct the altitude to the right Mean Sea Level (e.g. on
                 Diamond), then you can manually enter the value
                 to display correct height above the sea level.
                 The correcton values (called GEOID) for your
                 location can be computed here: </font><a
                 href="http://earth-info.nga.mil/GandG/wgs84/gravitymod/wgs84_180/intptW.html"><font
                 size="2" face="Arial">http://earth-info.nga.mil/GandG/wgs84/gravitymod/wgs84_180/intptW.html</font></a><font
-                size="2" face="Arial">?</font></li>
+                size="2" face="Arial">?</font> </li>
             <li><span style="font-family: Arial"><span style="font-size: 10pt"><strong>Beep on GPS
                 fix</strong> - if checked, beeps on GPS fix and loose.</span></span></li>
             <li><span style="font-family: Arial"><span style="font-size: 10pt"><strong>AVG</strong>
@@ -394,22 +418,6 @@ content="text/html; charset=iso-8859-1"/>
                 you can enter a custom log file name before
                 starting logging. Default off (the file name
                 generated automatically).</font></li>
-            <li><font size="2" face="Arial"><strong>Show
-                BkLightOff button</strong> - by default, you
-                shall be able to switch your phone off by the
-                hardware power button, and the GPS will continue
-                logging. If this does not work on your phone (or
-                you do NOT want to use &quot;read GPS data
-                directly&quot; settings) - then you shall display
-                &quot;BkLightOff&quot; button and use it to
-                switch off the screen during logging. The button
-                is displayed instead of &quot;Pause&quot; button,
-                the center button on the Main screen when
-                logging. <strong>Note</strong> that In this mode,
-                if you press the hardware power off button, the
-                GPS stops - so you will not get any log. I.e. be
-                carefull, and use BkLightOff button for the
-                logging to continue. Default off.</font></li>
             <li><font size="2" face="Arial"><strong>Show relative
                 altitude</strong> - when &quot;on&quot;, on Main
                 screen, show altitude relative to the starting
@@ -499,7 +507,8 @@ content="text/html; charset=iso-8859-1"/>
                 &quot;&lt;trk&gt;&quot; tag - try to save GPX
                 files with this option on or off if you have
                 problems reading GPX file with another
-                application. Default off.</font></li>
+                application. Default off. This option should always be 
+                off, unless you can solve the mentioned problems.</font>&nbsp;</li>
             <li><font size="2" face="Arial"><strong>Save GPX
                 speed in m/s</strong> - save speed in m/s instead
                 of km/h (which seems a default for GPX). Default
@@ -561,8 +570,8 @@ content="text/html; charset=iso-8859-1"/>
         activated, you will be asked each time you click
         &quot;Start&quot; button, if you want to proceed. Also in
         the &quot;info&quot; box you will see messages
-        &quot;livelog ok&quot; or &quot;livelog error!&quot; -
-        which tells you the status of last log attempt..</font></p>
+        &quot;livelog ok&quot; or &quot;livelog error!&quot; &nbsp;-
+        which tells you the status and time of last log attempt..</font></p>
         <p><font size="2" face="Arial"><strong><u>and finally: </u></strong></font></p>
         <ul>
             <li><font size="2" face="Arial">&quot;<strong>About</strong>&quot;
@@ -570,7 +579,50 @@ content="text/html; charset=iso-8859-1"/>
                 version and see other important info including a button to
                 display this readme file..</font></li>
         </ul>
-        <h2><font size="3" face="Arial">6. &#147;Maps&#148; </font></h2>
+        
+            <h2>
+                <span style="font-size: 12pt; font-family: Arial"></span>&nbsp;</h2>
+        <a name="graph"></a>
+            <h2>
+                <span style="font-size: 12pt; font-family: Arial">7. Graph</span></h2>
+            <p>
+                <span style="font-size: 10pt"><span style="font-family: Arial">Display graph of altitude or speed over time. You can
+                zoom the axes by dragging a point at the axis (outline) of the drawing in either direction. In other words you can 'take' for example the
+                    point "2 min" and dragg it to the desired new position, either right or left. Dragging
+                inside the drawing moves the graph. A double click does autoscale to fit the whole
+                data.<br />
+                </span>
+                </span>
+                <span style="font-size: 10pt; font-family: Arial">Double click on the top label changes
+                    between Altitude and Speed.<br />
+                    Double click on the bottom label changes between Time and Distance.</span></p>
+            <p>
+                <span style="font-size: 10pt; font-family: Arial"></span>&nbsp;</p>
+            <h2>
+                <span style="font-size: 12pt; font-family: Arial">8. Lap </span>
+            </h2>
+            <p>
+                <span style="font-size: 10pt; font-family: Arial">A lap can be defined in different
+                    ways. Either "manual" by clicking on the Main screen (not on the buttons) or distance
+                    based (400m, 1km, 2km, 5km) or time based (1min, 2min, 5min). The statistics of all your
+                    laps are displayed on the lap screen. You can export the data in csv format by clicking
+                    "export .csv". The directory and file name is the same as the track but with extension
+                    .csv. In addition after every lap a checkpoint with the lap data is created in the
+                    track (except in manual mode because this is used usually on a round trip and the
+                    checkpoints would fall all on the same place).</span></p>
+            <p>
+                <span style="font-size: 10pt; font-family: Arial">If the lap function is enabled the
+                    "Altitude" field in the main screen changes to "Lap" field. It displays the time
+                    (in distance based mode) of the current (and the last lap). If current lap has just
+                    begun (&lt;5%) the current lap value is just the last value (extrapolation would
+                    be too inaccurate). For the rest of the lap (5% to 100%) the current lap value is
+                    extrapolated to the whole lap distance so that the current value can easy be compared
+                    to the last value.</span></p>
+            <p>
+                <font face="Arial" size="3"></font>&nbsp;</p>
+            <h2>
+                <font face="Arial" size="3">9. “Maps” </font>
+            </h2>
         <p><font size="2" face="Arial">A &#147;map&#148; is any
         JPEG image with known coordinates of the corners. It is
         plotted as a background on &#147;Maps&#148; page. Maps
@@ -591,7 +643,7 @@ content="text/html; charset=iso-8859-1"/>
         can be derived from the file names. I.e. you do not need
         to specify the coordinates for OpenStreetMap tiles - just
         download them.</font></p>
-        <p><font size="2" face="Arial"><strong><u>6.1 txt + jpeg:
+        <p><font size="2" face="Arial"><strong><u>9.1 txt + jpeg:
         first method</u></strong> is to create a text file (with
         .txt extension and the same name as the image, e.g.
         &#147;MyTown.txt&#148;) which contains 4 lines: 1st line
@@ -614,7 +666,7 @@ content="text/html; charset=iso-8859-1"/>
         to identify it easily. Note that you can change the maps
         location in Options. The tool supports up to 512
         &#147;maps&#148; per folder.</font></p>
-        <p><font size="2" face="Arial"><strong><u>6.2 kml + jpeg:
+        <p><font size="2" face="Arial"><strong><u>9.2 kml + jpeg:
         second method</u></strong> is to use GoogleEarth to
         create maps, it is quick and accurate. A very good and
         detailed description how to create such a map is given in
@@ -667,18 +719,18 @@ content="text/html; charset=iso-8859-1"/>
         angle allows to determine the map size along x-axis. As
         we know the picture size in pixels, then we can determine
         the y-size of the map. </font></p>
-        <p><font size="2" face="Arial"><strong><u>6.3 gmi + jpeg:
+        <p><font size="2" face="Arial"><strong><u>9.3 gmi + jpeg:
         third method</u></strong> is to use GpsTuner' <strong>gmi</strong>
         files. Instead of the coordinates of the map' corners,
         you can supply coordinates of a few reference points
         (e.g. a bridge or road intersection). gmi file is a text
         file which contains the following lines:</font></p>
         <p><font size="1" face="Courier New">Map Calibration data
-        file v3.0<br>
-        Image1.jpg<br>
-        1025<br>
-        1859<br>
-        879;1153;8.96395330;45.50307600<br>
+        file v3.0<br/>
+        Image1.jpg<br/>
+        1025<br/>
+        1859<br/>
+        879;1153;8.96395330;45.50307600<br/>
         685;332;8.94953370;45.54786704</font></p>
         <p><font size="2" face="Arial">First line is the header
         (must be present, otherwise an error dialog is shown).
@@ -716,7 +768,7 @@ content="text/html; charset=iso-8859-1"/>
         href="http://www.map-imp-gmi-converter.com/index.php"><font
         size="2" face="Arial">http://www.map-imp-gmi-converter.com/index.php</font></a><font
         size="2" face="Arial"> </font></p>
-        <p><font size="2" face="Arial"><strong><u>6.4 Using
+        <p><font size="2" face="Arial"><strong><u>9.4 Using
         OpenStreeMap tiles</u></strong> - these are PNG images,
         arranged into a special directory structure based on
         &quot;zoom level&quot; (0 to 18), and the tile X
@@ -742,7 +794,12 @@ content="text/html; charset=iso-8859-1"/>
         not change the directory structure</u> (then you will get
         incorrect tile coordinates), or to <u>place any other
         files there</u> (they will not be loaded, i.e. only the
-        PNG files will be used). </font></p>
+        PNG files will be used).</font></p>
+        <p><font size="2" face="Arial">                
+        Since version 4.3 GCC supports other image formats in OSM style maps. Besides .png
+        also .jpg .bmp .gif .exif .tiff are supported. But all images of the whole map must
+        be of the same type. You can have separate maps with different formats in different
+        directories.</font></p>
         <p><font size="2" face="Arial">There is no limit on the
         number of tiles (just the size of you phone's storage
         card!). The large number of tiles will not slow the tool
@@ -764,11 +821,22 @@ content="text/html; charset=iso-8859-1"/>
         directory tree described above - so all you need is to
         copy it to your mobile, and point GpsCycleComputer to the
         top folder (e.g. &quot;tiles&quot;). </font></p>
+        <p><font size="2" face="Arial">
+        There is another powerful tool <strong>"Mobile Atlas Creator"</strong>
+            to download tiles, which is available from: 
+        </font><a
+        href="http://mobac.dnsalias.org/index.html"><font size="2"
+        face="Arial">http://mobac.dnsalias.org/index.html</font></a><font
+        size="2" face="Arial">. Mobile Atlas Creator supports many map sources and 
+        can create different map formats. The format<strong> "OSMTracker tile storage"</strong> is compatible
+        to GCC. In some cases it may be advantageous to apply the "custom tile
+            processing" for example to convert 170kB .png files into 25kB .jpg files (the x/y
+            size must be kept at 256x256!). </font></p>
         <p><font size="2" face="Arial">For more info visit </font><a
         href="http://www.openstreetmap.org"><font size="2"
         face="Arial">www.openstreetmap.org</font></a><font
         size="2" face="Arial">.</font></p>
-        <p><font size="2" face="Arial"><strong><u>6.5 Automatic
+        <p><font size="2" face="Arial"><strong><u>9.5 Automatic
         OpenStreetMap download</u></strong> - if you have an
         internet connection on your phone, then you can select an
         option to automatically download OSM tiles which do not
@@ -813,7 +881,7 @@ content="text/html; charset=iso-8859-1"/>
                 size="2" face="Arial">http://c.andy.sandbox.cloudmade.com/tiles/cycle/</font></a></li>
             <li><font size="2" face="Arial">OpenPisteMap </font><a
                 href="http://openpistemap.org/tiles/contours/"><font
-                size="2" face="Arial">http://openpistemap.org/tiles/contours/</font></a></li>
+                size="2" face="Arial">http://tiles.openpistemap.org/contours/</font></a></li>
             <li><font size="2" face="Arial">CloudMade Web style </font><a
                 href="http://tile.cloudmade.com/8bafab36916b5ce6b4395ede3cb9ddea/1/256/"><font
                 size="2" face="Arial">http://tile.cloudmade.com/8bafab36916b5ce6b4395ede3cb9ddea/1/256/</font></a></li>
@@ -846,7 +914,7 @@ content="text/html; charset=iso-8859-1"/>
         access such a sample address using a web browser, to
         check that you can see PNG images at that server, i.e.the
         server is working.</font></p>
-        <p><font size="2" face="Arial"><strong><u>6.6 Map
+        <p><font size="2" face="Arial"><strong><u>9.6 Map
         selection.</u></strong> The maps are automatically
         selected - as you touch and lift you finger from the
         screen or press zoom-in/zoom-out buttons. The best map
@@ -861,17 +929,11 @@ content="text/html; charset=iso-8859-1"/>
         Error&quot; if there is not enough free memory to display
         a map (e.g. if an image file it too large, or you try to
         load too many images at the same time).</font></p>
-        <p><font size="2" face="Arial">Note that you can see the
-        map <strong>only</strong> as a background for your
-        existing track, you cannot just browse any maps you
-        created without having a track recorded for that location
-        (well, if you want to see the map jpeg image - just click
-        on it in File Explorer - this is just a jpeg!)</font></p>
         <p><font size="2" face="Arial">Note that you can select a
         folder with jpeg file <strong><u>or</u></strong> a top
         folder with OpenStreetMap tiles - i.e. you <u>cannot</u>
         store both type of maps in the same folder.</font></p>
-        <p><font size="2" face="Arial"><strong><u>6.7 Multi-maps
+        <p><font size="2" face="Arial"><strong><u>9.7 Multi-maps
         plotting algorithm</u></strong> - tries to plot multiple
         jpeg maps (instead of a single, the best, map). The maps
         a simply plotted on the top of each other, so the trick
@@ -903,10 +965,10 @@ content="text/html; charset=iso-8859-1"/>
         select the best (or the best set of) maps for you. Do not
         create very large or very small images, the size is about
         1000x1000 max.</font></p>
-        <h2><font size="3" face="Arial">7. Track-to-follow </font></h2>
-        <p><font size="2" face="Arial">Use &quot;<strong>Load
-        track to follow ...</strong>&quot; button on the first
-        page of &quot;Options&quot; to load a track data from an
+        <h2><font size="3" face="Arial">10. Track-to-follow </font></h2>
+            <p>
+                <font face="Arial" size="2"><span style="font-size: 12pt; font-family: Times New Roman">
+                </span>Use &quot;<strong>Track2Follow</strong>&quot; button to load a track data from an
         existing file. You can load data from &quot;gcc&quot;,
         &quot;kml&quot; or &quot;gpx&quot; files - use
         &quot;left/right&quot; buttons on the open file dialog to
@@ -915,21 +977,29 @@ content="text/html; charset=iso-8859-1"/>
         any .gcc files on the &quot;Main&quot; page), then you
         shall be able to see both tracks plotted on the Maps page
         - note that you can set line style (color, width and plot
-        as line/dots) for each track separatelly. </font></p>
+        as line/dots) for each track separatelly. </font>
+            </p>
         <p><font size="2" face="Arial">To clear
-        &quot;track-to-follow&quot; press &quot;Clear...&quot;
+        &quot;track-to-follow&quot; press "Clear2Follow"
         button. You shall see message at the bottom of the screen
         which says &quot;Track to follow cleared&quot;. Then you
         will see only &quot;main&quot; track plotted on the Maps
         page. If you want to do opposite (i.e. to clear the main
         track, and view only track-to-follow, then you need to
-        clear the main track as well - press &quot;Clear ...
-        &quot; button twice. You shall see message &quot;All
+        clear the main track as well - press the
+            button twice "Clear2Follow" then "ClearTrack". You shall see message &quot;All
         tracks cleared&quot;. Now you can load the
         track-to-follow, and only the 2nd line will be displayed.
         Note that you can clear the main track only if the
         logging is not active.</font></p>
-        <h2><font size="3" face="Arial">8. Custom button skins
+            <p>
+                <font face="Arial" size="2">If you have problems loading file, an
+                error message will be displayed. If you have a
+                KML or GPX file which can be loaded correctly
+                into e.g. GoogleEarth, but cannot be read by this
+                tool, please send me the file, I will try to fix
+                this.</font></p>
+        <h2><font size="3" face="Arial">11. Custom button skins
         and custom back / fore color </font></h2>
         <p><font size="2" face="Arial">You can set your own
         background / text color and images for all buttons. All
@@ -951,7 +1021,7 @@ content="text/html; charset=iso-8859-1"/>
         a single color. For the font (fore) color, edit
         fore_color.jpg (and place then with
         GpsCycleComputer.exe). </font></p>
-        <h2><font size="3" face="Arial">9. Source code </font></h2>
+        <h2><font size="3" face="Arial">12. Source code </font></h2>
         <p><font size="2" face="Arial">A complete source code (in
         C#) is provided. For GCC file format see file Form1.cs,
         function &quot;LoadGcc&quot; which loads a gcc file.
@@ -981,8 +1051,8 @@ content="text/html; charset=iso-8859-1"/>
         work, then you actually do not need to build DLL, just
         copy it from the installation (after you install the
         application on your phone).</font></p>
-        <h2><font size="3" face="Arial">10. Useful Info</font></h2>
-        <h3><font size="2" face="Arial">10.1 GPS setup</font></h3>
+        <h2><font size="3" face="Arial">13. Useful Info</font></h2>
+        <h3><font size="2" face="Arial">13.1 GPS setup</font></h3>
         <p><font size="2" face="Arial">There are many ways for a
         software to connect to GPS. Usually it is assumed that
         the GPS hardware is connected to a serial port (e.g.
@@ -1058,7 +1128,7 @@ content="text/html; charset=iso-8859-1"/>
         relative to ground (not relative to your car dashboard
         while you are driving off !). On Diamond, in this
         conditions, usually you will get a lock in under 30 sec.</font></p>
-        <h3><font size="2" face="Arial">10.2 Problems with
+        <h3><font size="2" face="Arial">13.2 Problems with
         GoogleMaps installation, if you cannot open KML file</font></h3>
         <p><font size="2" face="Arial">There is a problem with
         some versions of GoogleMaps for Mobile - it cannot open a
@@ -1078,20 +1148,24 @@ content="text/html; charset=iso-8859-1"/>
         (e.g. -KML_FILE) required, i.e. they create incorrect
         association and you still will not be able to open KML
         files.</font></p>
-        <h3><font size="3" face="Arial"> <span style="font-size: 10pt">10.3 Updating from older
+        <h3><font size="3" face="Arial"> <span style="font-size: 10pt">13.3 Updating from older
             versions to version 4.x</span></font></h3>
         <p><font size="2" face="Arial">If you are updating from older versions (3.x) to version
             4.x it is very likely that you must correct your setting for GPS COM-port. Due to
             the introduction of COM0 this setting has changed by one step.<br />
             In most cases you will get a warning that EOF has reached and default settings are
-            used for the remainder. This is absolutely normal due to new options and only for
+            used for the remainder. This is absolutely normal due to new options. Only for
             the new options default settings are used.</font></p>
             <p>
                 <font face="Arial" size="2"></font>&nbsp;</p>
             <h2>
-                <font face="Arial" size="3">11. Contact </font>
+                <font face="Arial" size="3">14. License</font></h2>
+            <p>
+                GpsCycleComputer is Freeware and Open Source. Have fun (and include me in your prayers).</p>
+            <h2>
+                <font face="Arial" size="3">15. Contact </font>
             </h2>
-        <p><font size="2" face="Arial">Programming: AndyZap&nbsp;</font></p>
+        <p><font size="2" face="Arial">Programming: AndyZap, Blaustein&nbsp;</font></p>
         <p><font size="2" face="Arial">Design: expo7. Special
         thanks to AngelGR.</font></p>
         <p><a

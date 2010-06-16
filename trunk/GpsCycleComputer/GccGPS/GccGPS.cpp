@@ -551,7 +551,8 @@ void ParseGPGSV( std::vector<std::string> &words)
 	___max_snr = 0; 
 	//___num_sat = 0;
 	___num_sat = (___num_sat / 100) *100;		//clear only low part
-        ___expected_rec_number = 1;
+	___num_sat += atoi( words[3].c_str());		//number of sats in view
+    ___expected_rec_number = 1;
     }
 
     // make sure that we process records in order, i.e. rec match expected number
@@ -580,8 +581,8 @@ void ParseGPGSV( std::vector<std::string> &words)
             { ___max_snr = snr;  }
 
 	// count non-zero SNR sats
-        if(snr > 0)
-            { ___num_sat++;  }
+        //if(snr > 0)
+        //    { ___num_sat++;  }
     }
 
     ___expected_rec_number++;
@@ -589,15 +590,16 @@ void ParseGPGSV( std::vector<std::string> &words)
 //-----------------------------------------------------------------------------
 int    ___hour = 0, ___min = 0, ___sec = 0;
 double ___latitude = 0.0, ___longitude = 0.0;
-double ___hdop = 0.0; double ___altitude = 0.0;
+double ___hdop = 0.0; double ___altitude = 0.0; double ___geoid_sep = 0.0;
 
 void ParseGPGGA( std::vector<std::string> &words)
 {
-    ___hour = 0; ___min = 0; ___sec = 0;
-    ___latitude = 0.0;
-    ___longitude = 0.0;
-    ___hdop = 0.0;
-    ___altitude = 0.0;
+    ___hour = -1; ___min = 0; ___sec = 0;
+    ___latitude = -32768.0;
+    ___longitude = -32768.0;
+    ___hdop = -32768.0;
+    ___altitude = -32768.0;
+	___geoid_sep = -32768.0;
 
     if(words.size() < 13) { return; }
 
@@ -663,21 +665,20 @@ void ParseGPGGA( std::vector<std::string> &words)
     if(words[pos] != "M")  { ___altitude = 0.0; }
     pos++;
 
-    // word 11 : GEOID
-    double geoid = 0.0;
+    // word 11 : GEOID_SEPARATION
     if(CheckFloatWord(words[pos]))
     {
-        geoid =  atof( words[pos].c_str() );
+        ___geoid_sep =  atof( words[pos].c_str() );
     }
     pos++;
     // word 12 : GEOID
-    if(words[pos] != "M")  { geoid = 0.0; }
+    if(words[pos] != "M")  { ___geoid_sep = 0.0; }
 
     // FIX for some phones which reports altitude in GEOID
-    if((___altitude == 0.0) && (geoid != 0.0))
+    /*if((___altitude == 0.0) && (geoid != 0.0))	// no longer necessary - use WGS84 altitude
     {
         ___altitude = geoid; 
-    }
+    }*/
 }
 //-----------------------------------------------------------------------------
 double ___speed = -1.0;
@@ -685,6 +686,10 @@ double ___heading = -1.0;
 
 void ParseGPRMC( std::vector<std::string> &words)
 {
+	___hour = -1; ___min = 0; ___sec = 0;
+    ___latitude = -32768.0;
+    ___longitude = -32768.0;
+
     ___speed = -1.0;
     ___heading = -1.0;
 
@@ -692,6 +697,39 @@ void ParseGPRMC( std::vector<std::string> &words)
 
     // word counter
     int pos = 1;
+    // word 1 - UTC ------------------------------------------        read Time Lat Lon also from GPRMC because some (bluetooth)GPS send GPGGA only 4s but GPRMC every sec.
+    if(CheckFloatWord(words[pos]))
+    {
+        ___hour =  atoi( words[pos].substr(0, 2).c_str() );
+        ___min  =  atoi( words[pos].substr(2, 2).c_str() );
+        ___sec  =  atoi( words[pos].substr(4, 2).c_str() );
+    }
+
+	// word 3 : latitude  ------------------------------------
+	pos = 3;
+    if(CheckFloatWord(words[pos]))
+    {
+        ___latitude =  atoi( words[pos].substr(0, 2).c_str() ) +
+                       atof( words[pos].substr(2, 10000).c_str() )/60.;
+    }
+    pos++;
+
+	// word 4 : N or S for the hemisphere
+    if(words[pos] == "S")  { ___latitude *= -1.0; }
+    pos++;
+
+    // word 5 : longitude
+    if(CheckFloatWord(words[pos]))
+    {
+        ___longitude =  atoi( words[pos].substr(0, 3).c_str() ) +
+                        atof( words[pos].substr(3, 10000).c_str() )/60.;
+    }
+    pos++;
+
+    // word 6 : E or W
+    if(words[pos] == "W")  { ___longitude *= -1.0; }
+    pos++;
+
 
     // word 7 - Speed in knots ------------------------------------------
     pos = 7;
@@ -762,7 +800,7 @@ else if(com_port == 14) __hGpsPort = CreateFile(L"COM14:",GENERIC_READ|GENERIC_W
             return -2;
             break;
           default:
-            return 0;
+            return -3;
             break;
         }
     }
@@ -772,30 +810,30 @@ else if(com_port == 14) __hGpsPort = CreateFile(L"COM14:",GENERIC_READ|GENERIC_W
 		// COM port setting
 		DCB dcb;
 
-		if (GetCommState(__hGpsPort,&dcb) == 0)
-			{ return 0; }
+		if (GetCommState(__hGpsPort,&dcb))	//fails on some devices with internal GPS - in these cases it's not necessarry anyway
+		{
+			// Set baud rate and other params
+			dcb.BaudRate = (DWORD)rate;
+			dcb.Parity   = NOPARITY;
+			dcb.StopBits = ONESTOPBIT;
+			dcb.ByteSize = 8;
 
-		// Set baud rate and other params
-		dcb.BaudRate = (DWORD)rate;
-		dcb.Parity   = NOPARITY;
-		dcb.StopBits = ONESTOPBIT;
-		dcb.ByteSize = 8;
+			// use defaults for other fields (found on web)
+			dcb.fBinary         = TRUE;	
+			dcb.fParity         = FALSE;
+			dcb.fOutxCtsFlow    = FALSE;	      
+			dcb.fOutxDsrFlow    = FALSE;	      
+			dcb.fDtrControl     = DTR_CONTROL_ENABLE; 
+			dcb.fDsrSensitivity = FALSE;	      
+			dcb.fOutX           = FALSE;	      
+			dcb.fInX            = FALSE;	      
+			dcb.fNull           = FALSE;	      
+			dcb.fRtsControl     = RTS_CONTROL_ENABLE; 
+			dcb.fAbortOnError   = FALSE;	      
 
-		// use defaults for other fields (found on web)
-		dcb.fBinary         = TRUE;	
-		dcb.fParity         = FALSE;
-		dcb.fOutxCtsFlow    = FALSE;	      
-		dcb.fOutxDsrFlow    = FALSE;	      
-		dcb.fDtrControl     = DTR_CONTROL_ENABLE; 
-		dcb.fDsrSensitivity = FALSE;	      
-		dcb.fOutX           = FALSE;	      
-		dcb.fInX            = FALSE;	      
-		dcb.fNull           = FALSE;	      
-		dcb.fRtsControl     = RTS_CONTROL_ENABLE; 
-		dcb.fAbortOnError   = FALSE;	      
-
-		if (SetCommState(__hGpsPort,&dcb) == 0)
-			{ return 0; }
+			if (SetCommState(__hGpsPort,&dcb) == 0)
+				{ return -5; }
+		}
 
 		// set mask which events to monitor 
 		SetCommMask(__hGpsPort, EV_RXCHAR);
@@ -810,11 +848,11 @@ else if(com_port == 14) __hGpsPort = CreateFile(L"COM14:",GENERIC_READ|GENERIC_W
 		COMMTIMEOUTS CommTimeOuts;
 		CommTimeOuts.ReadIntervalTimeout            = 10;
 		CommTimeOuts.ReadTotalTimeoutMultiplier     = 0;
-		CommTimeOuts.ReadTotalTimeoutConstant       = 200;
+		CommTimeOuts.ReadTotalTimeoutConstant       = 300;
 		CommTimeOuts.WriteTotalTimeoutMultiplier    = 0;
 		CommTimeOuts.WriteTotalTimeoutConstant      = 10;
 		if (SetCommTimeouts( __hGpsPort, &CommTimeOuts ) == 0)
-			{ return 0; }
+			{ return -6; }
 
 		DWORD dwErrors;
 		COMSTAT ComStat;
@@ -861,7 +899,7 @@ extern "C" __declspec(dllexport) int GccIsGpsOpened()
 extern "C" __declspec(dllexport) int GccReadGps(int &hour, int &min, int &sec,                  // from GPGGA
                                                 double &latitude, double &longitude,
                                                 int &num_sat, double &hdop, double &altitude,
-                                                int &max_snr,                                   // from GPGSV
+                                                double &geoid_sep, int &max_snr,                                   // from GPGSV
                                                 double &speed, double &heading)                 // from GPRMC
 {
     if(__read_lock) { return 0; }
@@ -1013,7 +1051,7 @@ extern "C" __declspec(dllexport) int GccReadGps(int &hour, int &min, int &sec,  
 
                 hour     = ___hour;     min       = ___min;       sec = ___sec;
                 latitude = ___latitude; longitude = ___longitude;
-                hdop      = ___hdop;    altitude = ___altitude;
+                hdop      = ___hdop;    altitude = ___altitude;    geoid_sep = ___geoid_sep;
             }
             else if(words[0] == "$GPRMC")
             {
@@ -1021,6 +1059,8 @@ extern "C" __declspec(dllexport) int GccReadGps(int &hour, int &min, int &sec,  
 
                 return_status |= READ_HAS_GPRMC;
 
+				hour     = ___hour;     min       = ___min;       sec = ___sec;
+				latitude = ___latitude; longitude = ___longitude;
                 speed = ___speed; heading = ___heading;
             }
         }

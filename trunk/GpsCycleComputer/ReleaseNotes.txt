@@ -1,0 +1,25 @@
+GPS Cycle Computer GCC
+
+***** version 4.3 *******
+new features:
+- Menu page
+ - exit
+ - continue track
+ - recall settings
+ - input Lat Lon
+ - Lap function
+ - Graph versus distance (not only time)
+
+- modified autoscale algorithm to have osm zoom levels < 18
+- modified satellites in view
+- modified altitude reading, should now work better with windows GPS driver; additional option WGS84 altitude
+- corrected: GPX upload to crossingways
+- GPS driver enhanced
+- OSM style Map mode now supports besides .png other file types like .jpg .bmp .gif .exif .tiff
+- minor improvements and bug fixes
+
+
+known issues:
+- elevation gain (altitude gain) is showing too high value, if you move slowly or don't move
+
+

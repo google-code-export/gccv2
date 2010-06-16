@@ -100,14 +100,14 @@ namespace GpsUtils
                 {
                     int hour; int min; int sec;
                     double latitude;  double longitude;
-                    double hdop;      double altitude;
+                    double hdop; double altitude; double geoid_sep;
                     int    max_snr;   int    num_sat;
                     double speed;     double heading;
 
                     int status = GccReadGps(out hour, out min, out sec,
                                             out latitude, out longitude,
                                             out num_sat, out hdop, out altitude,
-                                            out max_snr,
+                                            out geoid_sep, out max_snr,
                                             out speed, out heading);
 
                     /*  defines from GccGPS
@@ -140,8 +140,9 @@ namespace GpsUtils
 
                             if(num_sat != 0)
                             {
-                                gpsPosition.dwSatellitesInView = num_sat;
-                                gpsPosition.dwValidFields |= 0x00002000;
+                                gpsPosition.dwSatellitesInView = num_sat % 100;
+                                gpsPosition.dwSatelliteCount = num_sat / 100;
+                                gpsPosition.dwValidFields |= 0x00002800;
                             }
                         }
 
@@ -149,7 +150,7 @@ namespace GpsUtils
                         if((status & 0x08) != 0)
                         {
                             // use dwFlags to fill today time (do not want to fill stUTCTime!)
-                            if( (hour != 0) || (min != 0) || (sec != 0) )
+                            if( hour != -1)
                             {
                                 // encode in 3 lower bytes
                                 gpsPosition.dwFlags = 0;
@@ -160,7 +161,7 @@ namespace GpsUtils
                                 gpsPosition.dwValidFields |= 0x00000001;
                             }
 
-                            if( (latitude != 0.0) && (longitude != 0.0) )
+                            if( (latitude != Int16.MinValue) && (longitude != Int16.MinValue) )
                             {
                                 gpsPosition.dblLatitude = latitude;
                                 gpsPosition.dblLongitude = longitude;
@@ -168,22 +169,46 @@ namespace GpsUtils
                                 gpsPosition.dwValidFields |= 0x00000004;
                             }
 
-                            if(hdop != 0.0)
+                            if(hdop != Int16.MinValue)
                             {
                                 gpsPosition.flHorizontalDilutionOfPrecision = (float) hdop;
                                 gpsPosition.dwValidFields |= 0x00000200;
                             }
 
-                            if(altitude != 0.0)
+                            if(altitude != Int16.MinValue)
                             {
-                                gpsPosition.flAltitudeWRTEllipsoid = (float) altitude;
+                                gpsPosition.flAltitudeWRTSeaLevel = (float) altitude;
+                                gpsPosition.dwValidFields |= 0x00000040;
+                            }
+                            if (altitude != Int16.MinValue && geoid_sep != Int16.MinValue)
+                            {
+                                gpsPosition.flAltitudeWRTEllipsoid = (float)(altitude + geoid_sep);
                                 gpsPosition.dwValidFields |= 0x00000080;
                             }
+
                         }
 
                         // GPRMC is OK
                         if((status & 0x10) != 0)
                         {
+                            if (hour != -1)
+                            {
+                                // encode in 3 lower bytes
+                                gpsPosition.dwFlags = 0;
+                                gpsPosition.dwFlags |= (sec & 0xFF);
+                                gpsPosition.dwFlags |= ((min & 0xFF) << 8);
+                                gpsPosition.dwFlags |= ((hour & 0xFF) << 16);
+
+                                gpsPosition.dwValidFields |= 0x00000001;
+                            }
+                            if ((latitude != Int16.MinValue) && (longitude != Int16.MinValue))
+                            {
+                                gpsPosition.dblLatitude = latitude;
+                                gpsPosition.dblLongitude = longitude;
+                                gpsPosition.dwValidFields |= 0x00000002;
+                                gpsPosition.dwValidFields |= 0x00000004;
+                            }
+
                             if(speed != -1.0)
                             {
                                 gpsPosition.flSpeed = (float) speed;
@@ -260,7 +285,7 @@ namespace GpsUtils
         static extern int GccReadGps(out int hour, out int min, out int sec,
                                      out double latitude, out double longitude,
                                      out int num_sat, out double hdop, out double altitude,
-                                     out int max_snr,
+                                     out double geoid_sep, out int max_snr,
                                      out double speed, out double heading);
 
         [DllImport("GccGPS.dll")]
