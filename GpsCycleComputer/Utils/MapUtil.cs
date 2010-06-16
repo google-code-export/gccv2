@@ -75,11 +75,12 @@ namespace GpsUtils
         // vars to work with OpenStreetMap tiles
         public int OsmTilesWebDownload = 0;  // 0 - web download "off", or the server index from a predefined server list
         private bool OsmTilesMode = false;
-        private const int OsmNumZoomLevels = 19;    //19  is too high - most servers do not respond
+        private const int OsmNumZoomLevels = 19;    //19  is too high - most servers do not respond on zoom level 18
         private bool[] OsmZoomAvailable = new bool[OsmNumZoomLevels]; // if a directories for this zoom level found (true/false)
         private const int OsmTmpReadArraySize = 4096;
         private byte[] OsmTmpReadArray = new byte[OsmTmpReadArraySize];
         private string OsmCustomServer = "http://";
+        private string OsmFileExtension = "";
 
         // map error codes
         private const int __MapNoError = 0;
@@ -116,6 +117,11 @@ namespace GpsUtils
                 int zoom_level = Convert.ToInt32(dirz_name);
                 OsmZoomAvailable[zoom_level] = true;
             }
+
+            // detect file extension .png or .jpg
+            string[] x_dirs = Directory.GetDirectories(zoom_dirs[0]);
+            string[] y_names = Directory.GetFiles(x_dirs[0]);
+            OsmFileExtension = Path.GetExtension(y_names[0]);
 
             return true;
         }
@@ -286,7 +292,7 @@ User-defined server (read server name from osm_server.txt)
                     int center_x = xtile_min + (xtile_max - xtile_min) / 2;
                     int center_y = ytile_min + (ytile_max - ytile_min) / 2;
                     string center_file_name = MapsFilesDirectory + "\\" + iz.ToString() +
-                                              "\\" + center_x.ToString() + "\\" + center_y.ToString() + ".png";
+                                              "\\" + center_x.ToString() + "\\" + center_y.ToString() + OsmFileExtension;
 
                     if(File.Exists(center_file_name) == false)  { continue; }
                 }
@@ -296,7 +302,7 @@ User-defined server (read server name from osm_server.txt)
                     for (int iy = ytile_min; iy <= ytile_max; iy++)
                     {
                         Maps[NumMaps].fname = MapsFilesDirectory + "\\" + iz.ToString() +
-                                              "\\" + ix.ToString() + "\\" + iy.ToString() + ".png";
+                                              "\\" + ix.ToString() + "\\" + iy.ToString() + OsmFileExtension;
 
                         Maps[NumMaps].lon1 = OsmXTile2Long(n, ix);
                         Maps[NumMaps].lon2 = OsmXTile2Long(n, ix+1);
@@ -1361,16 +1367,6 @@ User-defined server (read server name from osm_server.txt)
         }
         private void SetAutoScale(float[] PlotLong, float[] PlotLat, int PlotSize, bool lifeview)
         {
-            // compute data limits
-            DataLongMin = 1.0E9; DataLongMax = -1.0E9; DataLatMin = 1.0E9; DataLatMax = -1.0E9;
-            for (int i = 0; i < PlotSize; i++)
-            {
-                if (PlotLong[i] < DataLongMin) { DataLongMin = PlotLong[i]; }
-                if (PlotLong[i] > DataLongMax) { DataLongMax = PlotLong[i]; }
-                if (PlotLat[i] < DataLatMin) { DataLatMin = PlotLat[i]; }
-                if (PlotLat[i] > DataLatMax) { DataLatMax = PlotLat[i]; }
-            }
-
             // compute difference in Lat/Long scale
             utmUtil.setReferencePoint(PlotLat[PlotSize - 1], PlotLong[PlotSize - 1]);
 
@@ -1379,16 +1375,27 @@ User-defined server (read server name from osm_server.txt)
             Meter2Long = Math.Abs(Meter2Long - PlotLong[PlotSize - 1]) / 100.0;
             RatioMeterLatLong = Meter2Long / Meter2Lat;
 
-
             // during liveview (logging), set a fixed scale with current point in the middle
-            if (lifeview && (PlotSize > 0))
+            if (lifeview || (PlotSize <= 1))
             {
                 double last_x = PlotLong[PlotSize - 1];
                 double last_y = PlotLat[PlotSize - 1];
-                DataLongMin = last_x - Meter2Long*100.0;
+                DataLongMin = last_x - Meter2Long * 100.0;
                 DataLongMax = last_x + Meter2Long * 100.0;
                 DataLatMin = last_y - Meter2Lat * 100.0;
                 DataLatMax = last_y + Meter2Lat * 100.0;
+            }
+            else
+            {
+                // compute data limits
+                DataLongMin = 1.0E9; DataLongMax = -1.0E9; DataLatMin = 1.0E9; DataLatMax = -1.0E9;
+                for (int i = 0; i < PlotSize; i++)
+                {
+                    if (PlotLong[i] < DataLongMin) { DataLongMin = PlotLong[i]; }
+                    if (PlotLong[i] > DataLongMax) { DataLongMax = PlotLong[i]; }
+                    if (PlotLat[i] < DataLatMin) { DataLatMin = PlotLat[i]; }
+                    if (PlotLat[i] > DataLatMax) { DataLatMax = PlotLat[i]; }
+                }
             }
 
             // set plot scale, must be equal for both axis to plot map

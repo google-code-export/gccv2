@@ -34,6 +34,6 @@ extern "C" __declspec(dllexport) int GccIsGpsOpened();
 extern "C" __declspec(dllexport) int GccReadGps(int &hour, int &min, int &sec,                  // from GPGGA
                                                 double &latitude, double &longitude,
                                                 int &num_sat, double &hdop, double &altitude,
-                                                int &max_snr,                                   // from GPGSV
+                                                double &geoid_sep, int &max_snr,                                   // from GPGSV
                                                 double &speed, double &heading);
 

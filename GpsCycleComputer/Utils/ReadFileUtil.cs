@@ -18,7 +18,7 @@ namespace GpsUtils
 
         // read GCC file
         public static bool LoadGcc(string filename, int vector_size,          // allocated vector size (for dataX/Y/T)
-                                   ref float[] dataLat, ref float[] dataLong, ref  UInt16[] dataT, out int data_size)  // x and y realive to origin, in metres, t in sec ralative to start
+                                   ref float[] dataLat, ref float[] dataLong, ref  Int32[] dataT, out int data_size)  // x and y realive to origin, in metres, t in sec ralative to start
         {
             int Counter = 0;
             double OriginShiftX = 0.0; 
@@ -53,7 +53,8 @@ namespace GpsUtils
                     double data_long = rd.ReadDouble();
                     utmUtil.setReferencePoint(data_lat, data_long);
 
-                    Int16 x_int = 0; Int16 y_int = 0; Int16 z_int = 0; UInt16 v_int = 0; UInt16 t_int = 0;
+                    Int16 x_int = 0; Int16 y_int = 0; Int16 z_int = 0; Int16 s_int = 0;
+                    UInt16 t_16 = 0; UInt16 t_16last = 0; Int32 t_high = 0;
 
                     while (rd.PeekChar() != -1)
                     {
@@ -63,8 +64,8 @@ namespace GpsUtils
                             if (rd.PeekChar() != -1) { x_int = rd.ReadInt16(); } else { break; }
                             if (rd.PeekChar() != -1) { y_int = rd.ReadInt16(); } else { break; }
                             if (rd.PeekChar() != -1) { z_int = rd.ReadInt16(); } else { break; }
-                            if (rd.PeekChar() != -1) { v_int = rd.ReadUInt16(); } else { break; }
-                            if (rd.PeekChar() != -1) { t_int = rd.ReadUInt16(); } else { break; }
+                            if (rd.PeekChar() != -1) { s_int = rd.ReadInt16(); } else { break; }
+                            if (rd.PeekChar() != -1) { t_16 = rd.ReadUInt16(); } else { break; }
                         }
                         catch (Exception e) 
                         {
@@ -74,21 +75,21 @@ namespace GpsUtils
 
                         // check if this is a special record
                         // battery: z_int = 1
-                        if ((v_int == 0xFFFF) && (t_int == 0xFFFF) && (z_int == 1))
+                        if ((s_int == -1) && (t_16 == 0xFFFF) && (z_int == 1))
                         {
                         }
                         // origin shift: z_int = 0
-                        else if ((v_int == 0xFFFF) && (t_int == 0xFFFF) && (z_int == 0))
+                        else if ((s_int == -1) && (t_16 == 0xFFFF) && (z_int == 0))
                         {
                             OriginShiftX += x_int;
                             OriginShiftY += y_int;
                         }
                         // which GPS options were selected: z_int = 2
-                        else if ((v_int == 0xFFFF) && (t_int == 0xFFFF) && (z_int == 2))
+                        else if ((s_int == -1) && (t_16 == 0xFFFF) && (z_int == 2))
                         {
                         }
                         // checkpoint
-                        else if ((v_int == 0xFFFF) && (t_int == 0xFFFF) && (z_int == 3))
+                        else if ((s_int == -1) && (t_16 == 0xFFFF) && (z_int == 3))
                         {
                             // read checkpoint name, if not blank
                             for (int i = 0; i < x_int; i++)
@@ -121,7 +122,10 @@ namespace GpsUtils
 
                             dataLat[Counter] = (float)out_lat;
                             dataLong[Counter] = (float)out_long;
-                            dataT[Counter] = t_int;
+                            if (t_16 < t_16last)        // handle overflow
+                                t_high += 65536;
+                            t_16last = t_16;
+                            dataT[Counter] = t_high + t_16;
                             Counter++;
 
                             try 
@@ -181,7 +185,7 @@ namespace GpsUtils
 
         // read KML file
         public static bool LoadKml(string filename, int vector_size,          // allocated vector size (for dataX/Y/T)
-                                   ref float[] dataLat, ref float[] dataLong, ref  UInt16[] dataT, out int data_size)  // x and y realive to origin, in metres, t in sec ralative to start
+                                   ref float[] dataLat, ref float[] dataLong, ref  Int32[] dataT, out int data_size)  // x and y realive to origin, in metres, t in sec ralative to start
         {
             int Counter = 0;
             bool Status = false;
@@ -276,7 +280,7 @@ namespace GpsUtils
 
         // read GPX file
         public static bool LoadGpx(string filename, int vector_size,          // allocated vector size (for dataX/Y/T)
-                                   ref float[] dataLat, ref float[] dataLong, ref  UInt16[] dataT, out int data_size)  // x and y realive to origin, in metres, t in sec ralative to start
+                                   ref float[] dataLat, ref float[] dataLong, ref  Int32[] dataT, out int data_size)  // x and y realive to origin, in metres, t in sec ralative to start
         {
             int Counter = 0;
             bool Status = false;
@@ -417,7 +421,7 @@ namespace GpsUtils
 
                         TimeSpan run_time = tm - StartTime;
                         double double_total_sec = run_time.TotalSeconds; if (double_total_sec < 0.0) { double_total_sec = 0.0; }
-                        dataT[Counter] = (UInt16)double_total_sec; 
+                        dataT[Counter] = (Int32)double_total_sec; 
 
                         Counter++;
 

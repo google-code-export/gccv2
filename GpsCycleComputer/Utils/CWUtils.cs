@@ -184,6 +184,7 @@ namespace LiveTracker
         {
             string url = server + "/services/livetracking.asmx/UploadGPX";
             string payload = "";
+            payload += "clientInformation=" + UrlEncode("GpsCycleComputer V4") + "&";
             payload += "username=" + UrlEncode(username) + "&";
             payload += "password=" + passwordhash + "&";
             payload += "trackname=" + UrlEncode(trackname) + "&";
@@ -222,7 +223,7 @@ namespace LiveTracker
         {
             string url = server + "/services/livetracking.asmx/CurrentPosition"; 
             string payload= "";
-            payload+="username="+ UrlEncode(username) + "&";
+            payload += "username=" + UrlEncode(username) + "&";
             payload += "password=" + passwordhash + "&";
             payload += "lat=" + lat.ToString(CultureInfo.InvariantCulture) + "&";
             payload += "lon=" + lon.ToString(CultureInfo.InvariantCulture) + "&";

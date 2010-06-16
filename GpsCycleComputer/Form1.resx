@@ -124,7 +124,10 @@
     <value>117, 14</value>
   </metadata>
   <metadata name="inputPanel.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>248, 16</value>
+    <value>351, 14</value>
+  </metadata>
+  <metadata name="timerButton.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>241, 14</value>
   </metadata>
   <metadata name="$this.FormFactorShadowProperty" xml:space="preserve">
     <value>Pocket_PC_Phone_VGA</value>
