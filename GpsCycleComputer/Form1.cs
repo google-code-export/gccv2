@@ -406,8 +406,11 @@ namespace GpsCycleComputer
                             + " beta " + Assembly.GetExecutingAssembly().GetName().Version.Build.ToString()
 #endif
                             ;
-            
             labelRevision.Text = "programming/idea : AndyZap\ndesign : expo7\nspecial thanks to AngelGR\n\nversion " + Revision;
+
+            CurrentDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().GetModules()[0].FullyQualifiedName);
+            if (CurrentDirectory == "\\") { CurrentDirectory = ""; }
+
             ApplyCustomBackground();        //110ms
             CreateCustomControls();         //3350ms
 
@@ -1858,10 +1861,6 @@ namespace GpsCycleComputer
         private void Form1_Load(object sender, System.EventArgs e)
         {
             // load settings -----------------
-            CurrentDirectory =
-            Path.GetDirectoryName(Assembly.GetExecutingAssembly().GetModules()[0].FullyQualifiedName);
-            if (CurrentDirectory == "\\") { CurrentDirectory = ""; }
-
             IoFilesDirectory = CurrentDirectory + "\\tracks";
             MapsFilesDirectory = CurrentDirectory + "\\maps";
 
