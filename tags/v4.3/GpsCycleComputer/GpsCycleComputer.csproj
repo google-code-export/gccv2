@@ -1,0 +1,185 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{3EE8F42C-9902-47AF-B186-D159E90124F2}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>GpsSample</RootNamespace>
+    <AssemblyName>GpsCycleComputer</AssemblyName>
+    <ProjectTypeGuids>{4D628B5B-2FBC-4AA6-8C16-197242AEB884};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <PlatformFamilyName>PocketPC</PlatformFamilyName>
+    <PlatformID>4118C335-430C-497f-BE48-11C3316B135E</PlatformID>
+    <OSVersion>5.02</OSVersion>
+    <DeployDirSuffix>
+    </DeployDirSuffix>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <FormFactorID>
+    </FormFactorID>
+    <DeployDirPrefix>\</DeployDirPrefix>
+    <ApplicationIcon>Properties\icon2.ico</ApplicationIcon>
+    <SignAssembly>false</SignAssembly>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+    <StartupObject>GpsCycleComputer.Form1</StartupObject>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;$(PlatformFamilyName)</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <FileAlignment>512</FileAlignment>
+    <WarningLevel>4</WarningLevel>
+    <GenerateSerializationAssemblies>off</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;$(PlatformFamilyName)</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <FileAlignment>512</FileAlignment>
+    <WarningLevel>4</WarningLevel>
+    <GenerateSerializationAssemblies>off</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.WindowsCE.Forms" />
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utils\CWUtils.cs" />
+    <Compile Include="Form1.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="GPS.cs" />
+    <Compile Include="GpsPosition.cs" />
+    <Compile Include="Utils\Logger.cs" />
+    <Compile Include="Utils\MapUtil.cs" />
+    <Compile Include="Utils\ReadFileUtil.cs" />
+    <Compile Include="Utils\Utils.cs" />
+    <Compile Include="Utils\UtmUtil.cs" />
+    <Compile Include="Web References\CW\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="Form1.resx">
+      <DependentUpon>Form1.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Graphics\about.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Graphics\bklight.jpg" />
+    <EmbeddedResource Include="Graphics\bklight_p.jpg" />
+    <EmbeddedResource Include="Graphics\cancel.jpg" />
+    <EmbeddedResource Include="Graphics\cancel_p.jpg" />
+    <EmbeddedResource Include="Graphics\down.jpg" />
+    <EmbeddedResource Include="Graphics\down_p.jpg" />
+    <EmbeddedResource Include="Graphics\edit.jpg" />
+    <EmbeddedResource Include="Graphics\edit_p.jpg" />
+    <EmbeddedResource Include="Graphics\gpx.jpg" />
+    <EmbeddedResource Include="Graphics\gpx_p.jpg" />
+    <EmbeddedResource Include="Graphics\graph.jpg" />
+    <EmbeddedResource Include="Graphics\graph_p.jpg" />
+    <EmbeddedResource Include="Graphics\blank.jpg" />
+    <EmbeddedResource Include="Graphics\CW_logo.png" />
+    <EmbeddedResource Include="Graphics\blank_p.jpg" />
+    <EmbeddedResource Include="Graphics\gps_off.jpg" />
+    <EmbeddedResource Include="Graphics\gps_off_p.jpg" />
+    <EmbeddedResource Include="Graphics\gps_on.jpg" />
+    <EmbeddedResource Include="Graphics\gps_on_p.jpg" />
+    <EmbeddedResource Include="Graphics\checkpoint.jpg" />
+    <EmbeddedResource Include="Graphics\checkpoint_p.jpg" />
+    <EmbeddedResource Include="Graphics\continue.jpg" />
+    <EmbeddedResource Include="Graphics\continue_p.jpg" />
+    <EmbeddedResource Include="Graphics\exit.jpg" />
+    <EmbeddedResource Include="Graphics\exit_p.jpg" />
+    <EmbeddedResource Include="Graphics\help.jpg" />
+    <EmbeddedResource Include="Graphics\help_p.jpg" />
+    <EmbeddedResource Include="Graphics\menu.jpg" />
+    <EmbeddedResource Include="Graphics\menu_p.jpg" />
+    <EmbeddedResource Include="Graphics\lap.jpg" />
+    <EmbeddedResource Include="Graphics\lap_p.jpg" />
+    <Content Include="Properties\icon2.ico" />
+    <EmbeddedResource Include="Graphics\pause_mode.jpg" />
+    <EmbeddedResource Include="Graphics\pause_p.jpg" />
+    <EmbeddedResource Include="Graphics\up.jpg" />
+    <EmbeddedResource Include="Graphics\up_p.jpg" />
+    <EmbeddedResource Include="Graphics\kml.jpg" />
+    <EmbeddedResource Include="Graphics\kml_p.jpg" />
+    <EmbeddedResource Include="Graphics\left.jpg" />
+    <EmbeddedResource Include="Graphics\left_p.jpg" />
+    <EmbeddedResource Include="Graphics\main.jpg" />
+    <EmbeddedResource Include="Graphics\main_p.jpg" />
+    <EmbeddedResource Include="Graphics\map.jpg" />
+    <EmbeddedResource Include="Graphics\map_p.jpg" />
+    <EmbeddedResource Include="Graphics\open.jpg" />
+    <EmbeddedResource Include="Graphics\open_p.jpg" />
+    <EmbeddedResource Include="Graphics\options.jpg" />
+    <EmbeddedResource Include="Graphics\options_p.jpg" />
+    <EmbeddedResource Include="Graphics\pause.jpg" />
+    <EmbeddedResource Include="Graphics\pause_mode_p.jpg" />
+    <EmbeddedResource Include="Graphics\right.jpg" />
+    <EmbeddedResource Include="Graphics\right_p.jpg" />
+    <EmbeddedResource Include="Graphics\start.jpg" />
+    <EmbeddedResource Include="Graphics\start_p.jpg" />
+    <EmbeddedResource Include="Graphics\stop.jpg" />
+    <EmbeddedResource Include="Graphics\stop_p.jpg" />
+    <EmbeddedResource Include="Graphics\zoom_in.jpg" />
+    <EmbeddedResource Include="Graphics\zoom_in_p.jpg" />
+    <EmbeddedResource Include="Graphics\zoom_out.jpg" />
+    <EmbeddedResource Include="Graphics\zoom_out_p.jpg" />
+    <None Include="ClassDiagram1.cd" />
+    <None Include="Web References\CW\livetracking.disco" />
+    <None Include="Web References\CW\livetracking.wsdl" />
+    <None Include="Web References\CW\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <WebReferences Include="Web References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <WebReferenceUrl Include="http://www.crossingways.com/services/livetracking.asmx">
+      <UrlBehavior>Static</UrlBehavior>
+      <RelPath>Web References\CW\</RelPath>
+      <UpdateFromURL>http://www.crossingways.com/services/livetracking.asmx</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>
+      </CachedAppSettingsObjectName>
+      <CachedSettingsPropName>
+      </CachedSettingsPropName>
+    </WebReferenceUrl>
+  </ItemGroup>
+  <Import Condition="'$(TargetFrameworkVersion)' == 'v1.0'" Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.v1.targets" />
+  <Import Condition="'$(TargetFrameworkVersion)' == 'v2.0'" Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}">
+        <HostingProcess disable="1" />
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <PropertyGroup>
+    <PostBuildEvent>C:\WINDOWS\system32\xcopy.exe /Y "$(TargetPath)" "C:\Dokumente und Einstellungen\Klaus\Eigene Dateien\Visual Studio 2005\EmulatorShare"</PostBuildEvent>
+  </PropertyGroup>
+</Project>

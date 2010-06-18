@@ -1,0 +1,6 @@
+; GccGPS.def : Declares the module parameters for the DLL.
+
+LIBRARY      "GccGPS"
+
+EXPORTS
+    ; Explicit exports can go here
