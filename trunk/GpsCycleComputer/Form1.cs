@@ -5,17 +5,14 @@ using System;
 using System.Runtime.InteropServices;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Collections;
 using System.Windows.Forms;
-using System.Data;
 using System.IO;
 using System.Text;
 using System.Reflection;
+using GpsSample.FileSupport;
 using Microsoft.Win32;
 using GpsUtils;
 using LiveTracker;
-using System.Diagnostics;
-
 
 
 /* From WIKI:
@@ -5346,12 +5343,19 @@ namespace GpsCycleComputer
                 bool loaded_ok = true;
                 if (file_found)
                 {
-                    if (FileOpenMode == FileOpenMode_2ndGcc)
-                        { loaded_ok = ReadFileUtil.LoadGcc(file_name, PlotDataSize, ref Plot2ndLat, ref Plot2ndLong, ref Plot2ndT, out Counter2nd); }
-                    else if (FileOpenMode == FileOpenMode_2ndKml)
-                        { loaded_ok = ReadFileUtil.LoadKml(file_name, PlotDataSize, ref Plot2ndLat, ref Plot2ndLong, ref Plot2ndT, out Counter2nd); }
-                    else if (FileOpenMode == FileOpenMode_2ndGpx)
-                        { loaded_ok = ReadFileUtil.LoadGpx(file_name, PlotDataSize, ref Plot2ndLat, ref Plot2ndLong, ref Plot2ndT, out Counter2nd); }
+                    IFileSupport fs = null;
+                    switch (FileOpenMode)
+                    {
+                        case FileOpenMode_2ndGcc:
+                            fs = new GccSupport(); break;
+                        case FileOpenMode_2ndGpx:
+                            fs = new GpxSupport(); break;
+                        case FileOpenMode_2ndKml:
+                            fs = new KmlSupport(); break;
+                    }
+
+                    if(fs != null)
+                        loaded_ok = fs.Load(file_name, PlotDataSize, ref Plot2ndLat, ref Plot2ndLong, ref Plot2ndT, out Counter2nd);
                 }
 
                 if (loaded_ok)  // loaded OK
