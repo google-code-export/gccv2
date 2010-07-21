@@ -378,7 +378,7 @@ namespace GpsCycleComputer
             // Required for Windows Form Designer support
             
             InitializeComponent();      //3162ms
-            this.Controls.Add(this.mPage);
+            Controls.Add(mPage);
 
             // set defaults (shall load from file later)
             comboGpsPoll.SelectedIndex = 0;
@@ -580,62 +580,62 @@ namespace GpsCycleComputer
             // bottom menu --------------
 
             // help
-            buttonHelp.Parent = this.tabPageAbout;
+            buttonHelp.Parent = tabPageAbout;
             buttonHelp.Bounds = new Rectangle(5, 410, 474, 50);
             buttonHelp.Text = "View readme...";
-            buttonHelp.Click += new System.EventHandler(this.buttonHelp_Click);
-            buttonHelp.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular);
+            buttonHelp.Click += buttonHelp_Click;
+            buttonHelp.Font = new Font("Tahoma", 9F, FontStyle.Regular);
             buttonHelp.align = 2;
 
             // button to show/hide view selector
-            buttonShowViewSelector.Parent = this.tabPageOptions;
+            buttonShowViewSelector.Parent = tabPageOptions;
             buttonShowViewSelector.Bounds = new Rectangle(5, 400, 474, 50);
             buttonShowViewSelector.Text = "Select option pages to scroll ...";
-            buttonShowViewSelector.Click += new System.EventHandler(this.buttonShowViewOpt_Click);
-            buttonShowViewSelector.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular);
+            buttonShowViewSelector.Click += buttonShowViewOpt_Click;
+            buttonShowViewSelector.Font = new Font("Tahoma", 9F, FontStyle.Regular);
             buttonShowViewSelector.align = 3;
 
             // button to set maps location
-            buttonMapsLocation.Parent = this.tabPageOptions;
+            buttonMapsLocation.Parent = tabPageOptions;
             buttonMapsLocation.Bounds = new Rectangle(5, 0, 474, 80);
             buttonMapsLocation.Text = "Set maps files location ...";
-            buttonMapsLocation.Click += new System.EventHandler(this.buttonMapsLocation_Click);
-            buttonMapsLocation.Font = new System.Drawing.Font("Tahoma", 10F, System.Drawing.FontStyle.Regular);
+            buttonMapsLocation.Click += buttonMapsLocation_Click;
+            buttonMapsLocation.Font = new Font("Tahoma", 10F, FontStyle.Regular);
             buttonMapsLocation.align = 1;
 
             // button to set i/o location
-            buttonIoLocation.Parent = this.tabPageOptions;
+            buttonIoLocation.Parent = tabPageOptions;
             buttonIoLocation.Bounds = new Rectangle(5, 80, 474, 80);
             buttonIoLocation.Text = "Set input/output files location ...";
-            buttonIoLocation.Click += new System.EventHandler(this.buttonFileLocation_Click);
-            buttonIoLocation.Font = new System.Drawing.Font("Tahoma", 10F, System.Drawing.FontStyle.Regular);
+            buttonIoLocation.Click += buttonFileLocation_Click;
+            buttonIoLocation.Font = new Font("Tahoma", 10F, FontStyle.Regular);
             buttonIoLocation.align = 1;
 
             // buttons on CW page
-            buttonCWShowKeyboard.Parent = this.tabPageLiveLog;
+            buttonCWShowKeyboard.Parent = tabPageLiveLog;
             buttonCWShowKeyboard.Bounds = new Rectangle(202, 0, 270, 40);
             buttonCWShowKeyboard.Text = "Hide/show keyboard ...";
-            buttonCWShowKeyboard.Click += new System.EventHandler(this.buttonCWShowKeyboard_Click);
-            buttonCWShowKeyboard.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Regular);
+            buttonCWShowKeyboard.Click += buttonCWShowKeyboard_Click;
+            buttonCWShowKeyboard.Font = new Font("Tahoma", 8F, FontStyle.Regular);
             buttonCWShowKeyboard.align = 3;
 
-            buttonCWVerify.Parent = this.tabPageLiveLog;
+            buttonCWVerify.Parent = tabPageLiveLog;
             buttonCWVerify.Bounds = new Rectangle(202, 185, 270, 40);
             buttonCWVerify.Text = "Verify login ...";
-            buttonCWVerify.Click += new System.EventHandler(this.buttonCWVerify_Click);
-            buttonCWVerify.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Regular);
+            buttonCWVerify.Click += buttonCWVerify_Click;
+            buttonCWVerify.Font = new Font("Tahoma", 8F, FontStyle.Regular);
             buttonCWVerify.align = 3;
 
             // Always Fit Label
-            labelFileName.Parent = this.tabPageOptions;
+            labelFileName.Parent = tabPageOptions;
             labelFileName.Bounds = new Rectangle(3, 320, 474, 28);
-            labelFileName.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Regular);
+            labelFileName.Font = new Font("Tahoma", 8F, FontStyle.Regular);
             labelFileName.Text = "";
 
             // menu page
             mPage.Parent = this;
             mPage.Bounds = new Rectangle(0, 0, 480, 508);
-            mPage.Click += new EventHandler(this.button_Click);
+            mPage.Click += button_Click;
 
             // universal buttons
             button1.Parent = this;
@@ -650,26 +650,26 @@ namespace GpsCycleComputer
             button4.Bounds = new Rectangle(0, 428, 160, 80);
             button5.Bounds = new Rectangle(160, 428, 160, 80);
             button6.Bounds = new Rectangle(320, 428, 160, 80);
-            button1.Click += new System.EventHandler(this.button_Click);
-            button2.Click += new System.EventHandler(this.button_Click);
-            button3.Click += new System.EventHandler(this.button_Click);
-            button4.Click += new System.EventHandler(this.button_Click);
-            button5.Click += new System.EventHandler(this.button_Click);
-            button6.Click += new System.EventHandler(this.button_Click);
-            button1.MouseDown += new MouseEventHandler(button1_MouseDown);
-            button1.MouseUp += new MouseEventHandler(button1_MouseUp);
-            button1.DoubleClick += new EventHandler(button1_DoubleClick);
+            button1.Click += button_Click;
+            button2.Click += button_Click;
+            button3.Click += button_Click;
+            button4.Click += button_Click;
+            button5.Click += button_Click;
+            button6.Click += button_Click;
+            button1.MouseDown += button1_MouseDown;
+            button1.MouseUp += button1_MouseUp;
+            button1.DoubleClick += button1_DoubleClick;
             
 
             // No Background Panel for flicker-free paint
             NoBkPanel.Parent = this;
             NoBkPanel.Bounds = new Rectangle(0, 0, 480, 508);
             NoBkPanel.Name = "NoBkPanel";
-            NoBkPanel.Paint += new System.Windows.Forms.PaintEventHandler(this.tabGraph_Paint);
-            NoBkPanel.MouseMove += new System.Windows.Forms.MouseEventHandler(this.tabGraph_MouseMove);
-            NoBkPanel.MouseUp += new System.Windows.Forms.MouseEventHandler(this.tabGraph_MouseUp);
-            NoBkPanel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.tabGraph_MouseDown);
-            NoBkPanel.DoubleClick += new System.EventHandler(this.tabGraph_MouseDoubleClick);
+            NoBkPanel.Paint += tabGraph_Paint;
+            NoBkPanel.MouseMove += tabGraph_MouseMove;
+            NoBkPanel.MouseUp += tabGraph_MouseUp;
+            NoBkPanel.MouseDown += tabGraph_MouseDown;
+            NoBkPanel.DoubleClick += tabGraph_MouseDoubleClick;
 
             // about tab image, blank image and CW logo image
             AboutTabImage = new Bitmap(asm.GetManifestResourceStream("GpsSample.Graphics.about.jpg"));
@@ -698,102 +698,102 @@ namespace GpsCycleComputer
         
         private void ScaleToCurrentResolution()
         {
-            ScaleControl((Control)buttonMapsLocation);
-            ScaleControl((Control)buttonIoLocation);
-            ScaleControl((Control)buttonShowViewSelector);
-            ScaleControl((Control)comboGpsPoll);
-            ScaleControl((Control)comboDropFirst);
-            ScaleControl((Control)labelDropFirst);
-            ScaleControl((Control)labelGpsActivity);
-            ScaleControl((Control)comboUnits);
-            ScaleControl((Control)checkStopOnLow);
-            ScaleControl((Control)checkBeepOnFix);
-            ScaleControl((Control)labelRevision);
-            ScaleControl((Control)checkExStopTime);
-            ScaleControl((Control)labelFileName);
-            ScaleControl((Control)listBoxFiles);
-            ScaleControl((Control)labelUnits);
-            ScaleControl((Control)checkWgs84Alt);
+            ScaleControl(buttonMapsLocation);
+            ScaleControl(buttonIoLocation);
+            ScaleControl(buttonShowViewSelector);
+            ScaleControl(comboGpsPoll);
+            ScaleControl(comboDropFirst);
+            ScaleControl(labelDropFirst);
+            ScaleControl(labelGpsActivity);
+            ScaleControl(comboUnits);
+            ScaleControl(checkStopOnLow);
+            ScaleControl(checkBeepOnFix);
+            ScaleControl(labelRevision);
+            ScaleControl(checkExStopTime);
+            ScaleControl(labelFileName);
+            ScaleControl(listBoxFiles);
+            ScaleControl(labelUnits);
+            ScaleControl(checkWgs84Alt);
 
-            ScaleControl((Control)numericGeoID);
-            ScaleControl((Control)numericAvg);
-            ScaleControl((Control)checkGpxRte);
-            ScaleControl((Control)checkGpxSpeedMs);
-            ScaleControl((Control)checkKmlAlt);
+            ScaleControl(numericGeoID);
+            ScaleControl(numericAvg);
+            ScaleControl(checkGpxRte);
+            ScaleControl(checkGpxSpeedMs);
+            ScaleControl(checkKmlAlt);
 
-            ScaleControl((Control)checkEditFileName);
-            ScaleControl((Control)checkShowBkOff);
-            ScaleControl((Control)checkkeepAliveReg);
-            ScaleControl((Control)checkRelativeAlt);
-            ScaleControl((Control)labelMultiMaps);
-            ScaleControl((Control)labelMapDownload);
-            ScaleControl((Control)comboMultiMaps);
-            ScaleControl((Control)comboMapDownload);
+            ScaleControl(checkEditFileName);
+            ScaleControl(checkShowBkOff);
+            ScaleControl(checkkeepAliveReg);
+            ScaleControl(checkRelativeAlt);
+            ScaleControl(labelMultiMaps);
+            ScaleControl(labelMapDownload);
+            ScaleControl(comboMultiMaps);
+            ScaleControl(comboMapDownload);
 
-            ScaleControl((Control)labelKmlOpt2);
-            ScaleControl((Control)labelKmlOpt1);
-            ScaleControl((Control)comboBoxKmlOptColor);
-            ScaleControl((Control)comboBoxKmlOptWidth);
-            ScaleControl((Control)labelGpsBaudRate);
-            ScaleControl((Control)checkBoxUseGccDll);
-            ScaleControl((Control)comboBoxUseGccDllRate);
-            ScaleControl((Control)comboBoxUseGccDllCom);
+            ScaleControl(labelKmlOpt2);
+            ScaleControl(labelKmlOpt1);
+            ScaleControl(comboBoxKmlOptColor);
+            ScaleControl(comboBoxKmlOptWidth);
+            ScaleControl(labelGpsBaudRate);
+            ScaleControl(checkBoxUseGccDll);
+            ScaleControl(comboBoxUseGccDllRate);
+            ScaleControl(comboBoxUseGccDllCom);
 
-            ScaleControl((Control)buttonCWShowKeyboard);
-            ScaleControl((Control)buttonCWVerify);
-            ScaleControl((Control)labelCw2);
-            ScaleControl((Control)labelCw1);
-            ScaleControl((Control)labelCwInfo);
-            ScaleControl((Control)labelCwLogMode);
-            ScaleControl((Control)comboBoxCwLogMode);
-            ScaleControl((Control)textBoxCw2);
-            ScaleControl((Control)textBoxCw1);
-            ScaleControl((Control)checkUploadGpx);
-            ScaleControl((Control)labelCwUrl);
-            ScaleControl((Control)textBoxCwUrl);
-            ScaleControl((Control)panelCwLogo);
+            ScaleControl(buttonCWShowKeyboard);
+            ScaleControl(buttonCWVerify);
+            ScaleControl(labelCw2);
+            ScaleControl(labelCw1);
+            ScaleControl(labelCwInfo);
+            ScaleControl(labelCwLogMode);
+            ScaleControl(comboBoxCwLogMode);
+            ScaleControl(textBoxCw2);
+            ScaleControl(textBoxCw1);
+            ScaleControl(checkUploadGpx);
+            ScaleControl(labelCwUrl);
+            ScaleControl(textBoxCwUrl);
+            ScaleControl(panelCwLogo);
 
-            ScaleControl((Control)comboBoxLine2OptWidth);
-            ScaleControl((Control)comboBoxLine2OptColor);
-            ScaleControl((Control)labelLine2Opt1);
-            ScaleControl((Control)labelLine2Opt2);
+            ScaleControl(comboBoxLine2OptWidth);
+            ScaleControl(comboBoxLine2OptColor);
+            ScaleControl(labelLine2Opt1);
+            ScaleControl(labelLine2Opt2);
 
-            ScaleControl((Control)buttonHelp);
+            ScaleControl(buttonHelp);
 
-            ScaleControl((Control)checkPlotTrackAsDots);
-            ScaleControl((Control)checkPlotLine2AsDots);
+            ScaleControl(checkPlotTrackAsDots);
+            ScaleControl(checkPlotLine2AsDots);
 
-            ScaleControl((Control)labelOptText);
-            ScaleControl((Control)checkOptAbout);
-            ScaleControl((Control)checkOptLiveLog);
-            ScaleControl((Control)checkOptLaps);
-            ScaleControl((Control)checkOptMaps);
-            ScaleControl((Control)checkOptGps);
-            ScaleControl((Control)checkOptKmlGpx);
-            ScaleControl((Control)checkOptMain);
+            ScaleControl(labelOptText);
+            ScaleControl(checkOptAbout);
+            ScaleControl(checkOptLiveLog);
+            ScaleControl(checkOptLaps);
+            ScaleControl(checkOptMaps);
+            ScaleControl(checkOptGps);
+            ScaleControl(checkOptKmlGpx);
+            ScaleControl(checkOptMain);
 
-            ScaleControl((Control)numericGpxTimeShift);
-            ScaleControl((Control)labelGpxTimeShift);
-            ScaleControl((Control)checkMapsWhiteBk);
+            ScaleControl(numericGpxTimeShift);
+            ScaleControl(labelGpxTimeShift);
+            ScaleControl(checkMapsWhiteBk);
 
-            ScaleControl((Control)comboLapOptions);
-            ScaleControl((Control)checkLapBeep);
-            ScaleControl((Control)buttonLapExport);
-            ScaleControl((Control)textLapOptions);
-            ScaleControl((Control)mPage);
-            ScaleControl((Control)button1);
-            ScaleControl((Control)button2);
-            ScaleControl((Control)button3);
-            ScaleControl((Control)button4);
-            ScaleControl((Control)button5);
-            ScaleControl((Control)button6);
+            ScaleControl(comboLapOptions);
+            ScaleControl(checkLapBeep);
+            ScaleControl(buttonLapExport);
+            ScaleControl(textLapOptions);
+            ScaleControl(mPage);
+            ScaleControl(button1);
+            ScaleControl(button2);
+            ScaleControl(button3);
+            ScaleControl(button4);
+            ScaleControl(button5);
+            ScaleControl(button6);
 
-            ScaleControl((Control)tabBlank);
-            ScaleControl((Control)tabBlank1);
-            ScaleControl((Control)tabOpenFile);
+            ScaleControl(tabBlank);
+            ScaleControl(tabBlank1);
+            ScaleControl(tabOpenFile);
 
-            ScaleControl((Control)NoBkPanel);
-            ScaleControl((Control)tabControl);
+            ScaleControl(NoBkPanel);
+            ScaleControl(tabControl);
 
 
 
@@ -827,12 +827,6 @@ namespace GpsCycleComputer
 
             IoFilesDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().GetModules()[0].FullyQualifiedName);
             return false;
-        }
-
-        // Clean up any resources being used.
-        protected override void Dispose(bool disposing)
-        {
-            base.Dispose(disposing);
         }
 
         #region Windows Form Designer generated code
@@ -2091,12 +2085,12 @@ namespace GpsCycleComputer
                 fs = new FileStream(file_name, FileMode.Create);
                 wr = new BinaryWriter(fs, Encoding.ASCII);
 
-                wr.Write((int)comboGpsPoll.SelectedIndex);
-                wr.Write((int)comboUnits.SelectedIndex);
-                wr.Write((int)0); // not used anymore
-                wr.Write((int)(checkExStopTime.Checked ? 1 : 0));
-                wr.Write((int)(checkStopOnLow.Checked ? 1 : 0));
-                wr.Write((int)(checkGpxRte.Checked ? 1 : 0));
+                wr.Write(comboGpsPoll.SelectedIndex);
+                wr.Write(comboUnits.SelectedIndex);
+                wr.Write(0); // not used anymore
+                wr.Write((checkExStopTime.Checked ? 1 : 0));
+                wr.Write((checkStopOnLow.Checked ? 1 : 0));
+                wr.Write((checkGpxRte.Checked ? 1 : 0));
                 wr.Write((int)(0.5 + Decimal.ToDouble(numericGeoID.Value)));
 
                 // the best bit: save IoFilesDirectory as length and chars
@@ -2105,25 +2099,25 @@ namespace GpsCycleComputer
                 {
                     wr.Write((int)IoFilesDirectory[i]);
                 }
-                wr.Write((int)(checkKmlAlt.Checked ? 1 : 0));
-                wr.Write((int)(checkEditFileName.Checked ? 1 : 0));
+                wr.Write((checkKmlAlt.Checked ? 1 : 0));
+                wr.Write((checkEditFileName.Checked ? 1 : 0));
 
                 // kml line
-                wr.Write((int)comboBoxKmlOptColor.SelectedIndex);
-                wr.Write((int)comboBoxKmlOptWidth.SelectedIndex);
+                wr.Write(comboBoxKmlOptColor.SelectedIndex);
+                wr.Write(comboBoxKmlOptWidth.SelectedIndex);
 
                 // GCC DLL
-                wr.Write((int)(checkBoxUseGccDll.Checked ? 1 : 0));
-                wr.Write((int)comboBoxUseGccDllRate.SelectedIndex);
-                wr.Write((int)comboBoxUseGccDllCom.SelectedIndex);
+                wr.Write((checkBoxUseGccDll.Checked ? 1 : 0));
+                wr.Write(comboBoxUseGccDllRate.SelectedIndex);
+                wr.Write(comboBoxUseGccDllCom.SelectedIndex);
 
                 // and more ...
-                wr.Write((int)(checkShowBkOff.Checked ? 1 : 0));
-                wr.Write((int)(checkRelativeAlt.Checked ? 1 : 0));
-                wr.Write((int)comboMultiMaps.SelectedIndex);
+                wr.Write((checkShowBkOff.Checked ? 1 : 0));
+                wr.Write((checkRelativeAlt.Checked ? 1 : 0));
+                wr.Write(comboMultiMaps.SelectedIndex);
 
                 // save MapsFilesDirectory as length and chars
-                wr.Write((int)(MapsFilesDirectory.Length));
+                wr.Write((MapsFilesDirectory.Length));
                 for (int i = 0; i < MapsFilesDirectory.Length; i++)
                 {
                     wr.Write((int)MapsFilesDirectory[i]);
@@ -2131,57 +2125,57 @@ namespace GpsCycleComputer
 
                 // ---------- Crossingways option ----------------
                 // save  textBoxCw1.Text as length and chars
-                wr.Write((int)(textBoxCw1.Text.Length));
+                wr.Write(textBoxCw1.Text.Length);
                 for (int i = 0; i < textBoxCw1.Text.Length; i++)
                 {
                     wr.Write((int)textBoxCw1.Text[i]);
                 }
                 // save  CwHashPassword as length and chars
-                wr.Write((int)(CwHashPassword.Length));
+                wr.Write(CwHashPassword.Length);
                 for (int i = 0; i < CwHashPassword.Length; i++)
                 {
                     wr.Write((int)CwHashPassword[i]);
                 }
                 // live logging options
-                wr.Write((int)comboBoxCwLogMode.SelectedIndex);
+                wr.Write(comboBoxCwLogMode.SelectedIndex);
 
                 // 2nd line and "dots" options
-                wr.Write((int)comboBoxLine2OptWidth.SelectedIndex);
-                wr.Write((int)comboBoxLine2OptColor.SelectedIndex);
-                wr.Write((int)(checkPlotTrackAsDots.Checked ? 1 : 0));
-                wr.Write((int)(checkPlotLine2AsDots.Checked ? 1 : 0));
+                wr.Write(comboBoxLine2OptWidth.SelectedIndex);
+                wr.Write(comboBoxLine2OptColor.SelectedIndex);
+                wr.Write(checkPlotTrackAsDots.Checked ? 1 : 0);
+                wr.Write(checkPlotLine2AsDots.Checked ? 1 : 0);
 
                 // pages to show
-                wr.Write((int)(checkOptAbout.Checked ? 1 : 0));
-                wr.Write((int)(checkOptLiveLog.Checked ? 1 : 0));
-                wr.Write((int)(checkOptMaps.Checked ? 1 : 0));
-                wr.Write((int)(checkOptGps.Checked ? 1 : 0));
-                wr.Write((int)(checkOptKmlGpx.Checked ? 1 : 0));
+                wr.Write(checkOptAbout.Checked ? 1 : 0);
+                wr.Write(checkOptLiveLog.Checked ? 1 : 0);
+                wr.Write(checkOptMaps.Checked ? 1 : 0);
+                wr.Write(checkOptGps.Checked ? 1 : 0);
+                wr.Write(checkOptKmlGpx.Checked ? 1 : 0);
 
                 // GPX, Map Bkgrd and Last ext to open
                 wr.Write((int)(0.5 + Decimal.ToDouble(numericGpxTimeShift.Value)));
-                wr.Write((int)(checkMapsWhiteBk.Checked ? 1 : 0));
+                wr.Write(checkMapsWhiteBk.Checked ? 1 : 0);
                 wr.Write((int)FileExtentionToOpen);
-                wr.Write((int)(checkOptLaps.Checked ? 1 : 0));
-                wr.Write((int)comboMapDownload.SelectedIndex);
-                wr.Write((int)(checkOptMain.Checked ? 1 : 0));
-                wr.Write((int)(checkUploadGpx.Checked ? 1 : 0));
+                wr.Write(checkOptLaps.Checked ? 1 : 0);
+                wr.Write(comboMapDownload.SelectedIndex);
+                wr.Write(checkOptMain.Checked ? 1 : 0);
+                wr.Write(checkUploadGpx.Checked ? 1 : 0);
 
-                wr.Write((int)comboDropFirst.SelectedIndex);
-                wr.Write((int)(checkGpxSpeedMs.Checked ? 1 : 0));
+                wr.Write(comboDropFirst.SelectedIndex);
+                wr.Write(checkGpxSpeedMs.Checked ? 1 : 0);
 
                 wr.Write(CurrentLat);
                 wr.Write(CurrentLong);
 
-                wr.Write((int)(checkBeepOnFix.Checked ? 1 : 0));
+                wr.Write(checkBeepOnFix.Checked ? 1 : 0);
                 wr.Write((int)(numericAvg.Value));
-                wr.Write((int)(checkkeepAliveReg.Checked ? 1 : 0));
+                wr.Write(checkkeepAliveReg.Checked ? 1 : 0);
                 wr.Write(textBoxCwUrl.Text);
-                wr.Write((int)(checkWgs84Alt.Checked ? 1 : 0));
+                wr.Write(checkWgs84Alt.Checked ? 1 : 0);
 
-                wr.Write((int)comboLapOptions.SelectedIndex);
-                wr.Write((int)(checkLapBeep.Checked ? 1 : 0));
-                wr.Write((int)(GraphOverDistance ? 1 : 0));
+                wr.Write(comboLapOptions.SelectedIndex);
+                wr.Write(checkLapBeep.Checked ? 1 : 0);
+                wr.Write(GraphOverDistance ? 1 : 0);
                 wr.Write(importantNewsId);
 
             }
@@ -2418,14 +2412,7 @@ namespace GpsCycleComputer
                             case GpsInvalidButTrust:
                                 GpsDataState = GpsOk;
                                 goto case GpsOk;
-
-
-
                         }// switch
-
-                        
-
-                         
                     }
                     LastPointUtc = position.Time;   // save last time
                 } //if position.TLL valid
@@ -2610,10 +2597,6 @@ namespace GpsCycleComputer
             {
                 Utils.log.Error (" WriteStartDateTime ", e);
             }
-            finally
-            {
-                //writer.Flush ();
-            }
         }
 
         // write battery info
@@ -2689,11 +2672,10 @@ namespace GpsCycleComputer
         // generate a new file name using StartTime (without path without extension)
         private void GenerateFileName()
         {
-            string file_name = "";
             DateTime start_time = DateTime.Now;
 
             // file name is constructed as year,month,day, hour, min, sec, all as 2-digit values
-            file_name = (start_time.Year - 2000).ToString("00")
+            string file_name = (start_time.Year - 2000).ToString("00")
                     + start_time.Month.ToString("00")
                     + start_time.Day.ToString("00")
                     + "_"
@@ -3828,15 +3810,8 @@ namespace GpsCycleComputer
 
 
         #endregion
-        /*
-        private string replaceCommas(double x)      //replaced by CultureInfo
-        {
-            string output = x.ToString("0.##########");
-            output = output.Replace(",", ".");
-            return output;
-        }*/
 
-        private void buttonSaveKML_Click(object sender, EventArgs e)
+        private String getFileName(string extension)
         {
             if (listBoxFiles.SelectedIndex != -1)
             {
@@ -3844,165 +3819,66 @@ namespace GpsCycleComputer
                 gcc_file = gcc_file.Replace("*", ""); // remove * and + for the gpx/kml indication
                 gcc_file = gcc_file.Replace("+", "");
 
-                if (IoFilesDirectory == "\\") 
-                { 
-                    gcc_file = "\\" + gcc_file; ; 
+                if (IoFilesDirectory == "\\")
+                {
+                    gcc_file = "\\" + gcc_file;
                 }
-                else 
-                { 
-                    gcc_file = IoFilesDirectory + "\\" + gcc_file; 
+                else
+                {
+                    gcc_file = IoFilesDirectory + "\\" + gcc_file;
                 }
 
                 if (!LoadGcc(gcc_file))
                 {
                     MessageBox.Show("File has errors or blank", "Error loading .gcc file",
                                 MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
-                    return;
+                    return "";
                 }
             }
             else
             {
                 MessageBox.Show("No files selected", "Error",
                                 MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
-                return;
+                return "";
             }
 
             if (PlotCount == 0)
             {
                 MessageBox.Show("File is blank - no records to save to KML", "Error",
                                 MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
-                return;
+                return "";
             }
-            
-            Cursor.Current = Cursors.WaitCursor;
-            CheckIoDirectoryExists();
 
-            string kml_file = Path.GetFileNameWithoutExtension(CurrentFileName) + ".kml";
+            CheckIoDirectoryExists();
+            return Path.GetFileNameWithoutExtension(CurrentFileName) + extension;
+        }
+
+        private void buttonSaveKML_Click(object sender, EventArgs e)
+        {
+            String kml_file = getFileName(".kml");
+            if ("".Equals(kml_file)) return;
+
+            Cursor.Current = Cursors.WaitCursor;
 
             if (IoFilesDirectory == "\\") { kml_file = "\\" + kml_file; }
             else { kml_file = IoFilesDirectory + "\\" + kml_file; }
 
-            FileStream fs = null;
-            StreamWriter wr = null;
-            try
-            {
-                fs = new FileStream(kml_file, FileMode.Create);
-                wr = new StreamWriter(fs);
+            string distUnit;
+            string speedUnit;
+            string altUnit;
+            string exstop_info;
+            GetUnitLabels(out distUnit, out speedUnit, out altUnit, out exstop_info);
+            string dist, speedCur, speed_avg, speedMax, run_time_label, last_sample_time, altitude, battery;
+            GetValuesToDisplay(out dist, out speedCur, out speed_avg, out speedMax, out run_time_label, out last_sample_time, out altitude, out battery);
 
-                // write KML header
-                wr.WriteLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-                wr.WriteLine("<kml xmlns=\"http://www.opengis.net/kml/2.2\">");
-
-                wr.WriteLine(" <Document>");
-                wr.WriteLine("  <name><![CDATA[" + StartTime.ToString() + "]]></name>");
-
-                // Write the checkpoints
-                if (CheckPointCount != 0)
-                {
-                    wr.WriteLine("  <Folder> <name>Waypoints</name>");
-                    for (int chk = 0; chk < CheckPointCount; chk++)
-                    {
-                        // need to replave chars not supported by XML
-                        string chk_name = CheckPoints[chk].name.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;").Replace("\"", "&quot;").Replace("'", "&apos;");
-
-                        wr.WriteLine("  <Placemark><name>" + chk_name
-                                    + "</name><Point><altitudeMode>clampToGround</altitudeMode><coordinates>"
-                                    + CheckPoints[chk].lon.ToString("0.##########", IC)
-                                    + ","
-                                    + CheckPoints[chk].lat.ToString("0.##########", IC)
-                                    + ",0.000000</coordinates></Point></Placemark>");
-                    }
-                    wr.WriteLine("  </Folder>");
-                }
-
-                wr.WriteLine(" <Folder> <name>Tracks</name>");
-                wr.WriteLine("  <Placemark>");
-                wr.WriteLine("    <name>" + StartTime.ToString() + "</name>");
-
-                wr.WriteLine("    <Style id=\"yellowLineGreenPoly\">");
-                wr.WriteLine("      <LineStyle>");
-
-                // Colors : blue - red - green- yellow- white - black
-                if (comboBoxKmlOptColor.SelectedIndex == 0) { wr.WriteLine("        <color>ffff0000</color>"); }
-                else if (comboBoxKmlOptColor.SelectedIndex == 1) { wr.WriteLine("        <color>ff0000ff</color>"); }
-                else if (comboBoxKmlOptColor.SelectedIndex == 2) { wr.WriteLine("        <color>ff00ff00</color>"); }
-                else if (comboBoxKmlOptColor.SelectedIndex == 3) { wr.WriteLine("        <color>ff00ffff</color>"); }
-                else if (comboBoxKmlOptColor.SelectedIndex == 4) { wr.WriteLine("        <color>ffffffff</color>"); }
-                else if (comboBoxKmlOptColor.SelectedIndex == 5) { wr.WriteLine("        <color>ff000000</color>"); }
-                else if (comboBoxKmlOptColor.SelectedIndex == 6) { wr.WriteLine("        <color>ffc0c0c0</color>"); }
-                else if (comboBoxKmlOptColor.SelectedIndex == 7) { wr.WriteLine("        <color>ff0080ff</color>"); }
-                else if (comboBoxKmlOptColor.SelectedIndex == 8) { wr.WriteLine("        <color>ffff8000</color>"); }
-                else if (comboBoxKmlOptColor.SelectedIndex == 9) { wr.WriteLine("        <color>ff000080</color>"); }
-                else if (comboBoxKmlOptColor.SelectedIndex == 10) { wr.WriteLine("        <color>ff800080</color>"); }
-                else if (comboBoxKmlOptColor.SelectedIndex == 11) { wr.WriteLine("        <color>ffff0080</color>"); }
-
-                wr.WriteLine("        <width>" + ((comboBoxKmlOptWidth.SelectedIndex + 1) * 2).ToString() + "</width>");
-
-                wr.WriteLine("      </LineStyle>");
-                wr.WriteLine("      <PolyStyle>");
-                wr.WriteLine("        <color>7f00ff00</color>");
-                wr.WriteLine("      </PolyStyle>");
-                wr.WriteLine("    </Style>");
-
-                wr.WriteLine("      <description>");
-
-                // write description for this trip
-                string dist_unit, speed_unit, alt_unit, exstop_info;
-                GetUnitLabels(out dist_unit, out speed_unit, out alt_unit, out exstop_info);
-                string dist, speed_cur, speed_avg, speed_max, run_time, last_sample_time, altitude, battery;
-                GetValuesToDisplay(out dist, out speed_cur, out speed_avg, out speed_max, out run_time, out last_sample_time, out altitude, out battery);
-
-                wr.WriteLine(dist + " " + dist_unit + " " + run_time + " " + exstop_info);
-                wr.WriteLine(speed_cur + " " + speed_avg + " " + speed_max + " " + speed_unit);
-                wr.WriteLine("battery " + battery);
-
-                wr.WriteLine("	</description>");
-                wr.WriteLine("      <styleUrl>#yellowLineGreenPoly</styleUrl>");
-
-                wr.WriteLine("	    <LookAt>");
-                wr.WriteLine("			<longitude>" + StartLong.ToString("0.##########", IC) + "</longitude>");
-                wr.WriteLine("			<latitude>" + StartLat.ToString("0.##########", IC) + "</latitude>");
-                wr.WriteLine("			<altitude>0</altitude>");
-                wr.WriteLine("			<range>3000</range>");
-                wr.WriteLine("			<tilt>0</tilt>");
-                wr.WriteLine("			<heading>0</heading>");
-                wr.WriteLine("		</LookAt>");
-
-                wr.WriteLine("      <LineString>");
-                if (checkKmlAlt.Checked) { wr.WriteLine("      <altitudeMode>absolute</altitudeMode>"); }
-                wr.WriteLine("        <coordinates>");
-
-                // here write coordinates
-                for (int i = 0; i < PlotCount; i++)
-                {
-                    if (checkKmlAlt.Checked && PlotZ[i] != Int16.MinValue)      //ignore invalid value
-                    {
-                        wr.WriteLine(PlotLong[i].ToString("0.##########", IC) + "," + PlotLat[i].ToString("0.##########", IC) + "," + PlotZ[i].ToString());
-                    }
-                    else
-                    {
-                        wr.WriteLine(PlotLong[i].ToString("0.##########", IC) + "," + PlotLat[i].ToString("0.##########", IC));
-                    }
-                }
-
-                // write end of the KML file
-                wr.WriteLine("        </coordinates>");
-                wr.WriteLine("      </LineString>");
-                wr.WriteLine("    </Placemark>");
-                wr.WriteLine("   </Folder>");
-                wr.WriteLine(" </Document>");
-                wr.WriteLine("</kml>");
-
-            }
-            catch (Exception ee)
-            {
-                Utils.log.Error(" buttonSaveKML_Click", ee);
-            }
-            finally
-            {
-                if(wr != null) wr.Close();
-                if (fs != null) fs.Close();
-            }
+            new KmlSupport().Write(kml_file, CheckPointCount, CheckPoints,
+                PlotLat, PlotLong, PlotCount, PlotS, PlotT, PlotZ, StartTime,
+                comboBoxKmlOptColor, checkKmlAlt,
+                distUnit, speedUnit, altUnit, exstop_info,
+                dist, speedCur, speed_avg, speedMax, run_time_label, last_sample_time, altitude, battery,
+                StartLat, StartLong,
+                comboBoxKmlOptWidth);
+            
             Cursor.Current = Cursors.Default;
 
             // refill listBox, to indicate that KML was saved
@@ -4013,158 +3889,28 @@ namespace GpsCycleComputer
         }
         private void buttonSaveGPX_Click(object sender, EventArgs e)
         {
-            if (listBoxFiles.SelectedIndex != -1)
-            {
-                string gcc_file = listBoxFiles.SelectedItem.ToString();
-                gcc_file = gcc_file.Replace("*", ""); // remove * and + for the gpx/kml indication
-                gcc_file = gcc_file.Replace("+", "");
-
-                if (IoFilesDirectory == "\\") { gcc_file = "\\" + gcc_file; ; }
-                else { gcc_file = IoFilesDirectory + "\\" + gcc_file; }
-
-                if (!LoadGcc(gcc_file))
-                {
-                    MessageBox.Show("File has errors or blank", "Error loading .gcc file",
-                                MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
-                    return;
-                }
-            }
-            else
-            {
-                MessageBox.Show("No files selected", "Error",
-                                MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
-                return;
-            }
-
-            if (PlotCount == 0)
-            {
-                MessageBox.Show("File is blank - no records to save to GPX", "Error",
-                                MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
-                return;
-            }
-
-            string gpx_file = "";
+            String gpx_file = getFileName(".gpx");
+            if("".Equals(gpx_file)) return;
 
             Cursor.Current = Cursors.WaitCursor;
-            CheckIoDirectoryExists();
-
-            gpx_file = Path.GetFileNameWithoutExtension(CurrentFileName) + ".gpx";
-
+           
             if (IoFilesDirectory == "\\") { gpx_file = "\\" + gpx_file; }
             else { gpx_file = IoFilesDirectory + "\\" + gpx_file; }
 
-            FileStream fs = null;
-            StreamWriter wr = null;
-            try
-            {
-                fs = new FileStream(gpx_file, FileMode.Create);
-                wr = new StreamWriter(fs);
+            string dist_unit, speed_unit, alt_unit, exstop_info;
+            GetUnitLabels(out dist_unit, out speed_unit, out alt_unit, out exstop_info);
+            string dist, speed_cur, speed_avg, speed_max, run_time_label, last_sample_time, altitude, battery;
+            GetValuesToDisplay(out dist, out speed_cur, out speed_avg, out speed_max, out run_time_label, out last_sample_time, out altitude, out battery);
 
-                // write GPX header
-                wr.WriteLine("<?xml version=\"1.0\"?>");
-                wr.WriteLine("<gpx");
-                wr.WriteLine("version=\"1.0\"");
-                wr.WriteLine(" creator=\"GPSCycleComputer\"");
-                wr.WriteLine(" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
-                wr.WriteLine(" xmlns=\"http://www.topografix.com/GPX/1/0\"");
-                wr.WriteLine(" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd\">");
-                wr.WriteLine("");
-
-                // Write the checkpoints
-                if (CheckPointCount != 0)
-                {
-                    for (int chk = 0; chk < CheckPointCount; chk++)
-                    {
-                        // need to replave chars not supported by XML
-                        string chk_name = CheckPoints[chk].name.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;").Replace("\"", "&quot;").Replace("'", "&apos;");
-
-                        wr.WriteLine("<wpt lat=\"" + CheckPoints[chk].lat.ToString("0.##########", IC)
-                                    + "\" lon=\"" + CheckPoints[chk].lon.ToString("0.##########", IC)
-                                    + "\" ><name>" + chk_name
-                                    + "</name></wpt>");
-                    }
-                }
-
-                if (checkGpxRte.Checked)
-                {
-                    wr.WriteLine("<rte>");
-                }
-                else
-                {
-                    wr.WriteLine("<trk>");
-                }
-                wr.WriteLine("<name>" + StartTime.ToString() + "</name>");
-
-                string dist_unit, speed_unit, alt_unit, exstop_info;
-                GetUnitLabels(out dist_unit, out speed_unit, out alt_unit, out exstop_info);
-                string dist, speed_cur, speed_avg, speed_max, run_time_label, last_sample_time, altitude, battery;
-                GetValuesToDisplay(out dist, out speed_cur, out speed_avg, out speed_max, out run_time_label, out last_sample_time, out altitude, out battery);
-
-                wr.WriteLine("<desc><![CDATA[" + dist + " " + dist_unit + " " + run_time_label + " " + exstop_info
-                               + " " + speed_cur + " " + speed_avg + " " + speed_max + " " + speed_unit
-                               + " battery " + battery
-                               + "]]></desc>");
-
-                if (checkGpxRte.Checked == false) { wr.WriteLine("<trkseg>"); }
-
-                // here write coordinates
-                for (int i = 0; i < PlotCount; i++)
-                {
-                    if (checkGpxRte.Checked)
-                    {
-                        wr.WriteLine("<rtept lat=\"" + PlotLat[i].ToString("0.##########", IC) +
-                                     "\" lon=\"" + PlotLong[i].ToString("0.##########", IC) + "\">");
-                    }
-                    else
-                    {
-                        wr.WriteLine("<trkpt lat=\"" + PlotLat[i].ToString("0.##########", IC) +
-                                     "\" lon=\"" + PlotLong[i].ToString("0.##########", IC) + "\">");
-                    }
-                    if (PlotZ[i] != Int16.MinValue)     //ignore invalid value
-                    {
-                        wr.WriteLine("<ele>" + PlotZ[i].ToString() + "</ele>");
-                    }
-                    TimeSpan run_time = new TimeSpan(Decimal.ToInt32(numericGpxTimeShift.Value), 0, PlotT[i]);
-                    string run_time_str = (StartTime + run_time).ToString("u");
-                    run_time_str = run_time_str.Replace(" ", "T");
-                    wr.WriteLine("<time>" + run_time_str + "</time>");
-
-                    if (PlotS[i] != Int16.MinValue)     //ignore invalid value
-                    {
-                        if (checkGpxSpeedMs.Checked) // speed in m/s instead of km/h
-                        {
-                            wr.WriteLine("<speed>" + (PlotS[i] * (0.1 / 3.6)).ToString("0.##########", IC) + "</speed>");
-                        }
-                        else
-                        {
-                            wr.WriteLine("<speed>" + (PlotS[i] * 0.1).ToString("0.##########", IC) + "</speed>");
-                        }
-                    }
-                    if (checkGpxRte.Checked)
-                    {
-                        wr.WriteLine("</rtept>");
-                    }
-                    else
-                    {
-                        wr.WriteLine("</trkpt>");
-                    }
-                }
-                // write end of the GPX file
-                if (checkGpxRte.Checked == false) { wr.WriteLine("</trkseg>"); }
-                if (checkGpxRte.Checked) { wr.WriteLine("</rte>"); } else { wr.WriteLine("</trk>"); }
-
-                wr.WriteLine("</gpx>");
-
-            }
-            catch (Exception ee)
-            {
-                Utils.log.Error(" buttonSaveGPX_Click ", ee);
-            }
-            finally
-            {
-                if(wr != null) wr.Close();
-                if (fs != null) fs.Close();
-            }
+            new GpxSupport().Write(gpx_file, CheckPointCount, 
+                CheckPoints,
+                checkGpxRte, checkGpxSpeedMs,
+                PlotLat, PlotLong, PlotCount,
+                PlotS, PlotT, PlotZ, StartTime,
+                numericGpxTimeShift,
+                dist_unit, speed_unit, alt_unit, exstop_info,
+                dist, speed_cur, speed_avg, speed_max, run_time_label, last_sample_time, altitude, battery);
+            
             Cursor.Current = Cursors.Default;
 
             // refill listBox, to indicate that GPX was saved
