@@ -3,12 +3,15 @@
 using System.Globalization;
 using System.IO;
 using System.Windows.Forms;
+using GpsCycleComputer;
 using GpsUtils;
 
 namespace GpsSample.FileSupport
 {
     class GpxSupport : IFileSupport
     {
+        CultureInfo IC = CultureInfo.InvariantCulture;
+
         public bool Load(string filename, int vector_size, ref float[] dataLat, ref float[] dataLong, ref int[] dataT, out int data_size)
         {
             int Counter = 0;
@@ -170,6 +173,109 @@ namespace GpsSample.FileSupport
             }
             Cursor.Current = Cursors.Default;
             return Status;
+        }
+
+        public void Write(String gpx_file, int CheckPointCount,
+            Form1.CheckPointInfo[] CheckPoints,
+            CheckBox checkGpxRte, CheckBox checkGpxSpeedMs,
+            float[] PlotLat, float[] PlotLong, int PlotCount,
+            short[] PlotS, int[] PlotT, short[] PlotZ, DateTime StartTime,
+            NumericUpDown numericGpxTimeShift,
+            string dist_unit, string speed_unit, string alt_unit, string exstop_info,
+                string dist, string speed_cur, string speed_avg, string speed_max, string run_time_label, string last_sample_time, string altitude, string battery
+            )
+        {
+            FileStream fs = null;
+            StreamWriter wr = null;
+            try
+            {
+                fs = new FileStream(gpx_file, FileMode.Create);
+                wr = new StreamWriter(fs);
+
+                // write GPX header
+                wr.WriteLine("<?xml version=\"1.0\"?>");
+                wr.WriteLine("<gpx");
+                wr.WriteLine("version=\"1.0\"");
+                wr.WriteLine(" creator=\"GPSCycleComputer\"");
+                wr.WriteLine(" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
+                wr.WriteLine(" xmlns=\"http://www.topografix.com/GPX/1/0\"");
+                wr.WriteLine(" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd\">");
+                wr.WriteLine("");
+
+                if (CheckPointCount != 0)
+                {
+                    for (int chk = 0; chk < CheckPointCount; chk++)
+                    {
+                        // need to replave chars not supported by XML
+                        string chk_name = CheckPoints[chk].name.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;").Replace("\"", "&quot;").Replace("'", "&apos;");
+
+                        wr.WriteLine("<wpt lat=\"" + CheckPoints[chk].lat.ToString("0.##########", IC)
+                                    + "\" lon=\"" + CheckPoints[chk].lon.ToString("0.##########", IC)
+                                    + "\" ><name>" + chk_name
+                                    + "</name></wpt>");
+                    }
+                }
+
+                wr.WriteLine(checkGpxRte.Checked ? "<rte>" : "<trk>");
+                wr.WriteLine("<name>" + StartTime + "</name>");
+
+                wr.WriteLine("<desc><![CDATA[" + dist + " " + dist_unit + " " + run_time_label + " " + exstop_info
+                               + " " + speed_cur + " " + speed_avg + " " + speed_max + " " + speed_unit
+                               + " battery " + battery
+                               + "]]></desc>");
+
+                if (checkGpxRte.Checked == false) { wr.WriteLine("<trkseg>"); }
+
+                // here write coordinates
+                for (int i = 0; i < PlotCount; i++)
+                {
+                    if (checkGpxRte.Checked)
+                    {
+                        wr.WriteLine("<rtept lat=\"" + PlotLat[i].ToString("0.##########", IC) +
+                                     "\" lon=\"" + PlotLong[i].ToString("0.##########", IC) + "\">");
+                    }
+                    else
+                    {
+                        wr.WriteLine("<trkpt lat=\"" + PlotLat[i].ToString("0.##########", IC) +
+                                     "\" lon=\"" + PlotLong[i].ToString("0.##########", IC) + "\">");
+                    }
+                    if (PlotZ[i] != Int16.MinValue)     //ignore invalid value
+                    {
+                        wr.WriteLine("<ele>" + PlotZ[i] + "</ele>");
+                    }
+                    TimeSpan run_time = new TimeSpan(Decimal.ToInt32(numericGpxTimeShift.Value), 0, PlotT[i]);
+                    string run_time_str = (StartTime + run_time).ToString("u");
+                    run_time_str = run_time_str.Replace(" ", "T");
+                    wr.WriteLine("<time>" + run_time_str + "</time>");
+
+                    if (PlotS[i] != Int16.MinValue)     //ignore invalid value
+                    {
+                        if (checkGpxSpeedMs.Checked) // speed in m/s instead of km/h
+                        {
+                            wr.WriteLine("<speed>" + (PlotS[i] * (0.1 / 3.6)).ToString("0.##########", IC) + "</speed>");
+                        }
+                        else
+                        {
+                            wr.WriteLine("<speed>" + (PlotS[i] * 0.1).ToString("0.##########", IC) + "</speed>");
+                        }
+                    }
+                    wr.WriteLine(checkGpxRte.Checked ? "</rtept>" : "</trkpt>");
+                }
+                // write end of the GPX file
+                if (checkGpxRte.Checked == false) { wr.WriteLine("</trkseg>"); }
+                if (checkGpxRte.Checked) { wr.WriteLine("</rte>"); } else { wr.WriteLine("</trk>"); }
+
+                wr.WriteLine("</gpx>");
+            }
+            catch (Exception ee)
+            {
+                Utils.log.Error(" buttonSaveGPX_Click ", ee);
+            }
+            finally
+            {
+                if (wr != null) wr.Close();
+                if (fs != null) fs.Close();
+            }
         }
     }
 }
