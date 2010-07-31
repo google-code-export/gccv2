@@ -86,7 +86,6 @@
     <Compile Include="GpsPosition.cs" />
     <Compile Include="Utils\Logger.cs" />
     <Compile Include="Utils\MapUtil.cs" />
-    <Compile Include="Utils\ReadFileUtil.cs" />
     <Compile Include="Utils\Utils.cs" />
     <Compile Include="Utils\UtmUtil.cs" />
     <Compile Include="Web References\CW\Reference.cs">

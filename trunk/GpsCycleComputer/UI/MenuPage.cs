@@ -147,7 +147,7 @@ namespace GpsCycleComputer
         int bWidth =160, bHeigh = 80, GridHeigh = 120;
         int so = 0;     //scroll offset
         int lastDisplayed = 0;
-        int i_p = -1;   //index of pressed icon
+        public int i_p = -1;   //index of pressed icon
         Rectangle iv_rect;
 
         public MenuPage()
@@ -179,17 +179,19 @@ namespace GpsCycleComputer
                 so = 0;     //for safety
             //Invalidate();
         }
+        public int getButtonIndex(int X, int Y)
+        {
+            i_p = Y / GridHeigh * 3 + X / bWidth + so;
+            iv_rect = new Rectangle(bWidth * ((i_p - so) % 3), GridHeigh * ((i_p - so) / 3), bWidth, GridHeigh);
+            Invalidate(iv_rect);
+            return i_p;
+        }
 
         protected override void OnMouseDown(MouseEventArgs e)
         {
-            int index = e.Y / GridHeigh * 3 + e.X / bWidth + so;
+            int index = getButtonIndex(e.X, e.Y);
             if (index <= lastDisplayed)
-            {
                 this.Tag = index;
-                i_p = index;
-                iv_rect = new Rectangle(bWidth * ((i_p - so) % 3), GridHeigh * ((i_p - so) / 3), bWidth, GridHeigh);
-                Invalidate(iv_rect);
-            }
             else
                 this.Tag = null;
 

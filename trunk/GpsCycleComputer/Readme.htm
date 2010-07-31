@@ -228,10 +228,9 @@ content="text/html; charset=iso-8859-1"/>
             <li><strong>Continue</strong>: continues a previous recorded track.&nbsp;</li>
             <li><strong>Lap</strong>: (see below)&nbsp;</li>
             <li><font face="Arial" size="2"><strong>Recal 1</strong> .. <strong>3</strong>: with
-                these 3 buttons you can recall different option settings. At the moment it is somewhat
-                awkward to save these settings: Set the desired options for Recall 1, exit GCC,
-                then copy the file GpsCycleComputer.dat to GpsCycleComputer1.dat. Use same procedure
-                for Recall 2 and Recall 3.</font>&nbsp;</li>
+                these 3 buttons you can recall different option settings. Use the context menu to
+                save the settings for Recall 1 .. Recall 3. The settings are stored in the application
+                directory in the files GpsCycleComputer1.dat .. GpsCycleComputer3.dat.</font>&nbsp;</li>
             <li><strong>BKLight</strong>: <span style="font-size: 10pt; font-family: Arial">by default, you
                 shall be able to switch your phone off by the
                 hardware power button, and the GPS will continue
@@ -316,6 +315,9 @@ content="text/html; charset=iso-8859-1"/>
         pages, so press &quot;next&quot; or &quot;previous&quot;
         (center or right buttons) on options tab to switch
         between option pages.</font></p>
+            <p>
+                Some fields in Main page can be configured by context menu (press and hold to open
+                the context menu).</p>
         <p><font size="2" face="Arial"><strong><u>The first
         options you see:</u></strong></font></p>
         <ul>
@@ -412,7 +414,7 @@ content="text/html; charset=iso-8859-1"/>
                 and &quot;average speed&quot; calculations. This
                 is useful to see the &quot;net time&quot; when
                 you e.g. cycling and make breaks during the trip,
-                without the need to switch off the logger.</font></li>
+                without the need to switch off the logger.</font>&nbsp;</li>
             <li><font size="2" face="Arial"><strong>Ask for log
                 file name</strong> &#150; show an edit box, so
                 you can enter a custom log file name before
@@ -423,6 +425,12 @@ content="text/html; charset=iso-8859-1"/>
                 screen, show altitude relative to the starting
                 point, instead of the absolute altitude. Default
                 off.</font></li>
+            <li>Direct in the main screen by context menu of the <strong>Speed</strong> field you
+                can choose if speed is taken from the corresponding GPS sentence or if is calculated
+                from the moving position (or both).</li>
+            <li>In the Altitude field you can choose between <strong>"Altitude gain"</strong> (sum
+                of increasing altitude), <strong>"Altitude loss"</strong> (sum of falling altitude)
+                and <strong>"Altitude delta"</strong> (current - starting altitude).&nbsp;</li>
         </ul>
         <p><font size="2" face="Arial"><strong><u>Page &quot;Maps
         screen options&quot;</u></strong><strong>:</strong></font></p>
