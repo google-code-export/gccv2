@@ -1,6 +1,21 @@
 GPS Cycle Computer GCC
+********* version 4.4 *************
+new features:
+- context menu
+- alternate speed calculated from position change
+- Elevation Loss and Altitude Delta
 
-***** version 4.3 *******
+improvements:
+- calculation of Elevation Gain
+- calculation of Stoppage Time
+- averaging (smoothing) of speed
+
+bugfixes:
+- custom background and foreground
+
+
+
+********* version 4.3 *************
 new features:
 - Menu page
  - exit
