@@ -61,6 +61,7 @@ namespace GpsUtils
         private int ScreenY = 100;
         private double Data2Screen = 1.0;  // Coefficient to convert from data to screen values
         public double ZoomValue = 1.0;    // zoom coefficient, to multiply Data2Screen
+        public int DefaultZoomRadius = 100;    //default zoom in m (in either direction)
         private double DataLongMin = 1.0E9, DataLongMax = -1.0E9, DataLatMin = 1.0E9, DataLatMax = -1.0E9;
         private double Meter2Lat = 1.0, Meter2Long = 1.0, RatioMeterLatLong = 1.0;
 
@@ -119,10 +120,16 @@ namespace GpsUtils
             }
 
             // detect file extension .png or .jpg
-            string[] x_dirs = Directory.GetDirectories(zoom_dirs[0]);
-            string[] y_names = Directory.GetFiles(x_dirs[0]);
-            OsmFileExtension = Path.GetExtension(y_names[0]);
-
+            try
+            {
+                string[] x_dirs = Directory.GetDirectories(zoom_dirs[0]);
+                string[] y_names = Directory.GetFiles(x_dirs[0]);
+                OsmFileExtension = Path.GetExtension(y_names[0]);
+            }
+            catch
+            {
+                OsmFileExtension = ".png";
+            }
             return true;
         }
         // hyperbolic sine seems not supported in CF .NET
@@ -289,8 +296,8 @@ User-defined server (read server name from osm_server.txt)
                 // do a quick check if a central tile exist when we have lots of times, - skip if not exists
                 if ((num_tiles_in_this_zoom > 9) && (OsmTilesWebDownload == 0))
                 {
-                    int center_x = xtile_min + (xtile_max - xtile_min) / 2;
-                    int center_y = ytile_min + (ytile_max - ytile_min) / 2;
+                    int center_x = (xtile_min + xtile_max) / 2;
+                    int center_y = (ytile_min + ytile_max) / 2;
                     string center_file_name = MapsFilesDirectory + "\\" + iz.ToString() +
                                               "\\" + center_x.ToString() + "\\" + center_y.ToString() + OsmFileExtension;
 
@@ -751,21 +758,9 @@ User-defined server (read server name from osm_server.txt)
 
             // set number of bitmaps to use at the same time and the scale correction
             if      (MapMode == 0)  { NumBitmaps = 1; scaleCorrection = 1.0; }
-            else if (MapMode == 1)  { NumBitmaps = 2; scaleCorrection = 1.0; }
-            else if (MapMode == 2)  { NumBitmaps = 2; scaleCorrection = 0.5;}
-            else if (MapMode == 3)  { NumBitmaps = 2; scaleCorrection = 0.25;}
-            else if (MapMode == 4)  { NumBitmaps = 3; scaleCorrection = 1.0; }
-            else if (MapMode == 5)  { NumBitmaps = 3; scaleCorrection = 0.5; ;}
-            else if (MapMode == 6)  { NumBitmaps = 3; scaleCorrection = 0.25;}
-            else if (MapMode == 7)  { NumBitmaps = 4; scaleCorrection = 1.0; }
-            else if (MapMode == 8)  { NumBitmaps = 4; scaleCorrection = 0.5; ; }
-            else if (MapMode == 9)  { NumBitmaps = 4; scaleCorrection = 0.25; }
-            else if (MapMode == 10) { NumBitmaps = 6; scaleCorrection = 1.0; }
-            else if (MapMode == 11) { NumBitmaps = 6; scaleCorrection = 0.5; ; }
-            else if (MapMode == 12) { NumBitmaps = 6; scaleCorrection = 0.25; }
-            else if (MapMode == 13) { NumBitmaps = 8; scaleCorrection = 1.0; }
-            else if (MapMode == 14) { NumBitmaps = 8; scaleCorrection = 0.5; ; }
-            else if (MapMode == 15) { NumBitmaps = 8; scaleCorrection = 0.25; }
+            else if (MapMode == 1)  { NumBitmaps = 4; scaleCorrection = 1.0; }
+            else if (MapMode == 2)  { NumBitmaps = 4; scaleCorrection = 0.5;}
+            else if (MapMode == 3)  { NumBitmaps = 4; scaleCorrection = 0.25;}
             else    { NumBitmaps = 1; scaleCorrection = 1.0;}
 
             // compute overlap for each map and map qfactor (function from the zoom level)
@@ -812,11 +807,26 @@ User-defined server (read server name from osm_server.txt)
                 {
                     Array.Sort(Maps, 0, NumMaps, comp_qual);
                     is_map_not_exist = AreSomeOsmMapsNotExist();
+                    AreAnyCompletelyCoveredMapRemoved();
+                    double coverage = 0.0;
+                    for (int i = 0; i < NumBitmaps; i++)
+                    {
+                        if (!Maps[i].was_removed)
+                            coverage += Maps[i].overlap;
+                    }
+                    if (coverage == 0.0)
+                    {
+                        NumBitmaps = 64;
+                        is_map_not_exist = true;
+                    }
+                    else if (coverage < 0.98)
+                    {
+                        NumBitmaps = Math.Min(64, (int)(NumBitmaps / coverage + 3));
+                        is_map_not_exist = true;
+                    }
                     iteration_counter++;
                 }
                 while ((is_map_not_exist) && (iteration_counter < 5));
-
-                AreAnyCompletelyCoveredMapRemoved();
             }
         }
         public bool IsMapCompletelyCovered(int i, int j)
@@ -847,7 +857,7 @@ User-defined server (read server name from osm_server.txt)
             bool map_removed = false;
             for (int i = (NumBitmaps - 1); i >= 0; i--)
             {
-                if (Maps[i].overlap == 0.0) { continue; }
+                if (Maps[i].was_removed || Maps[i].overlap == 0.0) { continue; }
 
                 // check if map is completely covered by a map before
                 bool completely_covered = false;
@@ -877,7 +887,7 @@ User-defined server (read server name from osm_server.txt)
                 bool not_exist = false;
                 for (int i = 0; i < NumBitmaps; i++)
                 {
-                    if (Maps[i].overlap == 0.0) { continue; }
+                    if (Maps[i].was_removed || Maps[i].overlap == 0.0) { continue; }
 
                     // bitmap is null (i.e. we want to load it) - but it does not exist
                     if ((Maps[i].bmp == null) && (File.Exists(Maps[i].fname) == false))
@@ -1380,10 +1390,10 @@ User-defined server (read server name from osm_server.txt)
             {
                 double last_x = PlotLong[PlotSize - 1];
                 double last_y = PlotLat[PlotSize - 1];
-                DataLongMin = last_x - Meter2Long * 100.0;
-                DataLongMax = last_x + Meter2Long * 100.0;
-                DataLatMin = last_y - Meter2Lat * 100.0;
-                DataLatMax = last_y + Meter2Lat * 100.0;
+                DataLongMin = last_x - Meter2Long * DefaultZoomRadius;
+                DataLongMax = last_x + Meter2Long * DefaultZoomRadius;
+                DataLatMin = last_y - Meter2Lat * DefaultZoomRadius;
+                DataLatMax = last_y + Meter2Lat * DefaultZoomRadius;
             }
             else
             {

@@ -133,6 +133,8 @@
     <EmbeddedResource Include="Graphics\menu_p.jpg" />
     <EmbeddedResource Include="Graphics\lap.jpg" />
     <EmbeddedResource Include="Graphics\lap_p.jpg" />
+    <EmbeddedResource Include="Graphics\recall.jpg" />
+    <EmbeddedResource Include="Graphics\recall_p.jpg" />
     <Content Include="Properties\icon2.ico" />
     <EmbeddedResource Include="Graphics\pause_mode.jpg" />
     <EmbeddedResource Include="Graphics\pause_p.jpg" />

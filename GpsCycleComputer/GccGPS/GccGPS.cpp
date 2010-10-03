@@ -748,7 +748,7 @@ void ParseGPRMC( std::vector<std::string> &words)
 }
 
 //-----------------------------------------------------------------------------
-// Open handle to GPS port, COM0: ... COM14:
+// Open handle to GPS port, COM0: ... COM12:     13=filemode (\nmea.txt)     100..112=logRawNmea (\tmp.txt)
 
 HANDLE __hGpsPort = INVALID_HANDLE_VALUE;  // handle to the GPS com port
 
@@ -756,9 +756,16 @@ std::string __save_str = "";               // buffer to store uncomplete data, w
 
 
 bool filemode = false;
+bool logRawNmea = false;
 extern "C" __declspec(dllexport) int GccOpenGps(int com_port, int rate)
 {
 	wchar_t comport[10];
+	if(com_port >= 100)
+	{
+		logRawNmea = true;
+		com_port -= 100;
+	}
+	else { logRawNmea = false; }
 	if(com_port == 13)
 	{
 		wcscpy(comport, L"\\nmea.txt");
@@ -862,10 +869,12 @@ else if(com_port == 14) __hGpsPort = CreateFile(L"COM14:",GENERIC_READ|GENERIC_W
     __save_str = "";
     __read_lock = false;
 
-#ifdef WRITE_LINES_TO_FILE
-    FILE *file = fopen("\\tmp.txt", "w");
-    fprintf(file, "");
-#endif
+	if (logRawNmea)
+	{
+		FILE *file = fopen("\\tmp.txt", "w");
+		fprintf(file, "");
+		fclose(file);
+	}
 
     return 1;
 }
@@ -907,13 +916,14 @@ extern "C" __declspec(dllexport) int GccReadGps(int &hour, int &min, int &sec,  
     const int BUF_SIZE = 4096;
     DWORD dwBytesRead;
     char buf[BUF_SIZE+1];
-
     int return_status = 0;
+	FILE *file = NULL;
 
-#ifdef WRITE_LINES_TO_FILE
-    FILE *file = fopen("\\tmp.txt", "a");
-    fprintf(file, "File handle status: %d\n", (__hGpsPort != INVALID_HANDLE_VALUE ? 1 : 0));
-#endif
+	if (logRawNmea)
+	{
+		file = fopen("\\tmp.txt", "a");
+		fprintf(file, "File handle status: %d\n", (__hGpsPort != INVALID_HANDLE_VALUE ? 1 : 0));
+	}
 
     // reset output vars
     hour = 0;       min = 0;         sec = 0;
@@ -922,7 +932,11 @@ extern "C" __declspec(dllexport) int GccReadGps(int &hour, int &min, int &sec,  
     max_snr = 0;    speed = -1.0;    heading = -1.0;
 
     if(__hGpsPort == INVALID_HANDLE_VALUE)
-        { return return_status; }
+    { 
+		if (logRawNmea)
+			fclose(file);
+		return return_status;
+	}
 
     // read file
     __read_lock = true;
@@ -934,9 +948,8 @@ extern "C" __declspec(dllexport) int GccReadGps(int &hour, int &min, int &sec,  
                            );
     __read_lock = false;
 
-#ifdef WRITE_LINES_TO_FILE
-    fprintf(file, "GPS status: %d, read status: %d, bytes read: %d \n", GccGpsStatus(), (status ? 1 : 0), dwBytesRead);
-#endif
+	if (logRawNmea)
+		fprintf(file, "GPS status: %d, read status: %d, bytes read: %d \n", GccGpsStatus(), (status ? 1 : 0), dwBytesRead);
 
     // clear errors if any
     if(status == false)
@@ -944,7 +957,9 @@ extern "C" __declspec(dllexport) int GccReadGps(int &hour, int &min, int &sec,  
         DWORD dwErrors;
         COMSTAT ComStat;
         ClearCommError(__hGpsPort,&dwErrors,&ComStat);
-        return return_status;
+		if (logRawNmea)
+			fclose(file);
+		return return_status;
     }
 
     // terminate string
@@ -954,7 +969,9 @@ extern "C" __declspec(dllexport) int GccReadGps(int &hour, int &min, int &sec,  
     if(dwBytesRead == 0)
     {
         return_status |= READ_NO_ERRORS;
-        return return_status;
+		if (logRawNmea)
+			fclose(file);
+		return return_status;
     }
 
     // has some data
@@ -976,9 +993,9 @@ extern "C" __declspec(dllexport) int GccReadGps(int &hour, int &min, int &sec,  
     if(dwBytesRead > 600)
 	{
 		//MessageBeep(0);	//test
-#ifdef WRITE_LINES_TO_FILE
-		fprintf(file, "Warning: Too much Bytes read: %d\n", dwBytesRead);
-#endif
+		if (logRawNmea)
+			fprintf(file, "Warning: Too much Bytes read: %d\n", dwBytesRead);
+
 		if(dwBytesRead == BUF_SIZE)
 		{
 			PurgeComm(__hGpsPort, PURGE_RXCLEAR);
@@ -1018,16 +1035,14 @@ extern "C" __declspec(dllexport) int GccReadGps(int &hour, int &min, int &sec,  
         }
     }
 
-#ifdef WRITE_LINES_TO_FILE
-    fprintf(file, "------------ received %d lines ------------ \n", lines.size() );
-#endif
+	if (logRawNmea)
+		fprintf(file, "------------ received %d lines ------------ \n", lines.size() );
 
     // parse lines
     for(unsigned int i = 0; i < lines.size(); i++)
     {
-#ifdef WRITE_LINES_TO_FILE
-        fprintf(file, "%s\n", lines[i].c_str());
-#endif
+		if (logRawNmea)
+			fprintf(file, "%s\n", lines[i].c_str());
 
         // process valid lines only, i.e. the one with correct checksum
         if(IsLineValid(lines[i]))
@@ -1064,16 +1079,12 @@ extern "C" __declspec(dllexport) int GccReadGps(int &hour, int &min, int &sec,  
                 speed = ___speed; heading = ___heading;
             }
         }
-#ifdef WRITE_LINES_TO_FILE
-		else
-		{
-			fprintf(file, "^invalid line\n");
-		}
-#endif
+		else if (logRawNmea)
+		{	fprintf(file, "^invalid line\n"); }
     }
-#ifdef WRITE_LINES_TO_FILE
-    fclose(file);
-#endif
+
+	if (logRawNmea)
+		fclose(file);
 
     /*  debug write (if want to dump the read buffer, if line chopping did not work)
     if(dwBytesRead)

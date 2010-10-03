@@ -1,18 +1,32 @@
 GPS Cycle Computer GCC
+
+
 ********* version 4.4 *************
 new features:
 - context menu
 - alternate speed calculated from position change
 - Elevation Loss and Altitude Delta
+- save option sets (to recall)
+- day and night scheme
+- command line interface to load settings, tracks or track2follow
+- slope calculation and display in %
+- log of raw NMEA (only for developers and serious tester)
 
 improvements:
 - calculation of Elevation Gain
 - calculation of Stoppage Time
 - averaging (smoothing) of speed
+- displaying of (osm)map with missing zoom levels
+- shift menu page
+- default zoom can be configured
+- settings to recall can be named
+- beep when excluding stoppage time
+- default value GPS-AVG = 2
 
 bugfixes:
 - custom background and foreground
-
+- empty map directories
+- recall used map setting
 
 
 ********* version 4.3 *************

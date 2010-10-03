@@ -1,5 +1,5 @@
 //#define DEBUG
-#define BETA
+//#define BETA
 
 using System;
 using System.Runtime.InteropServices;
@@ -71,9 +71,9 @@ namespace GpsCycleComputer
 
         NoBackgroundPanel NoBkPanel = new NoBackgroundPanel();
 
-        PictureButton button1 = new PictureButton();
-        PictureButton button2 = new PictureButton();
-        PictureButton button3 = new PictureButton();
+        public PictureButton button1 = new PictureButton();
+        public PictureButton button2 = new PictureButton();
+        public PictureButton button3 = new PictureButton();
         PictureButton button4 = new PictureButton();
         PictureButton button5 = new PictureButton();
         PictureButton button6 = new PictureButton();
@@ -84,11 +84,9 @@ namespace GpsCycleComputer
         Bitmap BlankImage;
         Bitmap CWImage;
 
-
-
-
         public static Color bkColor;
         public static Color foColor;
+        bool dayScheme = false;
 
         /* Note units for all internal vars: 
          * time : sec  
@@ -156,7 +154,6 @@ namespace GpsCycleComputer
         double MaxSpeed = 0.0;
         double Distance = 0.0;
         double OldX = 0.0, OldY = 0.0;
-        double OldCurrentX, OldCurrentY;
         DateTime OldTime;
 
         int OldT = 0;
@@ -164,6 +161,7 @@ namespace GpsCycleComputer
         // Current time, X/Y relative to starting point, abs height Z and current speed
         int CurrentTimeSec = 0;
         int CurrentStoppageTimeSec = 0;
+        bool beepOnStartStop = false;
         double CurrentLat = 0.0, CurrentLong = 0.0;
         double CurrentX, CurrentY;
         double CurrentAlt = Int16.MinValue;
@@ -171,8 +169,12 @@ namespace GpsCycleComputer
         double m2feet = 1.0;        //convertion factor m to feet
         bool CurrentAltInvalid = true;
         double ReferenceAlt = Int16.MaxValue;
-        const double AltThreshold = 3.0;
+        const double AltThreshold = 5.0;        //gain and loss below theshold will be ignored
         double ElevationGain = 0.0;
+        double ElevationSlope = 0.0;
+        double ReferencAltSlope = Int16.MinValue;
+        double ReferenceXSlope = 0.0;
+        double ReferenceYSlope = 0.0;
         double CurrentSpeed = Int16.MinValue*0.1;
         string CurrentFileName = "";
         string CurrentStatusString = "gps off ";
@@ -182,11 +184,12 @@ namespace GpsCycleComputer
         double CurrentVy = 0.0;     //speed in y direction in m/s
         double CurrentV = Int16.MinValue * 0.1;      //speed in km/h
 
-        int MainConfigAlt2display = 0;  //0=gain; 1=loss; 2=delta
+        int MainConfigAlt2display = 0;  //0=gain; 1=loss; 2=delta; 3=slope
         int MainConfigSpeedSource = 0;  //0=from gps; 1=from position; 2=both
 
         // baud rates
         int[] BaudRates = new int[6] { 4800, 9600, 19200, 38400, 57600, 115200 };
+        bool logRawNmea = false;
 
         // get pass the command line arguments
         static string FirstArgument;
@@ -247,9 +250,6 @@ namespace GpsCycleComputer
         bool MapsFolderSetupMode = false;
         // current directory for maps files
         string MapsFilesDirectory;
-        // current directory for maps files
-        int LastOsmMapDownloadIndex = 0;
-
 
         // vars to select which file type to open
         const byte FileOpenMode_Gcc = 0;
@@ -266,10 +266,11 @@ namespace GpsCycleComputer
         const byte BufferDrawModeMain = 0;
         const byte BufferDrawModeMaps = 1;
         const byte BufferDrawModeGraph = 2;
-        const byte BufferDrawModeMenu = 3;      //only to have information of the current displayed page
+        public const byte BufferDrawModeMenu = 3;      //only to have information of the current displayed page
         const byte BufferDrawModeOptions = 4;
         const byte BufferDrawModeLap = 5;
-        byte BufferDrawMode = BufferDrawModeMain;
+        const byte BufferDrawModeFiledialog = 6;
+        public byte BufferDrawMode = BufferDrawModeMain;
 
         // main screen drawing vars (to set position)
         int[] MGridX = new int[4] { 0, 263, 340, 480 };
@@ -378,11 +379,11 @@ namespace GpsCycleComputer
         private CheckBox checkLapBeep;
         private Button buttonLapExport;
         private Panel panelCwLogo;
+        private Label labelDefaultZoom;
+        private NumericUpDown numericZoomRadius;
 
         private ContextMenu cMenu1 = new ContextMenu();
-        private MenuItem cMenuItem1 = new MenuItem();
-        private MenuItem cMenuItem2 = new MenuItem();
-        private MenuItem cMenuItem3 = new MenuItem();
+        private MenuItem[] cMenuItem = new MenuItem[] { new MenuItem(), new MenuItem(), new MenuItem(), new MenuItem() };
 
         // c-tor. Create classes used, init some components
         public Form1()
@@ -404,7 +405,7 @@ namespace GpsCycleComputer
             comboBoxUseGccDllCom.SelectedIndex = 4;
             checkBoxUseGccDll.Checked = true;
             checkPlotLine2AsDots.Checked = true;
-            comboMultiMaps.SelectedIndex = 0;
+            comboMultiMaps.SelectedIndex = 1;
             comboMapDownload.SelectedIndex = 0;
             comboBoxCwLogMode.SelectedIndex = 0;
             comboLapOptions.SelectedIndex = 0;
@@ -420,24 +421,25 @@ namespace GpsCycleComputer
             CurrentDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().GetModules()[0].FullyQualifiedName);
             if (CurrentDirectory == "\\") { CurrentDirectory = ""; }
 
-            ApplyCustomBackground();        //110ms
             CreateCustomControls();         //3350ms
 
             DoOrientationSwitch();          //11ms, 61ms in landscape
                                             //8s until here
             LockResize = false;
 
-            this.NoBkPanel.ContextMenu = cMenu1;
             cMenu1.Popup += new EventHandler(cMenu1_Popup);
-            cMenuItem1.Click += new EventHandler(cMenuItem_Click);
-            cMenuItem2.Click += new EventHandler(cMenuItem_Click);
-            cMenuItem3.Click += new EventHandler(cMenuItem_Click);
+            for (int i = 0; i < 4; i++)
+            { cMenuItem[i].Click += new EventHandler(cMenuItem_Click); }
+            this.NoBkPanel.ContextMenu = cMenu1;
             mPage.ContextMenu = cMenu1;
+            mPage.form1ref = this;
         }
 
         private void cMenu1_Popup(object sender, EventArgs e)
         {
             cMenu1.MenuItems.Clear();
+            for (int i = 0; i < 4; i++)
+            { cMenuItem[i].Checked = false; }
             int ClientMouseY = MousePosition.Y - Screen.PrimaryScreen.WorkingArea.Top;
             int numItems = 0;
 
@@ -447,23 +449,35 @@ namespace GpsCycleComputer
                 {
                     if (MousePosition.X < MGridX[2])
                     {
-                        cMenuItem1.Text = "ex stop";   //Time
-                        cMenuItem2.Text = "inc stop";
-                        numItems = 2;
+                        cMenuItem[0].Text = "inc stop";   //Time
+                        cMenuItem[1].Text = "ex stop";
+                        cMenuItem[2].Text = "ex stop + beep";
+                        numItems = 3;
+                        int i = 0;
+                        if (checkExStopTime.Checked)
+                        {
+                            i++;
+                            if (beepOnStartStop) { i++; }
+                        }
+                        cMenuItem[i].Checked = true;
                     }
                     else
                     {
-                        //Clock
+                        cMenuItem[0].Text = "night scheme";   //Clock
+                        cMenuItem[1].Text = "day scheme";
+                        numItems = 2;
+                        cMenuItem[dayScheme ? 1 : 0].Checked = true;
                     }
                 }
                 else if (ClientMouseY < MGridY[3])
                 {
                     if (MousePosition.X < MGridX[1])
                     {
-                        cMenuItem1.Text = "from gps";        //Speed
-                        cMenuItem2.Text = "from position";
-                        cMenuItem3.Text = "both";
+                        cMenuItem[0].Text = "from gps";        //Speed
+                        cMenuItem[1].Text = "from position";
+                        cMenuItem[2].Text = "both";
                         numItems = 3;
+                        cMenuItem[MainConfigSpeedSource].Checked = true;
                     }
                     else if (ClientMouseY < MGridY[2])
                     {
@@ -480,18 +494,28 @@ namespace GpsCycleComputer
                     {
                         //Distance
                     }
-                    else if (ClientMouseY < MGridY[4])
+                    else if (comboLapOptions.SelectedIndex == 0)
                     {
-                        cMenuItem1.Text = "absolute";   //Altitude cur
-                        cMenuItem2.Text = "relative";
-                        numItems = 2;
+                        if (ClientMouseY < MGridY[4])
+                        {
+                            cMenuItem[0].Text = "absolute";   //Altitude cur
+                            cMenuItem[1].Text = "relative";
+                            numItems = 2;
+                            cMenuItem[checkRelativeAlt.Checked ? 1 : 0].Checked = true;
+                        }
+                        else
+                        {
+                            cMenuItem[0].Text = "gain";     //Altitude gain
+                            cMenuItem[1].Text = "loss";
+                            cMenuItem[2].Text = "delta";
+                            cMenuItem[3].Text = "slope";
+                            numItems = 4;
+                            cMenuItem[MainConfigAlt2display].Checked = true;
+                        }
                     }
                     else
                     {
-                        cMenuItem1.Text = "gain";     //Altitude gain
-                        cMenuItem2.Text = "loss";
-                        cMenuItem3.Text = "delta";
-                        numItems = 3;
+                                        //Lap
                     }
                 }
                 else if (ClientMouseY < MGridY[7])
@@ -502,7 +526,11 @@ namespace GpsCycleComputer
                     }
                     else
                     {
-                        //GPS
+                        cMenuItem[0].Text = "beep on gps fix";         //GPS
+                        cMenuItem[1].Text = "log raw nmea";
+                        numItems = 2;
+                        if (checkBeepOnFix.Checked) { cMenuItem[0].Checked = true; }
+                        if (logRawNmea) { cMenuItem[1].Checked = true; }
                     }
                 }
             }
@@ -510,29 +538,52 @@ namespace GpsCycleComputer
             {
                 //MenuPage.
                 MenuPage.BFkt bfkt = (MenuPage.BFkt)mPage.getButtonIndex(MousePosition.X, MousePosition.Y);
-                numItems = 1;
-                if (bfkt == MenuPage.BFkt.recall1)
-                    cMenuItem1.Text = "save settings1";
-                else if (bfkt == MenuPage.BFkt.recall2)
-                    cMenuItem1.Text = "save settings2";
-                else if (bfkt == MenuPage.BFkt.recall3)
-                    cMenuItem1.Text = "save settings3";
+                if (bfkt == MenuPage.BFkt.recall1 || bfkt == MenuPage.BFkt.recall2 || bfkt == MenuPage.BFkt.recall3)
+                {
+                    cMenuItem[0].Text = "save settings";
+                    cMenuItem[1].Text = "change name";
+                    numItems = 2;
+                }
                 else
                     numItems = 0;
             }
-            if (numItems >= 1) cMenu1.MenuItems.Add(cMenuItem1);
-            if (numItems >= 2) cMenu1.MenuItems.Add(cMenuItem2);
-            if (numItems >= 3) cMenu1.MenuItems.Add(cMenuItem3);
+            else if (BufferDrawMode == BufferDrawModeGraph)
+            {
+                cMenuItem[0].Text = "autoscale";
+                cMenuItem[1].Text = "over time";
+                cMenuItem[2].Text = "over distance";
+                numItems = 3;
+                if (GraphScale == GraphAutoscale) cMenuItem[0].Checked = true;
+                if (GraphOverDistance) cMenuItem[2].Checked = true;
+                else cMenuItem[1].Checked = true;
+            }
+
+            for (int i = 0; i < numItems; i++)
+            {
+                cMenu1.MenuItems.Add(cMenuItem[i]);
+            }
         }
        
 
         void cMenuItem_Click(object sender, EventArgs e)
         {
-            if (((MenuItem)sender).Text == "ex stop")
-                checkExStopTime.Checked = true;
-            else if (((MenuItem)sender).Text == "inc stop")
-                checkExStopTime.Checked = false;
+            if (((MenuItem)sender).Text == "inc stop")
+            { checkExStopTime.Checked = false; beepOnStartStop = false; }
+            else if (((MenuItem)sender).Text == "ex stop")
+            { checkExStopTime.Checked = true; beepOnStartStop = false; }
+            else if (((MenuItem)sender).Text == "ex stop + beep")
+            { checkExStopTime.Checked = true; beepOnStartStop = true; }
 
+            else if (((MenuItem)sender).Text == "night scheme")
+            {
+                dayScheme = false;
+                ApplyCustomBackground();
+            }
+            else if (((MenuItem)sender).Text == "day scheme")
+            {
+                dayScheme = true;
+                ApplyCustomBackground();
+            }
             else if (((MenuItem)sender).Text == "from gps")
                 MainConfigSpeedSource = 0;
             else if (((MenuItem)sender).Text == "from position")
@@ -551,13 +602,33 @@ namespace GpsCycleComputer
                 MainConfigAlt2display = 1;
             else if (((MenuItem)sender).Text == "delta")
                 MainConfigAlt2display = 2;
+            else if (((MenuItem)sender).Text == "slope")
+                MainConfigAlt2display = 3;
 
-            else if (((MenuItem)sender).Text == "save settings1")
-                SaveSettings(CurrentDirectory + "\\GpsCycleComputer1.dat");
-            else if (((MenuItem)sender).Text == "save settings2")
-                SaveSettings(CurrentDirectory + "\\GpsCycleComputer2.dat");
-            else if (((MenuItem)sender).Text == "save settings3")
-                SaveSettings(CurrentDirectory + "\\GpsCycleComputer3.dat");
+            else if (((MenuItem)sender).Text == "beep on gps fix")
+                checkBeepOnFix.Checked = !checkBeepOnFix.Checked;
+            else if (((MenuItem)sender).Text == "log raw nmea")
+                logRawNmea = !logRawNmea;
+            // menu page
+            else if (((MenuItem)sender).Text == "save settings")
+            {
+                int bfkt = mPage.getButtonIndex(MousePosition.X, MousePosition.Y);
+                SaveSettings(CurrentDirectory + "\\" + mPage.mBAr[bfkt].text + ".dat");
+            }
+            else if (((MenuItem)sender).Text == "change name")
+            {
+                int bfkt = mPage.getButtonIndex(MousePosition.X, MousePosition.Y);
+                string name = mPage.mBAr[bfkt].text;
+                if (Utils.InputBox("Rename", "input name", ref name) == DialogResult.OK)
+                    mPage.mBAr[bfkt].text = name;
+            }
+            // graph page
+            else if (((MenuItem)sender).Text == "autoscale")
+                if (GraphScale != GraphAutoscale) GraphScale = GraphAutoscale; else GraphScale = GraphRedraw;
+            else if (((MenuItem)sender).Text == "over time")
+                GraphOverDistance = false;
+            else if (((MenuItem)sender).Text == "over distance")
+                GraphOverDistance = true;
 
             else
                 MessageBox.Show("no method for menu: " + ((MenuItem)sender).Text);
@@ -571,10 +642,8 @@ namespace GpsCycleComputer
             bkColor = LoadBkColor();
             foColor = LoadForeColor();
 
-            // this one is not editable
-            tabPageAbout.BackColor = Color.FromArgb(34, 34, 34);
-            labelRevision.BackColor = Color.FromArgb(34, 34, 34);
-            labelRevision.ForeColor = Color.FromArgb(255, 255, 255);
+            labelRevision.BackColor = bkColor;
+            labelRevision.ForeColor = foColor;
 
             tabBlank.BackColor = bkColor;
             tabBlank1.BackColor = bkColor;
@@ -662,6 +731,8 @@ namespace GpsCycleComputer
             buttonLapExport.BackColor = bkColor; buttonLapExport.ForeColor = foColor;
             textLapOptions.BackColor = bkColor; textLapOptions.ForeColor = foColor;
             mPage.BackColor = bkColor; mPage.ForeColor = foColor;
+            labelDefaultZoom.BackColor = bkColor; labelDefaultZoom.ForeColor = foColor;
+            numericZoomRadius.BackColor = bkColor; numericZoomRadius.ForeColor = foColor;
 
             tabPageOptions.BackColor = bkColor;
             tabPageGps.BackColor = bkColor;
@@ -695,7 +766,7 @@ namespace GpsCycleComputer
         }
         private Color LoadBkColor()
         {
-            string file_name = CurrentDirectory + "\\bk_color.jpg";
+            string file_name = CurrentDirectory + (dayScheme ? "\\bk_color.jpg" : "\\bk_color_night.jpg");
 #if DEBUG
 #else
             if (File.Exists(file_name))
@@ -705,11 +776,11 @@ namespace GpsCycleComputer
             }
 #endif
             // not exists, load internal one
-            return Color.FromArgb(34, 34, 34);
+            return dayScheme ? Color.FromArgb(255, 255, 255) : Color.FromArgb(34, 34, 34);
         }
         private Color LoadForeColor()
         {
-            string file_name = CurrentDirectory + "\\fore_color.jpg";
+            string file_name = CurrentDirectory + (dayScheme ? "\\fore_color.jpg" : "\\fore_color_night.jpg");
 #if DEBUG
 #else
             if (File.Exists(file_name))
@@ -719,7 +790,7 @@ namespace GpsCycleComputer
             }
 #endif
             // not exists, load internal one
-            return Color.FromArgb(255, 255, 255);
+            return dayScheme ? Color.FromArgb(34, 34, 34) : Color.FromArgb(255, 255, 255);
         }
 
         private void CreateCustomControls()
@@ -925,6 +996,8 @@ namespace GpsCycleComputer
             ScaleControl(numericGpxTimeShift);
             ScaleControl(labelGpxTimeShift);
             ScaleControl(checkMapsWhiteBk);
+            ScaleControl(labelDefaultZoom);
+            ScaleControl(numericZoomRadius);
 
             ScaleControl(comboLapOptions);
             ScaleControl(checkLapBeep);
@@ -987,6 +1060,7 @@ namespace GpsCycleComputer
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+            this.numericZoomRadius = new System.Windows.Forms.NumericUpDown();
             this.labelRevision = new System.Windows.Forms.Label();
             this.tabOpenFile = new System.Windows.Forms.Panel();
             this.listBoxFiles = new System.Windows.Forms.ListBox();
@@ -1057,6 +1131,7 @@ namespace GpsCycleComputer
             this.labelDropFirst = new System.Windows.Forms.Label();
             this.tabPageMainScr = new System.Windows.Forms.TabPage();
             this.tabPageMapScr = new System.Windows.Forms.TabPage();
+            this.labelDefaultZoom = new System.Windows.Forms.Label();
             this.tabPageKmlGpx = new System.Windows.Forms.TabPage();
             this.checkGpxSpeedMs = new System.Windows.Forms.CheckBox();
             this.tabPageLiveLog = new System.Windows.Forms.TabPage();
@@ -1079,6 +1154,34 @@ namespace GpsCycleComputer
             this.tabPageLaps.SuspendLayout();
             this.tabPageAbout.SuspendLayout();
             this.SuspendLayout();
+            // 
+            // numericZoomRadius
+            // 
+            this.numericZoomRadius.Increment = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.numericZoomRadius.Location = new System.Drawing.Point(322, 360);
+            this.numericZoomRadius.Maximum = new decimal(new int[] {
+            10000,
+            0,
+            0,
+            0});
+            this.numericZoomRadius.Minimum = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.numericZoomRadius.Name = "numericZoomRadius";
+            this.numericZoomRadius.Size = new System.Drawing.Size(155, 36);
+            this.numericZoomRadius.TabIndex = 52;
+            this.numericZoomRadius.Value = new decimal(new int[] {
+            100,
+            0,
+            0,
+            0});
+            this.numericZoomRadius.ValueChanged += new System.EventHandler(this.numericZoomRadiusChanged);
             // 
             // labelRevision
             // 
@@ -1506,21 +1609,9 @@ namespace GpsCycleComputer
             // comboMultiMaps
             // 
             this.comboMultiMaps.Items.Add("off");
-            this.comboMultiMaps.Items.Add("2 maps, 1x zoom");
-            this.comboMultiMaps.Items.Add("2 maps, 2x zoom");
-            this.comboMultiMaps.Items.Add("2 maps, 4x zoom");
-            this.comboMultiMaps.Items.Add("3 maps, 1x zoom");
-            this.comboMultiMaps.Items.Add("3 maps, 2x zoom");
-            this.comboMultiMaps.Items.Add("3 maps, 4x zoom");
-            this.comboMultiMaps.Items.Add("4 maps, 1x zoom");
-            this.comboMultiMaps.Items.Add("4 maps, 2x zoom");
-            this.comboMultiMaps.Items.Add("4 maps, 4x zoom");
-            this.comboMultiMaps.Items.Add("6 maps, 1x zoom");
-            this.comboMultiMaps.Items.Add("6 maps, 2x zoom");
-            this.comboMultiMaps.Items.Add("6 maps, 4x zoom");
-            this.comboMultiMaps.Items.Add("8 maps, 1x zoom");
-            this.comboMultiMaps.Items.Add("8 maps, 2x zoom");
-            this.comboMultiMaps.Items.Add("8 maps, 4x zoom");
+            this.comboMultiMaps.Items.Add("multi maps, 1x zoom");
+            this.comboMultiMaps.Items.Add("multi maps, 2x zoom");
+            this.comboMultiMaps.Items.Add("multi maps, 4x zoom");
             this.comboMultiMaps.Location = new System.Drawing.Point(141, 255);
             this.comboMultiMaps.Name = "comboMultiMaps";
             this.comboMultiMaps.Size = new System.Drawing.Size(336, 41);
@@ -1746,7 +1837,7 @@ namespace GpsCycleComputer
             this.tabPageGps.Controls.Add(this.numericGeoID);
             this.tabPageGps.Location = new System.Drawing.Point(0, 0);
             this.tabPageGps.Name = "tabPageGps";
-            this.tabPageGps.Size = new System.Drawing.Size(472, 469);
+            this.tabPageGps.Size = new System.Drawing.Size(480, 463);
             this.tabPageGps.Text = "GPS";
             // 
             // checkWgs84Alt
@@ -1777,7 +1868,7 @@ namespace GpsCycleComputer
             this.numericAvg.Size = new System.Drawing.Size(100, 36);
             this.numericAvg.TabIndex = 46;
             this.numericAvg.Value = new decimal(new int[] {
-            1,
+            2,
             0,
             0,
             0});
@@ -1827,6 +1918,8 @@ namespace GpsCycleComputer
             // 
             // tabPageMapScr
             // 
+            this.tabPageMapScr.Controls.Add(this.labelDefaultZoom);
+            this.tabPageMapScr.Controls.Add(this.numericZoomRadius);
             this.tabPageMapScr.Controls.Add(this.checkMapsWhiteBk);
             this.tabPageMapScr.Controls.Add(this.labelLine2Opt2);
             this.tabPageMapScr.Controls.Add(this.labelKmlOpt2);
@@ -1846,6 +1939,13 @@ namespace GpsCycleComputer
             this.tabPageMapScr.Name = "tabPageMapScr";
             this.tabPageMapScr.Size = new System.Drawing.Size(472, 469);
             this.tabPageMapScr.Text = "Map screen";
+            // 
+            // labelDefaultZoom
+            // 
+            this.labelDefaultZoom.Location = new System.Drawing.Point(2, 360);
+            this.labelDefaultZoom.Name = "labelDefaultZoom";
+            this.labelDefaultZoom.Size = new System.Drawing.Size(314, 36);
+            this.labelDefaultZoom.Text = "Default zoom [radius in m]";
             // 
             // tabPageKmlGpx
             // 
@@ -1994,7 +2094,7 @@ namespace GpsCycleComputer
                     Form1.FirstArgument = args[0];
                 }
             }
-
+            
             Application.Run(new Form1());
         }
 
@@ -2005,25 +2105,36 @@ namespace GpsCycleComputer
             IoFilesDirectory = CurrentDirectory + "\\tracks";
             MapsFilesDirectory = CurrentDirectory + "\\maps";
 
-            LoadSettings(CurrentDirectory + "\\GpsCycleComputer.dat");
+            // check if there are any args - then load the file
+            string parameterExt = Path.GetExtension(FirstArgument);
+            if (parameterExt == ".dat")
+                LoadSettings(FirstArgument);
+            else
+                LoadSettings(CurrentDirectory + "\\GpsCycleComputer.dat");
 
             // now allow to save setting on combo change
             DoNotSaveSettingsFlag = false;
 
-            // check if there are any args - then load the file
-            if (File.Exists(FirstArgument))
-            {
-                IoFilesDirectory = Path.GetDirectoryName(FirstArgument);
+            ApplyCustomBackground();
+
+            if (parameterExt == ".gcc")
                 LoadGcc(FirstArgument);
+
+            if (parameterExt != null)
+            {
+                IFileSupport fs = null;
+                if (parameterExt == ".gpx")
+                    fs = new GpxSupport();
+                else if (parameterExt == ".kml")
+                    fs = new KmlSupport();
+
+                if (fs != null)
+                    if (fs.Load(FirstArgument, PlotDataSize, ref Plot2ndLat, ref Plot2ndLong, ref Plot2ndT, out Counter2nd))
+                        labelFileName.SetText(Path.GetFileName(FirstArgument) + " loaded");   //loaded ok
             }
 
             // send indication to GPS driver to wake-up (if it is OFF)
             gps.startGpsService();
-
-            // load maps
-            CheckMapsDirectoryExists();
-            mapUtil.LoadMaps(MapsFilesDirectory);
-            LastOsmMapDownloadIndex = comboMapDownload.SelectedIndex;
 
             mapUtil.LoadCustomOsmServer(CurrentDirectory + "\\osm_server.txt");
 
@@ -2087,12 +2198,12 @@ namespace GpsCycleComputer
             BinaryReader wr = null;
             try
             {
-                fs = new FileStream(file_name, FileMode.OpenOrCreate);
+                fs = new FileStream(file_name, FileMode.Open);
                 wr = new BinaryReader(fs, Encoding.ASCII);
 
                 comboGpsPoll.SelectedIndex = wr.ReadInt32();
                 comboUnits.SelectedIndex = wr.ReadInt32();
-                wr.ReadInt32();  // not used anymore
+                beepOnStartStop = 1 == wr.ReadInt32();  // reused
                 checkExStopTime.Checked = 1 == wr.ReadInt32();
                 checkStopOnLow.Checked = 1 == wr.ReadInt32();
                 checkGpxRte.Checked = 1 == wr.ReadInt32();
@@ -2127,7 +2238,9 @@ namespace GpsCycleComputer
                 // and more ...
                 checkShowBkOff.Checked = 1 == wr.ReadInt32();
                 checkRelativeAlt.Checked = 1 == wr.ReadInt32();
-                comboMultiMaps.SelectedIndex = wr.ReadInt32();
+                int tmp = wr.ReadInt32();
+                if (tmp > 3) tmp = 1;               //to avoid Exception, because index shortened - remove in future releases?
+                comboMultiMaps.SelectedIndex = tmp;
 
                 // load MapsFilesDirectory
                 str_len = 0;
@@ -2141,6 +2254,7 @@ namespace GpsCycleComputer
                 {
                     MapsFilesDirectory = saved_name;
                     CheckMapsDirectoryExists();
+                    mapUtil.LoadMaps(MapsFilesDirectory);
                 }
 
                 // ---------- Crossingways option ----------------
@@ -2187,7 +2301,7 @@ namespace GpsCycleComputer
                 checkMapsWhiteBk.Checked = 1 == wr.ReadInt32();
                 FileExtentionToOpen = (byte)wr.ReadInt32();
                 checkOptLaps.Checked = 1 == wr.ReadInt32();
-                comboMapDownload.SelectedIndex = wr.ReadInt32();
+                comboMapDownload.SelectedIndex = wr.ReadInt32();         mapUtil.OsmTilesWebDownload = comboMapDownload.SelectedIndex;
                 checkOptMain.Checked = 1 == wr.ReadInt32();
                 checkUploadGpx.Checked = 1 == wr.ReadInt32();
 
@@ -2207,15 +2321,25 @@ namespace GpsCycleComputer
                 checkLapBeep.Checked = 1 == wr.ReadInt32();
                 GraphOverDistance = 1 == wr.ReadInt32();
                 importantNewsId = wr.ReadInt32();
-                
+
                 MainConfigSpeedSource = wr.ReadInt32();
                 MainConfigAlt2display = wr.ReadInt32();
+                dayScheme = 1 == wr.ReadInt32();
+                mapUtil.DefaultZoomRadius = wr.ReadInt32();         numericZoomRadius.Value = mapUtil.DefaultZoomRadius;
+                mPage.mBAr[(int)MenuPage.BFkt.recall1].text = wr.ReadString();
+                mPage.mBAr[(int)MenuPage.BFkt.recall2].text = wr.ReadString();
+                mPage.mBAr[(int)MenuPage.BFkt.recall3].text = wr.ReadString();
 
+            }
+            catch (FileNotFoundException)
+            {
+                MessageBox.Show("File not found: " + file_name, "Error",
+                                MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
             }
             catch (EndOfStreamException)
             {
                 MessageBox.Show("Unexpected EOF while reading " + file_name + " (Position " + fs.Position + ").\nUsing current (or default) Options for remainder.\n\nThis is ok if you have just updated to a newer version.", "Warning",
-                                MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
+                                MessageBoxButtons.OK, MessageBoxIcon.Asterisk, MessageBoxDefaultButton.Button1);
             }
             catch (Exception ee)
             {
@@ -2240,7 +2364,7 @@ namespace GpsCycleComputer
 
                 wr.Write(comboGpsPoll.SelectedIndex);
                 wr.Write(comboUnits.SelectedIndex);
-                wr.Write(0); // not used anymore
+                wr.Write((beepOnStartStop? 1 : 0)); // reused
                 wr.Write((checkExStopTime.Checked ? 1 : 0));
                 wr.Write((checkStopOnLow.Checked ? 1 : 0));
                 wr.Write((checkGpxRte.Checked ? 1 : 0));
@@ -2333,6 +2457,11 @@ namespace GpsCycleComputer
 
                 wr.Write(MainConfigSpeedSource);
                 wr.Write(MainConfigAlt2display);
+                wr.Write(dayScheme ? 1 : 0);
+                wr.Write((int)(numericZoomRadius.Value));
+                wr.Write(mPage.mBAr[(int)MenuPage.BFkt.recall1].text);
+                wr.Write(mPage.mBAr[(int)MenuPage.BFkt.recall2].text);
+                wr.Write(mPage.mBAr[(int)MenuPage.BFkt.recall3].text);
 
             }
             catch (Exception e)
@@ -2348,6 +2477,7 @@ namespace GpsCycleComputer
 
         int numsamples = 0;
         int goodsamples = 0;
+        bool moving = false;
         // main logging function to receive date from GPS
         private void GetGpsData()
         {
@@ -2408,6 +2538,7 @@ namespace GpsCycleComputer
                                     OldX = CurrentX; OldY = CurrentY;
                                     OldTime = position.Time;
                                     CurrentAltInvalid = true;
+                                    ReferencAltSlope = Int16.MinValue;
                                     if (MainConfigSpeedSource != 1 && position.SpeedValid)
                                     {
                                         CurrentSpeed = position.Speed * 1.852;
@@ -2431,9 +2562,6 @@ namespace GpsCycleComputer
                           
                                 double x, y;
                                 utmUtil.getXY(position.Latitude, position.Longitude, out x, out y);
-                                double deltax = x - OldX;
-                                double deltay = y - OldY;
-                                OldX = x; OldY = y;
                                 TimeSpan deltaT = position.Time - OldTime;
                                 double deltaT_s = deltaT.TotalSeconds;
                                 OldTime = position.Time;
@@ -2445,12 +2573,21 @@ namespace GpsCycleComputer
                                 //CurrentY = (CurrentY * (avg - 1) + y) / avg;
                                 CurrentX = ((CurrentX + CurrentVx * deltaT_s) * (avg - 1) + x) / avg;   //CurrentVx from last sample
                                 CurrentY = ((CurrentY + CurrentVy * deltaT_s) * (avg - 1) + y) / avg;
+                                double deltaX = CurrentX - OldX;
+                                double deltaY = CurrentY - OldY;
+                                OldX = CurrentX; OldY = CurrentY;
+                                double deltaXY = Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
+
                                 if (positionAltitudeValid)
                                 {
                                     if (CurrentAltInvalid)
                                     {   // initialize
                                         CurrentAlt = positionAltitude - (double)numericGeoID.Value;
                                         CurrentAltInvalid = false;
+                                        ReferencAltSlope = CurrentAlt;
+                                        ReferenceXSlope = CurrentX;
+                                        ReferenceYSlope = CurrentY;
+                                        ElevationSlope = 0.0;
                                     }
                                     else
                                     {   //averaging
@@ -2460,21 +2597,33 @@ namespace GpsCycleComputer
 
                                 if (GpsDataState == GpsInitVelo && deltaT_s > 0)
                                 {
-                                    CurrentVx = deltax / deltaT_s;      // m/s
-                                    CurrentVy = deltay / deltaT_s;
+                                    CurrentVx = deltaX / deltaT_s;      // m/s
+                                    CurrentVy = deltaY / deltaT_s;
                                     CurrentV = 3.6 * Math.Sqrt(CurrentVx * CurrentVx + CurrentVy * CurrentVy);  // 3.6* -> km/h
                                     GpsDataState++;     //=GpsAvg
                                 }
                                 else if (deltaT_s > 0)
                                 {
-                                    CurrentVx = (CurrentVx * (avg - 1) + (deltax / deltaT_s)) / avg;
-                                    CurrentVy = (CurrentVy * (avg - 1) + (deltay / deltaT_s)) / avg;
+                                    CurrentVx = (CurrentVx * (2*avg - 1) + (deltaX / deltaT_s)) / (2*avg);
+                                    CurrentVy = (CurrentVy * (2*avg - 1) + (deltaY / deltaT_s)) / (2*avg);
                                     CurrentV = 3.6 * Math.Sqrt(CurrentVx * CurrentVx + CurrentVy * CurrentVy);
+                                }
+
+                                if (ReferencAltSlope != Int16.MinValue)     // slope
+                                {
+                                    double deltaS = Math.Sqrt((CurrentX - ReferenceXSlope) * (CurrentX - ReferenceXSlope) + (CurrentY - ReferenceYSlope) * (CurrentY - ReferenceYSlope));
+                                    if (deltaS > 2)        // not too short distance
+                                    {
+                                        ElevationSlope = (ElevationSlope * (2*avg - 1) + ((CurrentAlt - ReferencAltSlope) / deltaS)) / (2*avg);
+                                        ReferencAltSlope = CurrentAlt;
+                                        ReferenceXSlope = CurrentX;
+                                        ReferenceYSlope = CurrentY;
+                                    }
                                 }
 
                                 if (MainConfigSpeedSource == 1)
                                 {
-                                    CurrentSpeed = CurrentV;    //CurrentVx,y is averaged  -  average CurrentV anyway?
+                                    CurrentSpeed = CurrentV;    //CurrentVx,y is averaged  -  average CurrentV anyway? better increase avg of CurrentVx,y because of sign-information
                                 }
                                 else
                                 {
@@ -2508,12 +2657,12 @@ namespace GpsCycleComputer
                                             StartTimeUtc = DateTime.UtcNow;
                                             StartBattery = Utils.GetBatteryStatus();
                                             StartAlt = Int16.MinValue;
-                                            OldCurrentX = CurrentX; OldCurrentY = CurrentY;
                                             ReferenceAlt = Int16.MaxValue;
                                             LapStartD = 0; LapStartT = 0; LapNumber = 0;
                                             lapManualDistance = 0; lapManualClick = false;
                                             currentLap = ""; lastLap = "";
                                             textLapOptions.Text = "";
+                                            moving = false;
                                             //utmUtil.setReferencePoint(StartLat, StartLong);
                                             //OldX = 0.0; OldY = 0.0;
                                             //VeloAvgState = 2;       //start velocity calculation new because of serReferencePoint
@@ -2559,8 +2708,17 @@ namespace GpsCycleComputer
                                         if (CurrentSpeed < 1.0)
                                         {
                                             CurrentStoppageTimeSec += CurrentTimeSec - OldT;
+                                            if (moving && beepOnStartStop)
+                                                MessageBeep(BeepType.IconAsterisk);
+                                            moving = false;
                                         }
-                                        OldT = (int)double_total_sec;
+                                        else
+                                        {
+                                            if (!moving && beepOnStartStop)
+                                                MessageBeep(BeepType.Ok);
+                                            moving = true;
+                                        }
+                                        OldT = CurrentTimeSec;
 
                                         // Update max speed (in kmh)
                                         if (CurrentSpeed > MaxSpeed)
@@ -2569,9 +2727,7 @@ namespace GpsCycleComputer
                                         }
 
                                         // compute distance
-                                        //Distance += Math.Sqrt(deltax * deltax + deltay * deltay);
-                                        Distance += Math.Sqrt((CurrentX-OldCurrentX) * (CurrentX-OldCurrentX) + (CurrentY-OldCurrentY) * (CurrentY-OldCurrentY));
-                                        OldCurrentX = CurrentX; OldCurrentY = CurrentY;
+                                        Distance += deltaXY;
 
                                         // compute elevation gain
                                         if (positionAltitudeValid)
@@ -3066,8 +3222,7 @@ namespace GpsCycleComputer
             CurrentLiveLoggingString = "";
 
             // reset move/zoom vars (as we switch from fixed zoom into auto zoom mode)
-            mapUtil.ZoomValue = 1.0; mapUtil.ScreenShiftX = 0; mapUtil.ScreenShiftY = 0;
-            MousePosX = 0;   MousePosY = 0;    MouseMoving = false;
+            ResetMapPosition();
 
             Cursor.Current = Cursors.WaitCursor;
 
@@ -3197,6 +3352,7 @@ namespace GpsCycleComputer
         // read file
         private void buttonLoad_Click(object sender, EventArgs e)
         {
+            BufferDrawMode = BufferDrawModeFiledialog;
             if (Logging || Paused)
             {
                 if (MessageBox.Show("Can't open file while logging.\nStop active Logging and proceed?", null, MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1)
@@ -3275,7 +3431,7 @@ namespace GpsCycleComputer
                 MenuExec((MenuPage.BFkt)((Control)sender).Tag);
         }
 
-        void showButton(PictureButton b, MenuPage.BFkt fkt)
+        public void showButton(PictureButton b, MenuPage.BFkt fkt)
         {
             b.BackgroundImage = mPage.mBAr[(int)fkt].icon;
             b.PressedImage = mPage.mBAr[(int)fkt].icon_p;
@@ -3335,6 +3491,7 @@ namespace GpsCycleComputer
                     buttonLoad2Clear_Click(null, null); break;
 
                 case MenuPage.BFkt.exit:
+                    BufferDrawMode = BufferDrawModeMain;    //to avoid exception in mPage OnMouseUp()
                     this.Close();
                     Application.Exit(); break;
                 case MenuPage.BFkt.continu:
@@ -3347,11 +3504,11 @@ namespace GpsCycleComputer
                     break;
 
                 case MenuPage.BFkt.recall1:
-                    RecallSettings(CurrentDirectory + "\\GpsCycleComputer1.dat"); break;
+                    RecallSettings(CurrentDirectory + "\\" + mPage.mBAr[(int)MenuPage.BFkt.recall1].text + ".dat"); break;
                 case MenuPage.BFkt.recall2:
-                    RecallSettings(CurrentDirectory + "\\GpsCycleComputer2.dat"); break;
+                    RecallSettings(CurrentDirectory + "\\" + mPage.mBAr[(int)MenuPage.BFkt.recall2].text + ".dat"); break;
                 case MenuPage.BFkt.recall3:
-                    RecallSettings(CurrentDirectory + "\\GpsCycleComputer3.dat"); break;
+                    RecallSettings(CurrentDirectory + "\\" + mPage.mBAr[(int)MenuPage.BFkt.recall3].text + ".dat"); break;
 
                 case MenuPage.BFkt.backlight_off:
                     Utils.SwitchBacklight(); break;
@@ -3428,9 +3585,13 @@ namespace GpsCycleComputer
         private void RecallSettings(string filename)
         {
             if (File.Exists(filename))
+            {
                 LoadSettings(filename);
+                mPage.Invalidate();         //refresh ev. changed recall names
+                MessageBeep(BeepType.Ok);
+            }
             else
-                MessageBox.Show("File: " + filename + " does not exist", "Error",
+                MessageBox.Show("File does not exist:\n" + filename, "Error",
                                     MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
         }
 
@@ -3677,7 +3838,7 @@ namespace GpsCycleComputer
             GetSystemPowerState(ps, 12, ref pflag);
             
             //if (ps.StartsWith("on"))
-            if((pflag & 0x00010000) > 0)
+            if ((pflag & 0x00010000) > 0 || ps.StartsWith("on"))
             {
                 PowerPolicyNotify(PPN_APPBUTTONPRESSED, 0);   //KB; informs PowerManager PPN_APPBUTTONPRESSED; would switch backlight on (if manual off)
             }
@@ -3785,7 +3946,7 @@ namespace GpsCycleComputer
                 return 1;
             // activate code from GccDll, if option selected
             gps.setOptions(checkBoxUseGccDll.Checked,
-               comboBoxUseGccDllCom.SelectedIndex, // as we number from 0
+                comboBoxUseGccDllCom.SelectedIndex + (logRawNmea ? 100 : 0),    // + 100 indicates to log raw nmea data
                BaudRates[comboBoxUseGccDllRate.SelectedIndex]);
             int ret = gps.Open();
             if (ret != 1)
@@ -4220,6 +4381,11 @@ namespace GpsCycleComputer
             GpsLogCounter = 0;
         }
 
+        private void numericZoomRadiusChanged(object sender, EventArgs e)
+        {
+            mapUtil.DefaultZoomRadius = (int)numericZoomRadius.Value;
+        }
+
 
         // draw main screen ------------------------------------------------
         Bitmap BackBuffer = null;           // the bitmap we draw into
@@ -4382,7 +4548,7 @@ namespace GpsCycleComputer
             if (CurrentAlt == Int16.MinValue)
                 altitude_str = "---";
             else
-                altitude_str = (altitude * m2feet).ToString("0");
+                altitude_str = (altitude * m2feet).ToString("0.0");
 
             double averageSpeed = (time_to_use == 0) ? 0.0 : (Distance * 3.6 / time_to_use);
 
@@ -4473,6 +4639,7 @@ namespace GpsCycleComputer
 
             if (checkExStopTime.Checked) { exstop_info = "ex stop"; }
             else { exstop_info = "inc stop"; }
+            if (beepOnStartStop) { exstop_info += " b"; }
         }
         private void GetGpsSearchFlags(out string gps_status1, out string gps_status2)
         {
@@ -4558,7 +4725,8 @@ namespace GpsCycleComputer
             {
                 if (MainConfigAlt2display == 0) label1 = "gain";
                 else if (MainConfigAlt2display == 1) label1 = "loss";
-                else label1 = "delta";
+                else if (MainConfigAlt2display == 2) label1 = "delta";
+                else label1 = "slope";
                 DrawMainLabelOnRight(BackBufferGraphics, label1, MGridX[3], MGridY[4], 9.0f);
             }
 
@@ -4585,19 +4753,23 @@ namespace GpsCycleComputer
             DrawMainValues(BackBufferGraphics, speed_max, (MGridX[1] + MGridX[3]) / 2, MGridY[3], 20.0f * df);
 
             string altitude2;
-            if(MainConfigAlt2display == 0)
-                altitude2 = (ElevationGain * m2feet).ToString("0");
-            else if (MainConfigAlt2display == 1)
+            if(MainConfigAlt2display == 0)      //gain
+                altitude2 = (ElevationGain * m2feet).ToString("0.0");
+            else if (MainConfigAlt2display == 1)        //loss
             {
                 double ElevationLoss = 0.0;
                 if (StartAlt != Int16.MinValue) ElevationLoss = CurrentAlt - StartAlt - ElevationGain;
-                altitude2 = (ElevationLoss * m2feet).ToString("0");
+                altitude2 = (ElevationLoss * m2feet).ToString("0.0");
             }
-            else
+            else if (MainConfigAlt2display == 2)        //delta
             {
                 double ElevationDelta = 0.0;
                 if (StartAlt != Int16.MinValue) ElevationDelta = CurrentAlt - StartAlt;
-                altitude2 = (ElevationDelta * m2feet).ToString("0");
+                altitude2 = (ElevationDelta * m2feet).ToString("0.0");
+            }
+            else                                //slope
+            {
+                altitude2 = ElevationSlope.ToString("0.0%   ");
             }
 
             if (comboLapOptions.SelectedIndex > 0)
@@ -4680,7 +4852,7 @@ namespace GpsCycleComputer
          const byte GraphMove = 3;
          const byte GraphZooming = 4;
          const byte GraphZoom = 5;
-        const byte GraphRedraw = 6;
+         const byte GraphRedraw = 6;
         byte GraphScale = GraphAutoscale;
         enum MousePos : byte { none, top, bottom, left, right, middle };
         MousePos mousePos = MousePos.none;
@@ -5774,6 +5946,7 @@ namespace GpsCycleComputer
         // load second line - track to follow
         private void buttonLoadTrack2Follow_Click(object sender, EventArgs e)
         {
+            BufferDrawMode = BufferDrawModeFiledialog;
             FolderSetupMode = false;
             if (FileExtentionToOpen == FileOpenMode_2ndKml)
             {
@@ -6049,13 +6222,11 @@ namespace GpsCycleComputer
 
             if (DoNotSaveSettingsFlag) { return; }
 
-            if ((comboMapDownload.SelectedIndex != 0) && (LastOsmMapDownloadIndex == 0))
+            if (comboMapDownload.SelectedIndex != 0)
             {
                 MessageBox.Show("Remember to set correct (or new blank) folder for map download\n\nCheck that you are connected to internet", "Map download is ON",
                                 MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
             }
-
-            LastOsmMapDownloadIndex = comboMapDownload.SelectedIndex;
         }
 
         private void buttonHelp_Click(object sender, EventArgs e)
@@ -6111,5 +6282,6 @@ namespace GpsCycleComputer
                 if(fs != null) fs.Close();
             }
         }
+
     }
 }
