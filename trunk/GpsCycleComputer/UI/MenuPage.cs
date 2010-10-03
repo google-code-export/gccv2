@@ -6,6 +6,7 @@ namespace GpsCycleComputer
 {
     public class MenuPage : Control
     {
+        public Form1 form1ref;
         public struct MButton
         {
             public Bitmap icon;
@@ -53,9 +54,9 @@ namespace GpsCycleComputer
                                                   new MButton ("continue.jpg", "Continue", false),
                                                   new MButton ("lap.jpg", "Lap"),
 
-                                                  new MButton ("edit.jpg", "Recall 1"),
-                                                  new MButton ("edit.jpg", "Recall 2"),
-                                                  new MButton ("edit.jpg", "Recall 3"),
+                                                  new MButton ("recall.jpg", "Recall 1"),
+                                                  new MButton ("recall.jpg", "Recall 2"),
+                                                  new MButton ("recall.jpg", "Recall 3"),
 
                                                   new MButton ("bklight.jpg", "BKLight"),
                                                   new MButton ("checkpoint.jpg", "Input LatLon"),
@@ -104,7 +105,7 @@ namespace GpsCycleComputer
             load_2clear,
 
             exit,
-            continu,
+            continu,            //'continue' is reserved for c instruction 
             lap,
 
             recall1,
@@ -149,6 +150,8 @@ namespace GpsCycleComputer
         int lastDisplayed = 0;
         public int i_p = -1;   //index of pressed icon
         Rectangle iv_rect;
+        int mouseDownY = -1;      //mouse down y position in pixels
+        int mouseDrag = 0;      //dragging in pixels
 
         public MenuPage()
         {
@@ -189,6 +192,7 @@ namespace GpsCycleComputer
 
         protected override void OnMouseDown(MouseEventArgs e)
         {
+            mouseDownY = e.Y;
             int index = getButtonIndex(e.X, e.Y);
             if (index <= lastDisplayed)
                 this.Tag = index;
@@ -197,11 +201,58 @@ namespace GpsCycleComputer
 
             base.OnMouseDown(e);
         }
+        
         protected override void OnMouseUp(MouseEventArgs e)
         {
+            mouseDrag = 0;
+            mouseDownY = -1;    //disable move
             i_p = -1;
             Invalidate(iv_rect);
+            if (form1ref.BufferDrawMode == Form1.BufferDrawModeMenu)
+            {
+                form1ref.showButton(form1ref.button2, UpPossible ? BFkt.mPageUp : BFkt.nothing);
+                form1ref.showButton(form1ref.button3, DownPossible ? BFkt.mPageDown : BFkt.nothing);
+            }
             base.OnMouseUp(e);
+        }
+
+        protected override void OnClick(EventArgs e)
+        {
+            mouseDrag = 0;
+            base.OnClick(e);
+        }
+
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            if (mouseDownY == -1) return;   //move without prior MouseDown (occures at longclick (context menu))
+            if (e.Y > mouseDownY)
+            {
+                mouseDrag = e.Y - mouseDownY;
+                if (mouseDrag > GridHeigh / 2 && UpPossible)
+                {
+                    MenuUp();
+                    mouseDownY += GridHeigh;
+                    mouseDrag -= GridHeigh;
+                }
+                if (!UpPossible)
+                    mouseDrag = 0;
+            }
+            if (e.Y < mouseDownY)
+            {
+                mouseDrag = e.Y - mouseDownY;
+                if (mouseDrag < -GridHeigh / 2 && DownPossible)
+                {
+                    MenuDown();
+                    mouseDownY -= GridHeigh;
+                    mouseDrag += GridHeigh;
+                }
+                if (!DownPossible)
+                    mouseDrag = 0;
+            }
+            if (Math.Abs(e.Y - mouseDownY) > GridHeigh/8)
+                this.Tag = null;
+            Invalidate();
+            base.OnMouseMove(e);
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -226,13 +277,13 @@ namespace GpsCycleComputer
             for (int i = so; i <= (int)BFkt.endOfMenuPage; i++)
             {
                 int ix = (i - so) % 3; int iy = (i - so) / 3;
-                if ((2*iy +1) * GridHeigh > 2 * Size.Height)            //show minimum half
+                if ((2 * iy + 1) * GridHeigh > 2 * Size.Height)            //show minimum half
                     break;                              // not enough room for a complete button
-                Rectangle dest_rect = new Rectangle(bWidth * ix, GridHeigh * iy, bWidth, bHeigh);
+                Rectangle dest_rect = new Rectangle(bWidth * ix, GridHeigh * iy + mouseDrag, bWidth, bHeigh);
                 Bitmap bm = (i == i_p) ? mBAr[i].icon_p : mBAr[i].icon;
                 e.Graphics.DrawImage(bm, dest_rect, new Rectangle(0, 0, mBAr[i].icon.Width, mBAr[i].icon.Height), GraphicsUnit.Pixel);
                 SizeF Tsize = e.Graphics.MeasureString(mBAr[i].text, this.Font);
-                e.Graphics.DrawString(mBAr[i].text, this.Font, br, bWidth * ix + (bWidth - Tsize.Width) / 2, GridHeigh * iy + bHeigh);
+                e.Graphics.DrawString(mBAr[i].text, this.Font, br, bWidth * ix + (bWidth - Tsize.Width) / 2, GridHeigh * iy + bHeigh + mouseDrag);
                 lastDisplayed = i;
             }
             base.OnPaint(e);
