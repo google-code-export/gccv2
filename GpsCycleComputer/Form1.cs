@@ -1,5 +1,6 @@
 //#define DEBUG
 //#define BETA
+#define SERVICEPACK
 
 using System;
 using System.Runtime.InteropServices;
@@ -154,6 +155,7 @@ namespace GpsCycleComputer
         double MaxSpeed = 0.0;
         double Distance = 0.0;
         double OldX = 0.0, OldY = 0.0;
+        double ReferenceXDist, ReferenceYDist;
         DateTime OldTime;
 
         int OldT = 0;
@@ -414,6 +416,9 @@ namespace GpsCycleComputer
                             + Assembly.GetExecutingAssembly().GetName().Version.Minor.ToString()
 #if BETA
                             + " beta " + Assembly.GetExecutingAssembly().GetName().Version.Build.ToString()
+#endif
+#if SERVICEPACK
+                            + " SP " + Assembly.GetExecutingAssembly().GetName().Version.Build.ToString()
 #endif
                             ;
             labelRevision.Text = "programming/idea : AndyZap\ndesign : expo7\nspecial thanks to AngelGR\n\nversion " + Revision;
@@ -2576,7 +2581,6 @@ namespace GpsCycleComputer
                                 double deltaX = CurrentX - OldX;
                                 double deltaY = CurrentY - OldY;
                                 OldX = CurrentX; OldY = CurrentY;
-                                double deltaXY = Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
 
                                 if (positionAltitudeValid)
                                 {
@@ -2657,6 +2661,7 @@ namespace GpsCycleComputer
                                             StartTimeUtc = DateTime.UtcNow;
                                             StartBattery = Utils.GetBatteryStatus();
                                             StartAlt = Int16.MinValue;
+                                            ReferenceXDist = CurrentX; ReferenceYDist = CurrentY;
                                             ReferenceAlt = Int16.MaxValue;
                                             LapStartD = 0; LapStartT = 0; LapNumber = 0;
                                             lapManualDistance = 0; lapManualClick = false;
@@ -2727,7 +2732,8 @@ namespace GpsCycleComputer
                                         }
 
                                         // compute distance
-                                        Distance += deltaXY;
+                                        Distance += Math.Sqrt((CurrentX - ReferenceXDist) * (CurrentX - ReferenceXDist) + (CurrentY - ReferenceYDist) * (CurrentY - ReferenceYDist));
+                                        ReferenceXDist = CurrentX; ReferenceYDist = CurrentY;
 
                                         // compute elevation gain
                                         if (positionAltitudeValid)
@@ -3346,8 +3352,8 @@ namespace GpsCycleComputer
                 if (File.Exists(gpx_file)) { status_string += "+"; }
 
                 listBoxFiles.Items.Add(status_string + Path.GetFileName(files[i]));
-                Cursor.Current = Cursors.Default;
             }
+            Cursor.Current = Cursors.Default;
         }
         // read file
         private void buttonLoad_Click(object sender, EventArgs e)
