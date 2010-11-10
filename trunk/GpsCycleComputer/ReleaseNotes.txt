@@ -1,6 +1,9 @@
 GPS Cycle Computer GCC
 
 
+********* version 4.4SP1 *********
+bugfix: - incorrect distance if logging not every second
+
 ********* version 4.4 *************
 new features:
 - context menu
