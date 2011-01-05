@@ -152,6 +152,7 @@ namespace GpsCycleComputer
         Rectangle iv_rect;
         int mouseDownY = -1;      //mouse down y position in pixels
         int mouseDrag = 0;      //dragging in pixels
+        public BFkt lastSelectedBFkt;  // Remember the last selected button, required for Recall buttons (renaming/save) 
 
         public MenuPage()
         {

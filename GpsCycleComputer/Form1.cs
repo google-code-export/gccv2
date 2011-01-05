@@ -385,6 +385,8 @@ namespace GpsCycleComputer
         private NumericUpDown numericZoomRadius;
 
         private ContextMenu cMenu1 = new ContextMenu();
+        private CheckBox checkGPSOffOnPowerOff;
+        private CheckBox checkKeepBackLightOn; 
         private MenuItem[] cMenuItem = new MenuItem[] { new MenuItem(), new MenuItem(), new MenuItem(), new MenuItem() };
 
         // c-tor. Create classes used, init some components
@@ -448,121 +450,141 @@ namespace GpsCycleComputer
             int ClientMouseY = MousePosition.Y - Screen.PrimaryScreen.WorkingArea.Top;
             int numItems = 0;
 
-            if (BufferDrawMode == BufferDrawModeMain)
+            switch (BufferDrawMode)
             {
-                if (ClientMouseY < MGridY[1])
-                {
-                    if (MousePosition.X < MGridX[2])
+                case BufferDrawModeMain:
                     {
-                        cMenuItem[0].Text = "inc stop";   //Time
-                        cMenuItem[1].Text = "ex stop";
-                        cMenuItem[2].Text = "ex stop + beep";
-                        numItems = 3;
-                        int i = 0;
-                        if (checkExStopTime.Checked)
+                        if (ClientMouseY < MGridY[1])
                         {
-                            i++;
-                            if (beepOnStartStop) { i++; }
+                            if (MousePosition.X < MGridX[2])
+                            {
+                                cMenuItem[0].Text = "inc stop";   //Time
+                                cMenuItem[1].Text = "ex stop";
+                                cMenuItem[2].Text = "ex stop + beep";
+                                numItems = 3;
+                                int i = 0;
+                                if (checkExStopTime.Checked)
+                                {
+                                    i++;
+                                    if (beepOnStartStop) { i++; }
+                                }
+                                cMenuItem[i].Checked = true;
+                            }
+                            else
+                            {
+                                cMenuItem[0].Text = "night scheme";   //Clock
+                                cMenuItem[1].Text = "day scheme";
+                                numItems = 2;
+                                cMenuItem[dayScheme ? 1 : 0].Checked = true;
+                            }
                         }
-                        cMenuItem[i].Checked = true;
-                    }
-                    else
-                    {
-                        cMenuItem[0].Text = "night scheme";   //Clock
-                        cMenuItem[1].Text = "day scheme";
-                        numItems = 2;
-                        cMenuItem[dayScheme ? 1 : 0].Checked = true;
-                    }
-                }
-                else if (ClientMouseY < MGridY[3])
-                {
-                    if (MousePosition.X < MGridX[1])
-                    {
-                        cMenuItem[0].Text = "from gps";        //Speed
-                        cMenuItem[1].Text = "from position";
-                        cMenuItem[2].Text = "both";
-                        numItems = 3;
-                        cMenuItem[MainConfigSpeedSource].Checked = true;
-                    }
-                    else if (ClientMouseY < MGridY[2])
-                    {
-                        //avg
-                    }
-                    else
-                    {
-                        //max
-                    }
-                }
-                else if (ClientMouseY < MGridY[5])
-                {
-                    if (MousePosition.X < MGridX[1])
-                    {
-                        //Distance
-                    }
-                    else if (comboLapOptions.SelectedIndex == 0)
-                    {
-                        if (ClientMouseY < MGridY[4])
+                        else if (ClientMouseY < MGridY[3])
                         {
-                            cMenuItem[0].Text = "absolute";   //Altitude cur
-                            cMenuItem[1].Text = "relative";
+                            if (MousePosition.X < MGridX[1])
+                            {
+                                cMenuItem[0].Text = "from gps";        //Speed
+                                cMenuItem[1].Text = "from position";
+                                cMenuItem[2].Text = "both";
+                                numItems = 3;
+                                cMenuItem[MainConfigSpeedSource].Checked = true;
+                            }
+                            else if (ClientMouseY < MGridY[2])
+                            {
+                                //avg
+                            }
+                            else
+                            {
+                                //max
+                            }
+                        }
+                        else if (ClientMouseY < MGridY[5])
+                        {
+                            if (MousePosition.X < MGridX[1])
+                            {
+                                //Distance
+                            }
+                            else if (comboLapOptions.SelectedIndex == 0)
+                            {
+                                if (ClientMouseY < MGridY[4])
+                                {
+                                    cMenuItem[0].Text = "absolute";   //Altitude cur
+                                    cMenuItem[1].Text = "relative";
+                                    numItems = 2;
+                                    cMenuItem[checkRelativeAlt.Checked ? 1 : 0].Checked = true;
+                                }
+                                else
+                                {
+                                    cMenuItem[0].Text = "gain";     //Altitude gain
+                                    cMenuItem[1].Text = "loss";
+                                    cMenuItem[2].Text = "delta";
+                                    cMenuItem[3].Text = "slope";
+                                    numItems = 4;
+                                    cMenuItem[MainConfigAlt2display].Checked = true;
+                                }
+                            }
+                            else
+                            {
+                                //Lap
+                            }
+                        }
+                        else if (ClientMouseY < MGridY[7])
+                        {
+                            if (MousePosition.X < MGridX[1])
+                            {
+                                //Info
+                            }
+                            else
+                            {
+                                cMenuItem[0].Text = "beep on gps fix";         //GPS
+                                cMenuItem[1].Text = "log raw nmea";
+                                numItems = 2;
+                                if (checkBeepOnFix.Checked) { cMenuItem[0].Checked = true; }
+                                if (logRawNmea) { cMenuItem[1].Checked = true; }
+                            }
+                        }
+                        break;
+                    }
+                case BufferDrawModeMenu:
+                    {
+                        //MenuPage.
+                        mPage.lastSelectedBFkt = (MenuPage.BFkt)mPage.getButtonIndex(MousePosition.X, MousePosition.Y);
+                        if (mPage.lastSelectedBFkt == MenuPage.BFkt.recall1 || mPage.lastSelectedBFkt == MenuPage.BFkt.recall2 || mPage.lastSelectedBFkt == MenuPage.BFkt.recall3)
+                        {
+                            cMenuItem[0].Text = "save settings";
+                            cMenuItem[1].Text = "change name";
                             numItems = 2;
-                            cMenuItem[checkRelativeAlt.Checked ? 1 : 0].Checked = true;
                         }
                         else
+                            numItems = 0;
+                        break;
+                    }
+                case BufferDrawModeGraph:
+                    {
+                        cMenuItem[0].Text = "autoscale";
+                        cMenuItem[1].Text = "over time";
+                        cMenuItem[2].Text = "over distance";
+                        numItems = 3;
+                        if (GraphScale == GraphAutoscale) cMenuItem[0].Checked = true;
+                        if (GraphOverDistance) cMenuItem[2].Checked = true;
+                        else cMenuItem[1].Checked = true;
+                        break;
+                    }
+                case BufferDrawModeMaps:
+                    {
+                        // Show start or end of track to follow (only available if a track2follow is loaded)
+                        if (Counter2nd > 0)
                         {
-                            cMenuItem[0].Text = "gain";     //Altitude gain
-                            cMenuItem[1].Text = "loss";
-                            cMenuItem[2].Text = "delta";
-                            cMenuItem[3].Text = "slope";
-                            numItems = 4;
-                            cMenuItem[MainConfigAlt2display].Checked = true;
+                            cMenuItem[numItems].Text = "show track to follow - start";
+                            numItems++;
+                            cMenuItem[numItems].Text = "show track to follow - end";
+                            numItems++;
                         }
+                        // Alternative method to reset map position (same functionality as double click)
+                        cMenuItem[numItems].Text = "reset map position (GPS/last)";
+                        numItems++;
+                        break;
                     }
-                    else
-                    {
-                                        //Lap
-                    }
-                }
-                else if (ClientMouseY < MGridY[7])
-                {
-                    if (MousePosition.X < MGridX[1])
-                    {
-                        //Info
-                    }
-                    else
-                    {
-                        cMenuItem[0].Text = "beep on gps fix";         //GPS
-                        cMenuItem[1].Text = "log raw nmea";
-                        numItems = 2;
-                        if (checkBeepOnFix.Checked) { cMenuItem[0].Checked = true; }
-                        if (logRawNmea) { cMenuItem[1].Checked = true; }
-                    }
-                }
             }
-            else if (BufferDrawMode == BufferDrawModeMenu)
-            {
-                //MenuPage.
-                MenuPage.BFkt bfkt = (MenuPage.BFkt)mPage.getButtonIndex(MousePosition.X, MousePosition.Y);
-                if (bfkt == MenuPage.BFkt.recall1 || bfkt == MenuPage.BFkt.recall2 || bfkt == MenuPage.BFkt.recall3)
-                {
-                    cMenuItem[0].Text = "save settings";
-                    cMenuItem[1].Text = "change name";
-                    numItems = 2;
-                }
-                else
-                    numItems = 0;
-            }
-            else if (BufferDrawMode == BufferDrawModeGraph)
-            {
-                cMenuItem[0].Text = "autoscale";
-                cMenuItem[1].Text = "over time";
-                cMenuItem[2].Text = "over distance";
-                numItems = 3;
-                if (GraphScale == GraphAutoscale) cMenuItem[0].Checked = true;
-                if (GraphOverDistance) cMenuItem[2].Checked = true;
-                else cMenuItem[1].Checked = true;
-            }
-
             for (int i = 0; i < numItems; i++)
             {
                 cMenu1.MenuItems.Add(cMenuItem[i]);
@@ -617,15 +639,17 @@ namespace GpsCycleComputer
             // menu page
             else if (((MenuItem)sender).Text == "save settings")
             {
-                int bfkt = mPage.getButtonIndex(MousePosition.X, MousePosition.Y);
-                SaveSettings(CurrentDirectory + "\\" + mPage.mBAr[bfkt].text + ".dat");
+                // On the HTC TouchDiamond 2 Device / Windows Mobile 6.5, the returned Mouse Position is the Mouse Position of the
+                // PopUp selection and not of the Button itself. The result will be, it´s not possible to 
+                // change the name, or safe the data. 
+                // Bugfix: Store the the position of the button before opening the popup menu.
+                SaveSettings(CurrentDirectory + "\\" + mPage.mBAr[(int) mPage.lastSelectedBFkt].text + ".dat");
             }
             else if (((MenuItem)sender).Text == "change name")
             {
-                int bfkt = mPage.getButtonIndex(MousePosition.X, MousePosition.Y);
-                string name = mPage.mBAr[bfkt].text;
+                string name = mPage.mBAr[(int) mPage.lastSelectedBFkt].text; 
                 if (Utils.InputBox("Rename", "input name", ref name) == DialogResult.OK)
-                    mPage.mBAr[bfkt].text = name;
+                    mPage.mBAr[(int) mPage.lastSelectedBFkt].text = name;
             }
             // graph page
             else if (((MenuItem)sender).Text == "autoscale")
@@ -634,7 +658,24 @@ namespace GpsCycleComputer
                 GraphOverDistance = false;
             else if (((MenuItem)sender).Text == "over distance")
                 GraphOverDistance = true;
-
+            else if (((MenuItem)sender).Text == "show track to follow - end")
+            {
+                if (Counter2nd > 0)
+                {
+                    mapUtil.ShowTrackToFollowMode = MapUtil.ShowTrackToFollow.T2FEnd;
+                    NoBkPanel.Invalidate();     // Update Screen
+                }
+            }
+            else if (((MenuItem)sender).Text == "show track to follow - start")
+            {
+                if (Counter2nd > 0)
+                {
+                    mapUtil.ShowTrackToFollowMode = MapUtil.ShowTrackToFollow.T2FStart;
+                    NoBkPanel.Invalidate();     // Update Screen
+                }
+            }
+            else if (((MenuItem)sender).Text == "reset map position (GPS/last)")
+                ResetMapPosition();
             else
                 MessageBox.Show("no method for menu: " + ((MenuItem)sender).Text);
         }
@@ -678,6 +719,8 @@ namespace GpsCycleComputer
             checkEditFileName.BackColor = bkColor; checkEditFileName.ForeColor = foColor;
             checkShowBkOff.BackColor = bkColor; checkShowBkOff.ForeColor = foColor;
             checkkeepAliveReg.BackColor = bkColor; checkkeepAliveReg.ForeColor = foColor;
+            checkGPSOffOnPowerOff.BackColor = bkColor; checkGPSOffOnPowerOff.ForeColor = foColor;
+            checkKeepBackLightOn.BackColor = bkColor; checkKeepBackLightOn.ForeColor = foColor;
             checkRelativeAlt.BackColor = bkColor; checkRelativeAlt.ForeColor = foColor;
             labelMultiMaps.BackColor = bkColor; labelMultiMaps.ForeColor = foColor;
             labelMapDownload.BackColor = bkColor; labelMapDownload.ForeColor = foColor;  
@@ -950,6 +993,8 @@ namespace GpsCycleComputer
             ScaleControl(checkEditFileName);
             ScaleControl(checkShowBkOff);
             ScaleControl(checkkeepAliveReg);
+            ScaleControl(checkKeepBackLightOn);
+            ScaleControl(checkGPSOffOnPowerOff);
             ScaleControl(checkRelativeAlt);
             ScaleControl(labelMultiMaps);
             ScaleControl(labelMapDownload);
@@ -1128,6 +1173,8 @@ namespace GpsCycleComputer
             this.tabControl = new System.Windows.Forms.TabControl();
             this.tabPageOptions = new System.Windows.Forms.TabPage();
             this.tabPageGps = new System.Windows.Forms.TabPage();
+            this.checkKeepBackLightOn = new System.Windows.Forms.CheckBox();
+            this.checkGPSOffOnPowerOff = new System.Windows.Forms.CheckBox();
             this.checkWgs84Alt = new System.Windows.Forms.CheckBox();
             this.checkkeepAliveReg = new System.Windows.Forms.CheckBox();
             this.numericAvg = new System.Windows.Forms.NumericUpDown();
@@ -1826,6 +1873,8 @@ namespace GpsCycleComputer
             // 
             // tabPageGps
             // 
+            this.tabPageGps.Controls.Add(this.checkKeepBackLightOn);
+            this.tabPageGps.Controls.Add(this.checkGPSOffOnPowerOff);
             this.tabPageGps.Controls.Add(this.checkWgs84Alt);
             this.tabPageGps.Controls.Add(this.checkkeepAliveReg);
             this.tabPageGps.Controls.Add(this.numericAvg);
@@ -1844,6 +1893,22 @@ namespace GpsCycleComputer
             this.tabPageGps.Name = "tabPageGps";
             this.tabPageGps.Size = new System.Drawing.Size(480, 463);
             this.tabPageGps.Text = "GPS";
+            // 
+            // checkKeepBackLightOn
+            // 
+            this.checkKeepBackLightOn.Location = new System.Drawing.Point(5, 414);
+            this.checkKeepBackLightOn.Name = "checkKeepBackLightOn";
+            this.checkKeepBackLightOn.Size = new System.Drawing.Size(479, 27);
+            this.checkKeepBackLightOn.TabIndex = 60;
+            this.checkKeepBackLightOn.Text = "Safe Energy-do not keep Backlight on";
+            // 
+            // checkGPSOffOnPowerOff
+            // 
+            this.checkGPSOffOnPowerOff.Location = new System.Drawing.Point(5, 378);
+            this.checkGPSOffOnPowerOff.Name = "checkGPSOffOnPowerOff";
+            this.checkGPSOffOnPowerOff.Size = new System.Drawing.Size(472, 28);
+            this.checkGPSOffOnPowerOff.TabIndex = 59;
+            this.checkGPSOffOnPowerOff.Text = "Safe Energy-GPS off on power off";
             // 
             // checkWgs84Alt
             // 
@@ -2106,6 +2171,7 @@ namespace GpsCycleComputer
         // Create GPS event handlers on form load
         private void Form1_Load(object sender, System.EventArgs e)
         {
+        
             // load settings -----------------
             IoFilesDirectory = CurrentDirectory + "\\tracks";
             MapsFilesDirectory = CurrentDirectory + "\\maps";
@@ -2135,7 +2201,7 @@ namespace GpsCycleComputer
 
                 if (fs != null)
                     if (fs.Load(FirstArgument, PlotDataSize, ref Plot2ndLat, ref Plot2ndLong, ref Plot2ndT, out Counter2nd))
-                        labelFileName.SetText(Path.GetFileName(FirstArgument) + " loaded");   //loaded ok
+                        labelFileName.SetText("Track2follow: " + Path.GetFileName(FirstArgument) + " loaded");   //loaded ok
             }
 
             // send indication to GPS driver to wake-up (if it is OFF)
@@ -2152,6 +2218,7 @@ namespace GpsCycleComputer
                 MessageBox.Show("You can use context menu to configure some fields in main page or modify some commands in menu page", "GCC - Important News");
                 importantNewsId = 404;
             }
+
         }
 
         // close GPS and files on form close
@@ -2194,6 +2261,7 @@ namespace GpsCycleComputer
                     e.Cancel = true;
                 }
             }
+
         }
 
 
@@ -2334,11 +2402,13 @@ namespace GpsCycleComputer
                 mPage.mBAr[(int)MenuPage.BFkt.recall1].text = wr.ReadString();
                 mPage.mBAr[(int)MenuPage.BFkt.recall2].text = wr.ReadString();
                 mPage.mBAr[(int)MenuPage.BFkt.recall3].text = wr.ReadString();
-
+                // additional Energy Safe options added
+                checkGPSOffOnPowerOff.Checked = 1 == wr.ReadInt32();
+                checkKeepBackLightOn.Checked = 1 == wr.ReadInt32();
             }
             catch (FileNotFoundException)
             {
-                MessageBox.Show("File not found: " + file_name, "Error",
+                MessageBox.Show("Configuration file not found: " + file_name, "Error",
                                 MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
             }
             catch (EndOfStreamException)
@@ -2467,6 +2537,9 @@ namespace GpsCycleComputer
                 wr.Write(mPage.mBAr[(int)MenuPage.BFkt.recall1].text);
                 wr.Write(mPage.mBAr[(int)MenuPage.BFkt.recall2].text);
                 wr.Write(mPage.mBAr[(int)MenuPage.BFkt.recall3].text);
+                // additional Energy Safe options added
+                wr.Write(checkGPSOffOnPowerOff.Checked ? 1 : 0);
+                wr.Write(checkKeepBackLightOn.Checked ? 1 : 0);
 
             }
             catch (Exception e)
@@ -3167,6 +3240,20 @@ namespace GpsCycleComputer
                     MessageBox.Show("GCC is already logging!");
                 return;
             }*/
+
+            // warn if track logging is activated, but track log will be interrupted, if
+            // GPS is switched off on power off
+            if (checkGPSOffOnPowerOff.Checked == true)
+            {
+                if (MessageBox.Show("Safe energy option activated. GPS is switched off on power off.\nLogging will be interrupted on power off. Do you want to keep GPS always on?", "GPS always on",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
+                {
+                    // Cancel the Closing event from closing the form.
+                    checkGPSOffOnPowerOff.Checked = false;
+                    KeepToolRunning(true);
+                }
+            }
+
             // warn if live logging is activated, and ask if want to proceed
             if (comboBoxCwLogMode.SelectedIndex != 0)
             {
@@ -3595,6 +3682,9 @@ namespace GpsCycleComputer
                 LoadSettings(filename);
                 mPage.Invalidate();         //refresh ev. changed recall names
                 MessageBeep(BeepType.Ok);
+                // If a changed maps or Input/Output location is displayed, it may become invalid after a recall.
+                // To avoid displaying an invalid path, overwrite the existing text.
+                labelFileName.SetText("Recall settings: " + Path.GetFileNameWithoutExtension( filename ));
             }
             else
                 MessageBox.Show("File does not exist:\n" + filename, "Error",
@@ -3906,9 +3996,18 @@ namespace GpsCycleComputer
                 CurrentGpsLedColor = bkColor;
             }
             CurrentBattery = Utils.GetBatteryStatus();
-            
 
-            NoBkPanel.Invalidate();
+/*            string ps = new string('\0', 12);
+            uint pflag = 0;
+            GetSystemPowerState(ps, 12, ref pflag);
+
+            // Update the screen only, if the device is switched on. During unattended state, the display is off, and 
+            // we do not update the screen. Avoid unnecessary CPU load / battery consumption
+            // After a first test, we do not have any improvement in Battery lifetime. Therefore not used...
+            if ( (pflag & 0x00400000) == 0 )    // POWER_STATE_UNATTENDED - Unattended state
+*/          {
+                NoBkPanel.Invalidate();
+            }
             LockGpsTick = false;
 
             //test
@@ -3966,7 +4065,17 @@ namespace GpsCycleComputer
                 GpsDataState = GpsBecameValid;
             timerGps.Enabled = true;
             CurrentStatusString = "gps opening ...";
-            KeepToolRunning(true);
+            // Only if option "Save Energy-GPS off when power off" is not activated, keep 
+            // GPS always on  
+            if( checkGPSOffOnPowerOff.Checked == false )
+            {
+                KeepToolRunning(true);
+            }
+            // Keep backlight on, if Backlight Energy safe option is not set.
+            if (checkKeepBackLightOn.Checked == false)
+            {
+                timerIdleReset.Enabled = true;
+            }
             goodsamples = 0; //debug
             numsamples = 0; //debug
             return ret;
@@ -3976,8 +4085,10 @@ namespace GpsCycleComputer
         {
             gps.Close();
             GpsDataState = GpsNotOk;
-            //buttonGPS.Text = "GPS is off";        //todo
+            // buttonGPS.Text = "GPS is off";        //todo
             KeepToolRunning(false);
+            // Allow backlight to switch off after timeout
+            timerIdleReset.Enabled = false;
         }
 
         void SuspendGps()
@@ -3992,12 +4103,12 @@ namespace GpsCycleComputer
         IntPtr gpsPowerHandle4 = IntPtr.Zero;
         IntPtr gpsPowerHandle5 = IntPtr.Zero;*/
 
+        // KeepToolRunning changes the settings of the power manager, to keep the application running, even
+        // if the device is switched off via the power button
         void KeepToolRunning(bool run)
         {
-            if (run)
+            if( run )
             {
-                timerIdleReset.Enabled = true;
-
                 // this is what you need to keep tool running if power turned off
                 if (true) //checkShowBkOff.Checked == false)
                 {
@@ -4084,8 +4195,6 @@ namespace GpsCycleComputer
             }
             else
             {
-                timerIdleReset.Enabled = false;
-
                 if (true) //checkShowBkOff.Checked == false)
                 {
                     try
@@ -4685,7 +4794,7 @@ namespace GpsCycleComputer
         }
 
         float df = 1.0f;
-        private void DrawMain(Graphics g)
+        private void DrawMain(Graphics g)           // draw main screen with watch, speed, distance, altitute...
         {
             BackBufferGraphics.Clear(bkColor);
 
@@ -5132,9 +5241,10 @@ namespace GpsCycleComputer
             MousePosX = 0;
             MousePosY = 0;
             MouseMoving = false;
+            mapUtil.ShowTrackToFollowMode = MapUtil.ShowTrackToFollow.T2FOff;     // Do not display Track to Follow start/end
         }
 
-        private void tabGraph_Paint(object sender, PaintEventArgs e)
+        private void tabGraph_Paint(object sender, PaintEventArgs e)        // Update Screen Main view, Map view, or Graph
         {
             PrepareBackBuffer();
 
@@ -5512,7 +5622,7 @@ namespace GpsCycleComputer
                     // If a new track-to-follow loaded (and main track not exist) - need to reset map zoom/shift vars
                     if ((Counter2nd != 0) && (PlotCount == 0)) { ResetMapPosition(); }
 
-                    if (file_found) { labelFileName.SetText(Path.GetFileName(file_name) + " loaded"); }
+                    if (file_found) { labelFileName.SetText("Track2follow: " + Path.GetFileName(file_name) + " loaded"); }
                     else { labelFileName.SetText(""); }
 
                     mPage.mBAr[(int)MenuPage.BFkt.load_2clear].text = "Clear2Follow";
