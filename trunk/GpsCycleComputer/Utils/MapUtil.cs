@@ -57,6 +57,16 @@ namespace GpsUtils
         public MapInfo[] Maps = new MapInfo[MaxNumMaps];
         private string MapsFilesDirectory;
 
+        public enum ShowTrackToFollow
+        {
+            T2FOff,
+            T2FStart,
+            T2FEnd
+        };
+
+        // Show the current position on the map or the start/stop position of the track
+        public ShowTrackToFollow ShowTrackToFollowMode = ShowTrackToFollow.T2FOff;
+
         private int ScreenX = 100;         // screen (drawing) size in pixels
         private int ScreenY = 100;
         private double Data2Screen = 1.0;  // Coefficient to convert from data to screen values
@@ -1460,10 +1470,37 @@ User-defined server (read server name from osm_server.txt)
 
             // store current drawing screen size and set scale from "main" or the "track-to-follow" (if main not exist)
             ScreenX = BackBuffer.Width; ScreenY = BackBuffer.Height;
-            if (lifeview) { SetAutoScale( CurLong, CurLat, 1, lifeview); }  //current position (last position)
-            else if (PlotSize != 0) { SetAutoScale(PlotLong, PlotLat, PlotSize, lifeview); }
-            else if (PlotSize2 != 0) { SetAutoScale(PlotLong2, PlotLat2, PlotSize2, false); }
-            else { SetAutoScale(CurLong, CurLat, 1, false); }
+            if (ShowTrackToFollowMode == ShowTrackToFollow.T2FStart && PlotSize2 != 0) 
+            { 
+                // Show start position of track to follow
+                SetAutoScale(PlotLong2, PlotLat2, 1, false); }
+            else if (ShowTrackToFollowMode == ShowTrackToFollow.T2FEnd && PlotSize2 != 0)
+            {
+                // Show end position of track to follow
+                float[] Long = { PlotLong2[PlotSize2 - 1] };
+                float[] Lat = { PlotLat2[PlotSize2 - 1] };
+                SetAutoScale( Long, Lat, 1, false);
+            }
+            else if (lifeview) 
+            { 
+                // Show current GPS position (last position)
+                SetAutoScale(CurLong, CurLat, 1, lifeview); 
+            }
+            else if (PlotSize != 0) 
+            { 
+                // Show all points of loaded track
+                SetAutoScale(PlotLong, PlotLat, PlotSize, lifeview); 
+            }
+            else if (PlotSize2 != 0) 
+            { 
+                // Show all points of track to follow
+                SetAutoScale(PlotLong2, PlotLat2, PlotSize2, false); 
+            }
+            else 
+            { 
+                // Show last position
+                SetAutoScale(CurLong, CurLat, 1, false); 
+            }
 
             // need to draw the picture first into back buffer
             BackBufferGraphics.Clear(Back_Color);

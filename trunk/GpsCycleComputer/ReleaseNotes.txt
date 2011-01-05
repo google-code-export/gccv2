@@ -1,5 +1,16 @@
 GPS Cycle Computer GCC
 
+********* version 4.5 *********
+new features:
+- New context menu on the map screen - to show the start / end position of the track to follow
+- new energy safe options 
+  switch GPS off during power off (tracklog will be interrupted, a popup will inform the user)
+  switch Backlight off after timeout
+
+bufixes:
+- Bugifx Recall Buttons naming and safe configuration now working on Windows Mobile 6.5 / HTC TD2
+- Improved text output on the settings-option page (after changing the map file location, and recall a configuration, the wrong
+  map file path was displayed)
 
 ********* version 4.4SP1 *********
 bugfix: - incorrect distance if logging not every second
