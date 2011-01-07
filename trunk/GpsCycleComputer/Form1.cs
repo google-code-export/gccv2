@@ -1,6 +1,6 @@
 //#define DEBUG
 //#define BETA
-#define SERVICEPACK
+//#define SERVICEPACK
 
 using System;
 using System.Runtime.InteropServices;
@@ -662,6 +662,7 @@ namespace GpsCycleComputer
             {
                 if (Counter2nd > 0)
                 {
+                    ResetMapPosition();
                     mapUtil.ShowTrackToFollowMode = MapUtil.ShowTrackToFollow.T2FEnd;
                     NoBkPanel.Invalidate();     // Update Screen
                 }
@@ -670,6 +671,7 @@ namespace GpsCycleComputer
             {
                 if (Counter2nd > 0)
                 {
+                    ResetMapPosition();
                     mapUtil.ShowTrackToFollowMode = MapUtil.ShowTrackToFollow.T2FStart;
                     NoBkPanel.Invalidate();     // Update Screen
                 }
@@ -1412,7 +1414,7 @@ namespace GpsCycleComputer
             // 
             // checkBoxUseGccDll
             // 
-            this.checkBoxUseGccDll.Location = new System.Drawing.Point(5, 147);
+            this.checkBoxUseGccDll.Location = new System.Drawing.Point(5, 143);
             this.checkBoxUseGccDll.Name = "checkBoxUseGccDll";
             this.checkBoxUseGccDll.Size = new System.Drawing.Size(312, 40);
             this.checkBoxUseGccDll.TabIndex = 24;
@@ -1426,7 +1428,7 @@ namespace GpsCycleComputer
             this.comboBoxUseGccDllRate.Items.Add("38400");
             this.comboBoxUseGccDllRate.Items.Add("57600");
             this.comboBoxUseGccDllRate.Items.Add("115200");
-            this.comboBoxUseGccDllRate.Location = new System.Drawing.Point(324, 197);
+            this.comboBoxUseGccDllRate.Location = new System.Drawing.Point(324, 189);
             this.comboBoxUseGccDllRate.Name = "comboBoxUseGccDllRate";
             this.comboBoxUseGccDllRate.Size = new System.Drawing.Size(152, 41);
             this.comboBoxUseGccDllRate.TabIndex = 32;
@@ -1447,21 +1449,21 @@ namespace GpsCycleComputer
             this.comboBoxUseGccDllCom.Items.Add("COM11:");
             this.comboBoxUseGccDllCom.Items.Add("COM12:");
             this.comboBoxUseGccDllCom.Items.Add("\\nmea.txt");
-            this.comboBoxUseGccDllCom.Location = new System.Drawing.Point(324, 147);
+            this.comboBoxUseGccDllCom.Location = new System.Drawing.Point(324, 143);
             this.comboBoxUseGccDllCom.Name = "comboBoxUseGccDllCom";
             this.comboBoxUseGccDllCom.Size = new System.Drawing.Size(153, 41);
             this.comboBoxUseGccDllCom.TabIndex = 31;
             // 
             // labelGpsBaudRate
             // 
-            this.labelGpsBaudRate.Location = new System.Drawing.Point(184, 197);
+            this.labelGpsBaudRate.Location = new System.Drawing.Point(184, 189);
             this.labelGpsBaudRate.Name = "labelGpsBaudRate";
             this.labelGpsBaudRate.Size = new System.Drawing.Size(134, 40);
             this.labelGpsBaudRate.Text = "Baud rate:";
             // 
             // numericGeoID
             // 
-            this.numericGeoID.Location = new System.Drawing.Point(349, 244);
+            this.numericGeoID.Location = new System.Drawing.Point(349, 237);
             this.numericGeoID.Maximum = new decimal(new int[] {
             300,
             0,
@@ -1896,23 +1898,23 @@ namespace GpsCycleComputer
             // 
             // checkKeepBackLightOn
             // 
-            this.checkKeepBackLightOn.Location = new System.Drawing.Point(5, 414);
+            this.checkKeepBackLightOn.Location = new System.Drawing.Point(5, 419);
             this.checkKeepBackLightOn.Name = "checkKeepBackLightOn";
-            this.checkKeepBackLightOn.Size = new System.Drawing.Size(479, 27);
+            this.checkKeepBackLightOn.Size = new System.Drawing.Size(479, 40);
             this.checkKeepBackLightOn.TabIndex = 60;
             this.checkKeepBackLightOn.Text = "Safe Energy-do not keep Backlight on";
             // 
             // checkGPSOffOnPowerOff
             // 
-            this.checkGPSOffOnPowerOff.Location = new System.Drawing.Point(5, 378);
+            this.checkGPSOffOnPowerOff.Location = new System.Drawing.Point(5, 373);
             this.checkGPSOffOnPowerOff.Name = "checkGPSOffOnPowerOff";
-            this.checkGPSOffOnPowerOff.Size = new System.Drawing.Size(472, 28);
+            this.checkGPSOffOnPowerOff.Size = new System.Drawing.Size(472, 40);
             this.checkGPSOffOnPowerOff.TabIndex = 59;
             this.checkGPSOffOnPowerOff.Text = "Safe Energy-GPS off on power off";
             // 
             // checkWgs84Alt
             // 
-            this.checkWgs84Alt.Location = new System.Drawing.Point(5, 240);
+            this.checkWgs84Alt.Location = new System.Drawing.Point(5, 235);
             this.checkWgs84Alt.Name = "checkWgs84Alt";
             this.checkWgs84Alt.Size = new System.Drawing.Size(338, 40);
             this.checkWgs84Alt.TabIndex = 55;
@@ -1920,7 +1922,7 @@ namespace GpsCycleComputer
             // 
             // checkkeepAliveReg
             // 
-            this.checkkeepAliveReg.Location = new System.Drawing.Point(5, 332);
+            this.checkkeepAliveReg.Location = new System.Drawing.Point(5, 327);
             this.checkkeepAliveReg.Name = "checkkeepAliveReg";
             this.checkkeepAliveReg.Size = new System.Drawing.Size(472, 40);
             this.checkkeepAliveReg.TabIndex = 51;
@@ -1928,7 +1930,7 @@ namespace GpsCycleComputer
             // 
             // numericAvg
             // 
-            this.numericAvg.Location = new System.Drawing.Point(377, 290);
+            this.numericAvg.Location = new System.Drawing.Point(377, 283);
             this.numericAvg.Minimum = new decimal(new int[] {
             1,
             0,
@@ -1945,7 +1947,7 @@ namespace GpsCycleComputer
             // 
             // checkBeepOnFix
             // 
-            this.checkBeepOnFix.Location = new System.Drawing.Point(5, 290);
+            this.checkBeepOnFix.Location = new System.Drawing.Point(5, 281);
             this.checkBeepOnFix.Name = "checkBeepOnFix";
             this.checkBeepOnFix.Size = new System.Drawing.Size(366, 40);
             this.checkBeepOnFix.TabIndex = 41;
