@@ -97,6 +97,8 @@ namespace GpsUtils
         private const int __MapNoError = 0;
         private const int __MapErrorReading = 1;
         private const int __MapErrorDownload = 2;
+        private const int __MapErrorOutOfMemory = 3;
+
         private int MapErrors = __MapNoError;
 
 
@@ -939,9 +941,15 @@ User-defined server (read server name from osm_server.txt)
                         {
                             Maps[i].bmp = new Bitmap(Maps[i].fname);
                         }
+                        // if the size of the picture file is too large, an out of memory exception will occur
+                        catch (System.OutOfMemoryException)
+                        {
+                            Maps[i].bmp = null;
+                            MapErrors = __MapErrorOutOfMemory;
+                        }
                         catch (Exception e)
                         {
-                            Utils.log.Error (" DrawJpeg - new Bitmap", e);
+                            Utils.log.Error(" DrawJpeg - new Bitmap", e);
                             Maps[i].bmp = null;
                             MapErrors = __MapErrorReading;
                         }
@@ -1358,12 +1366,16 @@ User-defined server (read server name from osm_server.txt)
 
             if      (MapErrors == __MapErrorReading)  
             {
-                str_map = "Read Error";
+                str_map += "\nRead Error";
                 Utils.log.Debug ("Map ERROR " + str_map);
+            }
+            else if (MapErrors == __MapErrorOutOfMemory)
+            {
+                str_map += "\nOut of Memory Error\n(Filesize too large)";
             }
             else if (MapErrors == __MapErrorDownload) 
             { 
-                str_map = "Download Error";
+                str_map += "\nDownload Error";
                 Utils.log.Debug ("Map ERROR " + str_map);
             }
 
