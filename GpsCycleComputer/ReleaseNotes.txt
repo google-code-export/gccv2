@@ -2,6 +2,9 @@ GPS Cycle Computer GCC
 
 ********* version 4.5 *********
 new features:
+- if track2follow and current position can´t be displayed on the same screen, 
+  an additional line indicates the shortest way and the distance between t2f and current position 
+  is shown
 - New context menu on the map screen - to show the start / end position of the track to follow
 - new energy safe options 
   switch GPS off during power off (tracklog will be interrupted, a popup will inform the user)
