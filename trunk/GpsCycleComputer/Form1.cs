@@ -574,11 +574,17 @@ namespace GpsCycleComputer
                         // Show start or end of track to follow (only available if a track2follow is loaded)
                         if (Counter2nd > 0)
                         {
-                            cMenuItem[numItems].Text = "show track to follow - start";
+                            cMenuItem[numItems].Text = "show track2follow - start";
                             numItems++;
-                            cMenuItem[numItems].Text = "show track to follow - end";
+                            cMenuItem[numItems].Text = "show track2follow - end";
                             numItems++;
                         }
+						// If logging is activated, we can add a check point (faster access as menu page)
+	                    if (Logging || Paused)
+						{
+							cMenuItem[numItems].Text = "add check point";
+							numItems++;
+						}
                         // Alternative method to reset map position (same functionality as double click)
                         cMenuItem[numItems].Text = "reset map position (GPS/last)";
                         numItems++;
@@ -658,7 +664,7 @@ namespace GpsCycleComputer
                 GraphOverDistance = false;
             else if (((MenuItem)sender).Text == "over distance")
                 GraphOverDistance = true;
-            else if (((MenuItem)sender).Text == "show track to follow - end")
+            else if (((MenuItem)sender).Text == "show track2follow - end")
             {
                 if (Counter2nd > 0)
                 {
@@ -667,7 +673,7 @@ namespace GpsCycleComputer
                     NoBkPanel.Invalidate();     // Update Screen
                 }
             }
-            else if (((MenuItem)sender).Text == "show track to follow - start")
+            else if (((MenuItem)sender).Text == "show track2follow - start")
             {
                 if (Counter2nd > 0)
                 {
@@ -676,6 +682,15 @@ namespace GpsCycleComputer
                     NoBkPanel.Invalidate();     // Update Screen
                 }
             }
+			else if (((MenuItem)sender).Text == "add check point")
+			{
+                string checkpoint = "";
+                DialogResult Result = Utils.InputBox(null, "Enter Checkpoint name", ref checkpoint);
+                if (Result == DialogResult.OK)
+				{
+                    WriteCheckPoint(checkpoint);
+                }
+ 			}
             else if (((MenuItem)sender).Text == "reset map position (GPS/last)")
                 ResetMapPosition();
             else
