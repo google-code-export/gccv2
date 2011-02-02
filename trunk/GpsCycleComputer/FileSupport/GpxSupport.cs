@@ -209,20 +209,24 @@ namespace GpsSample.FileSupport
                         // need to replave chars not supported by XML
                         string chk_name = CheckPoints[chk].name.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;").Replace("\"", "&quot;").Replace("'", "&apos;");
 
+                        // GPS Track Analyser expects a newline between wpt and name
                         wr.WriteLine("<wpt lat=\"" + CheckPoints[chk].lat.ToString("0.##########", IC)
                                     + "\" lon=\"" + CheckPoints[chk].lon.ToString("0.##########", IC)
-                                    + "\" ><name>" + chk_name
-                                    + "</name></wpt>");
+                                    + "\" >");
+                        wr.WriteLine("<name>" + chk_name + "</name>");
+                        wr.WriteLine("</wpt>");
                     }
                 }
 
                 wr.WriteLine(checkGpxRte.Checked ? "<rte>" : "<trk>");
                 wr.WriteLine("<name>" + StartTime + "</name>");
-
-                wr.WriteLine("<desc><![CDATA[" + dist + " " + dist_unit + " " + run_time_label + " " + exstop_info
+                // GPS Track Analyser expects a newline between desc and Data
+                wr.WriteLine("<desc>");
+                wr.WriteLine("<![CDATA[" + dist + " " + dist_unit + " " + run_time_label + " " + exstop_info
                                + " " + speed_cur + " " + speed_avg + " " + speed_max + " " + speed_unit
                                + " battery " + battery
-                               + "]]></desc>");
+                               + "]]>");
+                wr.WriteLine("</desc>");
 
                 if (checkGpxRte.Checked == false) { wr.WriteLine("<trkseg>"); }
 

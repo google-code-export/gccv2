@@ -3281,7 +3281,7 @@ namespace GpsCycleComputer
                     return;
                 }
             }
-
+           
             GenerateFileName();
             
             // check if we need to show the custom file name panel, or can start loging with default name
@@ -3292,7 +3292,13 @@ namespace GpsCycleComputer
                 {
                     CurrentFileName = value;
                 }
+                else  // if cancel button is pressed, do not start logging.
+                {
+                    CurrentFileName = "";       // No valid file loaded (if continue button will be pressed later...)
+                    return;
+                }
             }
+
             CurrentFileName += ".gcc";
             labelFileName.SetText("Current File Name: " + CurrentFileName);
 
