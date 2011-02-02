@@ -5,16 +5,20 @@ new features:
 - if track2follow and current position can´t be displayed on the same screen, 
   an additional line indicates the shortest way and the distance between t2f and current position 
   is shown
-- New context menu on the map screen - to show the start / end position of the track to follow, 
-  add an check point and reset map to current position
+- New context menu on the map screen:
+  * show the start / end position of the track to follow, 
+  * add an check point (only if logging is active)
+  * reset map to current position
 - new energy safe options 
   switch GPS off during power off (tracklog will be interrupted, a popup will inform the user)
   switch Backlight off after timeout
+- if a track log is activated, and in the file dialog the cancel button is pressed, logging is not started.
 
 bufixes:
 - Bugifx Recall Buttons naming and safe configuration now working on Windows Mobile 6.5 / HTC TD2
 - Improved text output on the settings-option page (after changing the map file location, and recall a configuration, the wrong
   map file path was displayed)
+- Improved compatibility of GPX file format. Newlines added
 
 ********* version 4.4SP1 *********
 bugfix: - incorrect distance if logging not every second
