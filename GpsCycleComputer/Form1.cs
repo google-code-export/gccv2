@@ -3633,8 +3633,31 @@ namespace GpsCycleComputer
                     if (Utils.InputBox("Input", "Lat; Lon (separated with semicolon)", ref LatLon[0]) == DialogResult.OK)
                     {
                         LatLon = LatLon[0].Split(';');
+                        // The current Lat/Long values will only be usefull, if GPS is switched off.
+                        // If GPS is on, the values are directly overwritten.
                         CurrentLat = Convert.ToDouble(LatLon[0]);
                         CurrentLong = Convert.ToDouble(LatLon[1]);
+
+                        // If a track to follow consists of more than 1 point, (one point is used for this button...)
+                        // ask, if the user wants to replace the loaded track to follow 
+                        if (Counter2nd > 1)
+                        {
+                            if (MessageBox.Show("Do you want to replace loaded track to follow with the new Lat/Long values?",
+                                "Overwrite Track2Follow", MessageBoxButtons.YesNo, MessageBoxIcon.Asterisk, MessageBoxDefaultButton.Button1)
+                                == DialogResult.No)
+                            {
+                                break;
+                            }
+                        }
+                        // Replace the existing track2follow with the new coordinates
+                        Plot2ndLat[0] = (float) CurrentLat;
+                        Plot2ndLong[0] = (float) CurrentLong;
+                        Counter2nd = 1;
+                        // And Jump in the Map screen directly to the track to follow start position
+                        ResetMapPosition();
+                        mapUtil.ShowTrackToFollowMode = MapUtil.ShowTrackToFollow.T2FStart;
+                        // Jump Directly to the Map view
+                        buttonMap_Click(null, null);
                     }
                     break;
                 case MenuPage.BFkt.help:
