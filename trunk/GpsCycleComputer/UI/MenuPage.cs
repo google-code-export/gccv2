@@ -162,7 +162,7 @@ namespace GpsCycleComputer
 
         public bool DownPossible
         {
-            get { return so <= (int)BFkt.endOfMenuPage - 3; }
+            get { return so <= (int)BFkt.endOfMenuPage - 9; }
         }
         public bool UpPossible
         {

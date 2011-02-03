@@ -1277,7 +1277,6 @@ User-defined server (read server name from osm_server.txt)
                 //Point point = new Point(ToScreenX(PlotLong[i]), ToScreenY(PlotLat[i]));
                 points[d].X = ToScreenX(PlotLong[i]);
                 points[d].Y = ToScreenY(PlotLat[i]);
-                i++;
 
                 if ((points[d].X >= 0) && (points[d].X < ScreenX) && (points[d].Y >= 0) && (points[d].Y < ScreenY))    //only points within screen
                 { 
@@ -1300,6 +1299,8 @@ User-defined server (read server name from osm_server.txt)
 						MinDistanceIndex = i;
                     }
                 }
+
+                i++;
 
                 if (d > 0)  //erster punkt auf jeden Fall
                 {
