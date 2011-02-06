@@ -1083,17 +1083,26 @@ User-defined server (read server name from osm_server.txt)
             pa[1].X = (int)(x0 - size * 2 / 3 * Math.Cos(Math.PI / 2.0 - (heading_int * Math.PI / 180.0)));
             pa[1].Y = (int)(y0 + size * 2 / 3 * Math.Sin(Math.PI / 2.0 - (heading_int * Math.PI / 180.0)));
 
-            // point B - at +210 deg from current
-            pa[2].X = (int)(x0 + size * Math.Cos(Math.PI / 2.0 - ((heading_int + 210) * Math.PI / 180.0)));
-            pa[2].Y = (int)(y0 - size * Math.Sin(Math.PI / 2.0 - ((heading_int + 210) * Math.PI / 180.0)));
-            br.Color = heading_int == 720 ? Color.DeepSkyBlue : Color.Blue;
-            g.FillPolygon(br, pa);
-
             // point A - at +150 deg from current
             pa[2].X = (int)(x0 + size * Math.Cos(Math.PI / 2.0 - ((heading_int + 150) * Math.PI / 180.0)));
             pa[2].Y = (int)(y0 - size * Math.Sin(Math.PI / 2.0 - ((heading_int + 150) * Math.PI / 180.0)));
-            br.Color = heading_int == 720 ? Color.CornflowerBlue : Color.DarkBlue;
+            if (heading_int == 720) br.Color = Color.DimGray;
             g.FillPolygon(br, pa);
+
+            // point B - at +210 deg from current
+            pa[2].X = (int)(x0 + size * Math.Cos(Math.PI / 2.0 - ((heading_int + 210) * Math.PI / 180.0)));
+            pa[2].Y = (int)(y0 - size * Math.Sin(Math.PI / 2.0 - ((heading_int + 210) * Math.PI / 180.0)));
+            br.Color = modifyColor(br.Color, +100);
+            g.FillPolygon(br, pa);
+        }
+
+        Color modifyColor(Color c, int mod)     //adds mod to color components
+        {
+            int r, g, b;
+            r = c.R + mod; if (r > 255) r = 255; if (r < 0) r = 0;
+            g = c.G + mod; if (g > 255) g = 255; if (g < 0) g = 0;
+            b = c.B + mod; if (b > 255) b = 255; if (b < 0) b = 0;
+            return Color.FromArgb(r, g, b);
         }
 
 /* original
@@ -1349,8 +1358,8 @@ User-defined server (read server name from osm_server.txt)
                 if (CurrentX <= 0 || CurrentX >= ScreenX || CurrentY <= 0 || CurrentY >= ScreenY ||
                      MinDistanceX <= 0 || MinDistanceX >= ScreenX || MinDistanceY <= 0 || MinDistanceY >= ScreenY)    //only points within screen
                 {
-                    float OldPenWidth = p.Width;
-                    Color OldPenColor = p.Color;
+                    //float OldPenWidth = p.Width;
+                    //Color OldPenColor = p.Color;
                     Font drawFont = new Font("Arial", 8, FontStyle.Regular);
 
                     // Calculate the distance between track and current position
@@ -1363,8 +1372,9 @@ User-defined server (read server name from osm_server.txt)
                     string strDistance = "Distance to T2F: " + deltaS.ToString("0.0") + unit_name;
                     SizeF TextSize = g.MeasureString(strDistance, drawFont);
 
-                    // We draw the line between current position and T2F with half of the T2F width
+                    // We draw the line between current position and T2F with half of the T2F width and somewhat lighter
                     p.Width = Math.Max( 2, p.Width / 2 );
+                    p.Color = modifyColor(p.Color, +100);
                     // not supported by .NET CF??? p.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
                     g.DrawLine( p, CurrentX, CurrentY, MinDistanceX, MinDistanceY );
                     
@@ -1382,8 +1392,8 @@ User-defined server (read server name from osm_server.txt)
                     g.DrawString(strDistance, drawFont, drawBrush, 2, ScreenY - TextBoxHeigth);
 
                     // restore old pen settings for further use
-                    p.Width = OldPenWidth;
-                    p.Color = OldPenColor;
+                    //p.Width = OldPenWidth;
+                    //p.Color = OldPenColor;
                 }
             }
 
