@@ -12,13 +12,15 @@ namespace GpsSample.FileSupport
     {
         CultureInfo IC = CultureInfo.InvariantCulture;
 
-        public bool Load(string filename, int vector_size, ref float[] dataLat, ref float[] dataLong, ref int[] dataT, out int data_size)
+        public bool Load(string filename, ref Form1.WayPointInfo WayPoints,
+            int vector_size, ref float[] dataLat, ref float[] dataLong, ref int[] dataT, out int data_size)
         {
             int Counter = 0;
             bool Status = false;
             DateTime StartTime = DateTime.Now;
 
             data_size = 0;
+            WayPoints.WayPointCount = 0;
 
             // set "." as decimal separator for reading the map info
             NumberFormatInfo number_info = new NumberFormatInfo();
@@ -30,9 +32,9 @@ namespace GpsSample.FileSupport
                 FileStream fs = new FileStream(filename, FileMode.Open);
                 StreamReader sr = new StreamReader(fs);
                 string line = "";
-
                 double last_lat = 0.0;
                 double last_long = 0.0;
+                string name = "";
 
                 while (sr.Peek() != -1)
                 {
@@ -159,6 +161,24 @@ namespace GpsSample.FileSupport
 
                         last_lat = 0.0;
                         last_long = 0.0;
+                    }
+                    // read names of Waypoints
+                    else if ( (line.IndexOf("<name>") >= 0) )
+                    {
+                        name = line.Replace("<name>", "");
+                        name = name.Replace("</name>", "");
+                    }
+                    // read names of Waypoints
+                    else if ( (line.IndexOf("</wpt>") >= 0) && (last_lat != 0.0) && (last_long != 0.0) && (name.Length > 0) )
+                    {
+                        if (WayPoints.WayPointCount < WayPoints.WayPointDataSize - 1)
+                        {
+                            WayPoints.lat[WayPoints.WayPointCount] = (float)last_lat;
+                            WayPoints.lon[WayPoints.WayPointCount] = (float)last_long;
+                            WayPoints.name[WayPoints.WayPointCount] = name;
+                            WayPoints.WayPointCount++;
+                            name = "";
+                        }
                     }
                 }
                 sr.Close();

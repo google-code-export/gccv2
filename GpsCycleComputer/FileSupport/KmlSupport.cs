@@ -12,13 +12,14 @@ namespace GpsSample.FileSupport
     {
         CultureInfo IC = CultureInfo.InvariantCulture;
 
-        public bool Load(string filename, int vector_size, ref float[] dataLat, ref float[] dataLong, ref int[] dataT, out int data_size)
+        public bool Load(string filename, ref Form1.WayPointInfo WayPoints,
+            int vector_size, ref float[] dataLat, ref float[] dataLong, ref int[] dataT, out int data_size)
         {
             int Counter = 0;
             bool Status = false;
 
             data_size = 0;
-
+            WayPoints.WayPointCount = 0;        // No Waypoint Support for KML files yet.
             // set "." as decimal separator for reading the map info
             NumberFormatInfo number_info = new NumberFormatInfo();
             number_info.NumberDecimalSeparator = ".";
