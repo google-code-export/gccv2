@@ -29,6 +29,7 @@ using LiveTracker;
 
 namespace GpsCycleComputer
 {
+
     public class Form1 : System.Windows.Forms.Form
     {
 #if DEBUG
@@ -186,8 +187,15 @@ namespace GpsCycleComputer
         double CurrentVy = 0.0;     //speed in y direction in m/s
         double CurrentV = Int16.MinValue * 0.1;      //speed in km/h
 
-        int MainConfigAlt2display = 0;  //0=gain; 1=loss; 2=delta; 3=slope
-        int MainConfigSpeedSource = 0;  //0=from gps; 1=from position; 2=both
+        int MainConfigAlt2display = 0;  // 0=gain; 1=loss; 2=delta; 3=slope
+        int MainConfigSpeedSource = 0;  // 0=from gps; 1=from position; 2=both
+        public enum eConfigDistance
+        {
+            eDistanceTrip = 0,          // no not change order, because used in string array and for option check
+            eDistanceTrack2FollowStart,
+            eDistanceTrack2FollowEnd,
+        }
+        eConfigDistance MainConfigDistance = eConfigDistance.eDistanceTrip;     
 
         // baud rates
         int[] BaudRates = new int[6] { 4800, 9600, 19200, 38400, 57600, 115200 };
@@ -211,7 +219,7 @@ namespace GpsCycleComputer
 
         // check-points
         const int CheckPointDataSize = 128;
-        public struct CheckPointInfo // structure to store CheckPoint data
+        public struct CheckPointInfo // structure to store CheckPoint data (used for tracklog)
         {
             public string name;
             public float lat;
@@ -222,6 +230,34 @@ namespace GpsCycleComputer
         };
         CheckPointInfo[] CheckPoints = new CheckPointInfo[CheckPointDataSize];
         int CheckPointCount = 0;
+
+        public class WayPointInfo      // Structure to store Waypoints, used by track2follow
+        {
+            public int WayPointDataSize;
+            public int WayPointCount;
+            public float[] lat;
+            public float[] lon;
+            public string[] name;
+            public WayPointInfo(int size)
+            {
+                WayPointDataSize = 0;
+                SetSize(size);
+            }
+            public void SetSize(int size)
+            {
+                // only if the size changes, allocate new memory
+                if( size != 0 && size != WayPointDataSize )
+                {
+                    lat = new float[size];
+                    lon = new float[size];
+                    name = new string[size];
+                }
+                WayPointDataSize = size;
+                WayPointCount = 0;
+            }
+        };
+        // Use same datasize for Waypoints and Checkpoints
+        WayPointInfo WayPoints = new WayPointInfo(0);        
 
         // lap statistics
         int LapNumber = 0;
@@ -386,7 +422,8 @@ namespace GpsCycleComputer
 
         private ContextMenu cMenu1 = new ContextMenu();
         private CheckBox checkGPSOffOnPowerOff;
-        private CheckBox checkKeepBackLightOn; 
+        private CheckBox checkKeepBackLightOn;
+        private CheckBox checkDispWaypoints; 
         private MenuItem[] cMenuItem = new MenuItem[] { new MenuItem(), new MenuItem(), new MenuItem(), new MenuItem() };
 
         // c-tor. Create classes used, init some components
@@ -501,7 +538,15 @@ namespace GpsCycleComputer
                         {
                             if (MousePosition.X < MGridX[1])
                             {
-                                //Distance
+                                // Distance to Track2Follow only available if a track2follow is loaded
+                                if (Counter2nd > 0)
+                                {                                //Distance
+                                    cMenuItem[0].Text = "since start of trip";        // Distance from start of trip
+                                    cMenuItem[1].Text = "to track2follow start";
+                                    cMenuItem[2].Text = "to track2follow end";
+                                    numItems = 3;
+                                    cMenuItem[(int)MainConfigDistance].Checked = true;
+                                }
                             }
                             else if (comboLapOptions.SelectedIndex == 0)
                             {
@@ -575,19 +620,22 @@ namespace GpsCycleComputer
                         if (Counter2nd > 0)
                         {
                             cMenuItem[numItems].Text = "show track2follow - start";
+                            if (mapUtil.ShowTrackToFollowMode == MapUtil.ShowTrackToFollow.T2FStart) cMenuItem[numItems].Checked = true;
                             numItems++;
                             cMenuItem[numItems].Text = "show track2follow - end";
+                            if (mapUtil.ShowTrackToFollowMode == MapUtil.ShowTrackToFollow.T2FEnd) cMenuItem[numItems].Checked = true;
                             numItems++;
                         }
-						// If logging is activated, we can add a check point (faster access as menu page)
-	                    if (Logging || Paused)
-						{
-							cMenuItem[numItems].Text = "add check point";
-							numItems++;
-						}
                         // Alternative method to reset map position (same functionality as double click)
                         cMenuItem[numItems].Text = "reset map position (GPS/last)";
+                        if (mapUtil.ShowTrackToFollowMode == MapUtil.ShowTrackToFollow.T2FOff) cMenuItem[numItems].Checked = true;
                         numItems++;
+                        // If logging is activated, we can add a check point (faster access as menu page)
+                        if (Logging || Paused)
+                        {
+                            cMenuItem[numItems].Text = "add check point";
+                            numItems++;
+                        }
                         break;
                     }
             }
@@ -623,6 +671,13 @@ namespace GpsCycleComputer
                 MainConfigSpeedSource = 1;
             else if (((MenuItem)sender).Text == "both")
                 MainConfigSpeedSource = 2;
+
+            else if (((MenuItem)sender).Text == "since start of trip")
+                MainConfigDistance = eConfigDistance.eDistanceTrip;
+            else if (((MenuItem)sender).Text == "to track2follow start")
+                MainConfigDistance = eConfigDistance.eDistanceTrack2FollowStart;
+            else if (((MenuItem)sender).Text == "to track2follow end")
+                MainConfigDistance = eConfigDistance.eDistanceTrack2FollowEnd;
 
             else if (((MenuItem)sender).Text == "absolute")
                 checkRelativeAlt.Checked = false;
@@ -789,6 +844,7 @@ namespace GpsCycleComputer
 
             numericGpxTimeShift.BackColor = bkColor; numericGpxTimeShift.ForeColor = foColor;
             labelGpxTimeShift.BackColor = bkColor; labelGpxTimeShift.ForeColor = foColor;
+            checkDispWaypoints.BackColor = bkColor; checkDispWaypoints.ForeColor = foColor;
             checkMapsWhiteBk.BackColor = bkColor; checkMapsWhiteBk.ForeColor = foColor;
 
             comboLapOptions.BackColor = bkColor; comboLapOptions.ForeColor = foColor;
@@ -1062,6 +1118,7 @@ namespace GpsCycleComputer
 
             ScaleControl(numericGpxTimeShift);
             ScaleControl(labelGpxTimeShift);
+            ScaleControl(checkDispWaypoints);
             ScaleControl(checkMapsWhiteBk);
             ScaleControl(labelDefaultZoom);
             ScaleControl(numericZoomRadius);
@@ -1200,6 +1257,7 @@ namespace GpsCycleComputer
             this.labelDropFirst = new System.Windows.Forms.Label();
             this.tabPageMainScr = new System.Windows.Forms.TabPage();
             this.tabPageMapScr = new System.Windows.Forms.TabPage();
+            this.checkDispWaypoints = new System.Windows.Forms.CheckBox();
             this.labelDefaultZoom = new System.Windows.Forms.Label();
             this.tabPageKmlGpx = new System.Windows.Forms.TabPage();
             this.checkGpxSpeedMs = new System.Windows.Forms.CheckBox();
@@ -1231,7 +1289,7 @@ namespace GpsCycleComputer
             0,
             0,
             0});
-            this.numericZoomRadius.Location = new System.Drawing.Point(322, 360);
+            this.numericZoomRadius.Location = new System.Drawing.Point(320, 405);
             this.numericZoomRadius.Maximum = new decimal(new int[] {
             10000,
             0,
@@ -1663,14 +1721,14 @@ namespace GpsCycleComputer
             // 
             // labelMultiMaps
             // 
-            this.labelMultiMaps.Location = new System.Drawing.Point(2, 257);
+            this.labelMultiMaps.Location = new System.Drawing.Point(2, 307);
             this.labelMultiMaps.Name = "labelMultiMaps";
             this.labelMultiMaps.Size = new System.Drawing.Size(133, 40);
             this.labelMultiMaps.Text = "Multi-maps";
             // 
             // labelMapDownload
             // 
-            this.labelMapDownload.Location = new System.Drawing.Point(2, 307);
+            this.labelMapDownload.Location = new System.Drawing.Point(2, 357);
             this.labelMapDownload.Name = "labelMapDownload";
             this.labelMapDownload.Size = new System.Drawing.Size(133, 40);
             this.labelMapDownload.Text = "Download";
@@ -1681,7 +1739,7 @@ namespace GpsCycleComputer
             this.comboMultiMaps.Items.Add("multi maps, 1x zoom");
             this.comboMultiMaps.Items.Add("multi maps, 2x zoom");
             this.comboMultiMaps.Items.Add("multi maps, 4x zoom");
-            this.comboMultiMaps.Location = new System.Drawing.Point(141, 255);
+            this.comboMultiMaps.Location = new System.Drawing.Point(139, 305);
             this.comboMultiMaps.Name = "comboMultiMaps";
             this.comboMultiMaps.Size = new System.Drawing.Size(336, 41);
             this.comboMultiMaps.TabIndex = 34;
@@ -1697,7 +1755,7 @@ namespace GpsCycleComputer
             this.comboMapDownload.Items.Add("CloudMade Mobile style");
             this.comboMapDownload.Items.Add("CloudMade NoNames style");
             this.comboMapDownload.Items.Add("User-defined in osm_server.txt");
-            this.comboMapDownload.Location = new System.Drawing.Point(141, 305);
+            this.comboMapDownload.Location = new System.Drawing.Point(139, 355);
             this.comboMapDownload.Name = "comboMapDownload";
             this.comboMapDownload.Size = new System.Drawing.Size(336, 41);
             this.comboMapDownload.TabIndex = 35;
@@ -1756,7 +1814,7 @@ namespace GpsCycleComputer
             this.labelLine2Opt1.Location = new System.Drawing.Point(2, 157);
             this.labelLine2Opt1.Name = "labelLine2Opt1";
             this.labelLine2Opt1.Size = new System.Drawing.Size(105, 40);
-            this.labelLine2Opt1.Text = "2nd line";
+            this.labelLine2Opt1.Text = "Track2f";
             // 
             // labelLine2Opt2
             // 
@@ -1830,7 +1888,7 @@ namespace GpsCycleComputer
             // 
             // checkMapsWhiteBk
             // 
-            this.checkMapsWhiteBk.Location = new System.Drawing.Point(2, 205);
+            this.checkMapsWhiteBk.Location = new System.Drawing.Point(2, 255);
             this.checkMapsWhiteBk.Name = "checkMapsWhiteBk";
             this.checkMapsWhiteBk.Size = new System.Drawing.Size(469, 40);
             this.checkMapsWhiteBk.TabIndex = 45;
@@ -1843,7 +1901,7 @@ namespace GpsCycleComputer
             this.checkPlotLine2AsDots.Name = "checkPlotLine2AsDots";
             this.checkPlotLine2AsDots.Size = new System.Drawing.Size(469, 40);
             this.checkPlotLine2AsDots.TabIndex = 41;
-            this.checkPlotLine2AsDots.Text = "Plot 2nd line as dots";
+            this.checkPlotLine2AsDots.Text = "Plot track to follow as dots";
             // 
             // timerGps
             // 
@@ -1908,7 +1966,7 @@ namespace GpsCycleComputer
             this.tabPageGps.Controls.Add(this.numericGeoID);
             this.tabPageGps.Location = new System.Drawing.Point(0, 0);
             this.tabPageGps.Name = "tabPageGps";
-            this.tabPageGps.Size = new System.Drawing.Size(480, 463);
+            this.tabPageGps.Size = new System.Drawing.Size(472, 469);
             this.tabPageGps.Text = "GPS";
             // 
             // checkKeepBackLightOn
@@ -2005,6 +2063,7 @@ namespace GpsCycleComputer
             // 
             // tabPageMapScr
             // 
+            this.tabPageMapScr.Controls.Add(this.checkDispWaypoints);
             this.tabPageMapScr.Controls.Add(this.labelDefaultZoom);
             this.tabPageMapScr.Controls.Add(this.numericZoomRadius);
             this.tabPageMapScr.Controls.Add(this.checkMapsWhiteBk);
@@ -2024,12 +2083,21 @@ namespace GpsCycleComputer
             this.tabPageMapScr.Controls.Add(this.comboMapDownload);
             this.tabPageMapScr.Location = new System.Drawing.Point(0, 0);
             this.tabPageMapScr.Name = "tabPageMapScr";
-            this.tabPageMapScr.Size = new System.Drawing.Size(472, 469);
+            this.tabPageMapScr.Size = new System.Drawing.Size(480, 463);
             this.tabPageMapScr.Text = "Map screen";
+            // 
+            // checkDispWaypoints
+            // 
+            this.checkDispWaypoints.Location = new System.Drawing.Point(2, 205);
+            this.checkDispWaypoints.Name = "checkDispWaypoints";
+            this.checkDispWaypoints.Size = new System.Drawing.Size(261, 33);
+            this.checkDispWaypoints.TabIndex = 59;
+            this.checkDispWaypoints.Text = "Display waypoints";
+            this.checkDispWaypoints.Click += new System.EventHandler(this.CheckDispWayPoints_click);
             // 
             // labelDefaultZoom
             // 
-            this.labelDefaultZoom.Location = new System.Drawing.Point(2, 360);
+            this.labelDefaultZoom.Location = new System.Drawing.Point(2, 407);
             this.labelDefaultZoom.Name = "labelDefaultZoom";
             this.labelDefaultZoom.Size = new System.Drawing.Size(314, 36);
             this.labelDefaultZoom.Text = "Default zoom [radius in m]";
@@ -2217,7 +2285,8 @@ namespace GpsCycleComputer
                     fs = new KmlSupport();
 
                 if (fs != null)
-                    if (fs.Load(FirstArgument, PlotDataSize, ref Plot2ndLat, ref Plot2ndLong, ref Plot2ndT, out Counter2nd))
+                    if (fs.Load(FirstArgument, ref WayPoints,
+                                PlotDataSize, ref Plot2ndLat, ref Plot2ndLong, ref Plot2ndT, out Counter2nd))
                         labelFileName.SetText("Track2follow: " + Path.GetFileName(FirstArgument) + " loaded");   //loaded ok
             }
 
@@ -2229,6 +2298,7 @@ namespace GpsCycleComputer
             // select option pages to show and apply map bkground option
             FillPagesToShow();
             checkMapsWhiteBk_Click(checkMapsWhiteBk, EventArgs.Empty);
+            CheckDispWayPoints_click(checkDispWaypoints, EventArgs.Empty);
 
             if (importantNewsId != 404)
             {
@@ -2422,6 +2492,9 @@ namespace GpsCycleComputer
                 // additional Energy Safe options added
                 checkGPSOffOnPowerOff.Checked = 1 == wr.ReadInt32();
                 checkKeepBackLightOn.Checked = 1 == wr.ReadInt32();
+                checkDispWaypoints.Checked = 1 == wr.ReadInt32();
+				MainConfigDistance = (eConfigDistance) wr.ReadInt32();
+				
             }
             catch (FileNotFoundException)
             {
@@ -2557,7 +2630,8 @@ namespace GpsCycleComputer
                 // additional Energy Safe options added
                 wr.Write(checkGPSOffOnPowerOff.Checked ? 1 : 0);
                 wr.Write(checkKeepBackLightOn.Checked ? 1 : 0);
-
+                wr.Write(checkDispWaypoints.Checked ? 1 : 0);
+				wr.Write((int)MainConfigDistance);
             }
             catch (Exception e)
             {
@@ -4868,8 +4942,9 @@ namespace GpsCycleComputer
                 if (comboLapOptions.SelectedIndex <= 6) { alt_unit = "min:s"; }
                 else { alt_unit = "km"; }
             }
-            string[] speed_info = new string[3] { "cur g", "cur p", "cur" };
 
+            string[] speed_info = new string[3] { "cur gps", "cur pos", "cur" };
+            string[] dist_info = new string[3] {"trip", "t2f st", "t2f end" };
             DrawMainLabelAndUnits(BackBufferGraphics, "Time",     "h:m:s",    MGridX[0], MGridY[0]);
             DrawMainLabelAndUnits(BackBufferGraphics, "Speed",    speed_unit, MGridX[0], MGridY[1]);
             DrawMainLabelAndUnits(BackBufferGraphics, "Distance", dist_unit,  MGridX[0], MGridY[3]);
@@ -4878,6 +4953,7 @@ namespace GpsCycleComputer
             DrawMainLabelAndUnits(BackBufferGraphics, "GPS",      "",         MGridX[1], MGridY[5]);
             DrawMainLabelOnRight(BackBufferGraphics, exstop_info, MGridX[2], MGridY[0], 9.0f);
             DrawMainLabelOnRight(BackBufferGraphics, speed_info[MainConfigSpeedSource], MGridX[1], MGridY[1], 9.0f);
+            DrawMainLabelOnRight(BackBufferGraphics, dist_info[Counter2nd == 0 ? (int)eConfigDistance.eDistanceTrip : (int)MainConfigDistance], MGridX[1], MGridY[3], 9.0f);
             DrawMainLabelOnRight(BackBufferGraphics, "avg", MGridX[3], MGridY[1], 9.0f);
             DrawMainLabelOnRight(BackBufferGraphics, "max", MGridX[3], MGridY[2], 9.0f);
             DrawMainLabelOnRight(BackBufferGraphics, "cur", MGridX[3], MGridY[3] + MHeightDelta, 9.0f);
@@ -4890,8 +4966,7 @@ namespace GpsCycleComputer
                 else label1 = "slope";
                 DrawMainLabelOnRight(BackBufferGraphics, label1, MGridX[3], MGridY[4], 9.0f);
             }
-
-            
+                        
             // draw the values
             string dist, speed_cur, speed_avg, speed_max, run_time, last_sample_time, altitude, battery;
             GetValuesToDisplay(out dist, out speed_cur, out speed_avg, out speed_max, out run_time, out last_sample_time, out altitude, out battery);
@@ -4909,6 +4984,22 @@ namespace GpsCycleComputer
             else
                 DrawMainValues(BackBufferGraphics, speed_cur, (MGridX[0] + MGridX[1]) / 2, MGridY[3], 30.0f * df);
 
+            if (MainConfigDistance != eConfigDistance.eDistanceTrip && Counter2nd != 0)
+            {
+                double xDist, yDist;
+                utmUtil.setReferencePoint(CurrentLat, CurrentLong);
+                if (MainConfigDistance == eConfigDistance.eDistanceTrack2FollowStart)    // show distance to track2follow start
+                {
+                    utmUtil.getXY(Plot2ndLat[0], Plot2ndLong[0], out xDist, out yDist);
+                }
+                else  // show Distance to track2follow end
+                {
+                    utmUtil.getXY(Plot2ndLat[Counter2nd - 1], Plot2ndLong[Counter2nd - 1], out xDist, out yDist);
+                }
+                // Calculate the distance between track and current position
+                double deltaS = Math.Sqrt(xDist * xDist + yDist * yDist);
+                dist = PrintDist(deltaS * GetUnitsConversionCff());
+            }    
             DrawMainValues(BackBufferGraphics, dist, (MGridX[0] + MGridX[1]) / 2, MGridY[5], 26.0f * df);
             DrawMainValues(BackBufferGraphics, speed_avg, (MGridX[1] + MGridX[3]) / 2, MGridY[2], 20.0f * df);
             DrawMainValues(BackBufferGraphics, speed_max, (MGridX[1] + MGridX[3]) / 2, MGridY[3], 20.0f * df);
@@ -5309,7 +5400,7 @@ namespace GpsCycleComputer
                 mapUtil.DrawMaps(e.Graphics, BackBuffer, BackBufferGraphics, MouseMoving,
                                  gps.OpenedOrSuspended, comboMultiMaps.SelectedIndex, GetUnitsConversionCff(), GetUnitsName(),
                                  PlotLong, PlotLat, PlotCount, GetLineColor(comboBoxKmlOptColor), GetLineWidth(comboBoxKmlOptWidth),
-                                 checkPlotTrackAsDots.Checked,
+                                 checkPlotTrackAsDots.Checked, WayPoints,
                                  Plot2ndLong, Plot2ndLat, Counter2nd, GetLineColor(comboBoxLine2OptColor), GetLineWidth(comboBoxLine2OptWidth),
                                  checkPlotLine2AsDots.Checked,
                                  CurLong, CurLat, Heading, CurrentGpsLedColor);
@@ -5660,7 +5751,7 @@ namespace GpsCycleComputer
                     }
 
                     if(fs != null)
-                        loaded_ok = fs.Load(file_name, PlotDataSize, ref Plot2ndLat, ref Plot2ndLong, ref Plot2ndT, out Counter2nd);
+                        loaded_ok = fs.Load(file_name, ref WayPoints, PlotDataSize, ref Plot2ndLat, ref Plot2ndLong, ref Plot2ndT, out Counter2nd);
                 }
 
                 if (loaded_ok)  // loaded OK
@@ -6193,6 +6284,7 @@ namespace GpsCycleComputer
                 Counter2nd = 0;
                 labelFileName.SetText("Track to follow cleared");
                 mPage.mBAr[(int)MenuPage.BFkt.load_2clear].text = "ClearTrack";
+                WayPoints.WayPointCount = 0;        // Clear Waypoints of T2F
             }
         }
 
@@ -6376,6 +6468,18 @@ namespace GpsCycleComputer
             { mapUtil.Back_Color = Color.White; mapUtil.Fore_Color = Color.Black; }
             else
             { mapUtil.Back_Color = bkColor; mapUtil.Fore_Color = foColor; }
+        }
+
+        private void CheckDispWayPoints_click(object sender, EventArgs e)
+        {
+            if( checkDispWaypoints.Checked)
+            {
+                WayPoints.SetSize( CheckPointDataSize );
+            }
+            else
+            {
+                WayPoints.SetSize( 0 );
+            }
         }
 
         private void comboMapDownload_SelectedIndexChanged(object sender, EventArgs e)

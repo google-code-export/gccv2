@@ -11,6 +11,7 @@ using System.Globalization;
 using System.Net;
 using System.Text;
 using System.Runtime.InteropServices;
+using GpsCycleComputer;
 
 #endregion
 
@@ -1248,18 +1249,24 @@ User-defined server (read server name from osm_server.txt)
 
 
         // KB-Version2
-        private void DrawTrackLine(Graphics g, Pen p, float[] PlotLong, float[] PlotLat, int PlotSize, bool plot_dots, float CurLong, float CurLat, bool ShowDistance, double unit_cff, string unit_name)
+        // 
+        private int DrawTrackLine(Graphics g, Pen p, float[] PlotLong, float[] PlotLat, int PlotSize, bool plot_dots, float CurLong, float CurLat, bool GetMinDistance)
         {
+            // return value: Index of the Point with the minimum Distance between track2follow and current position.
+            // But only, if one of both is outside of the current screen.
+            // -1 if index is not available
+
             // idea is to draw max 128 points (as it is slow),
             // so first select only points which are within the map
             // reduce further size of the points to max 128
             //int begin = Environment.TickCount;
             //String str = "";// = new String("");
 
+            int IndexMinDistance = -1;
             // Current position on the screen
             int CurrentX = 0; 
             int CurrentY = 0;
-            if (ShowDistance == true)
+            if (GetMinDistance == true)
             {
                 CurrentX = ToScreenX(CurLong);
                 CurrentY = ToScreenY(CurLat);
@@ -1268,7 +1275,6 @@ User-defined server (read server name from osm_server.txt)
             int MinDistance = int.MaxValue;
             int MinDistanceX = 0;
             int MinDistanceY = 0;
-			int MinDistanceIndex = 0;
 
             SolidBrush drawBrush = new SolidBrush(p.Color); // brush to draw points
             int pen_size = (int)p.Width;
@@ -1293,7 +1299,7 @@ User-defined server (read server name from osm_server.txt)
                     LineStarted = true; 
                 }
 
-                if (ShowDistance == true)
+                if (GetMinDistance == true)
                 {
                     // Find Point on track with minimum Distance to current position
                     int xDist = points[d].X - CurrentX;
@@ -1305,7 +1311,7 @@ User-defined server (read server name from osm_server.txt)
                         MinDistance = Dist;
                         MinDistanceX = points[d].X;
                         MinDistanceY = points[d].Y;
-						MinDistanceIndex = i;
+						IndexMinDistance = i;
                     }
                 }
 
@@ -1351,49 +1357,22 @@ User-defined server (read server name from osm_server.txt)
                 }
             }
 
-            if (ShowDistance == true)
+            if (GetMinDistance == true)
             {
                 // If the Current Position is outside of the Screen or the nearest point on the track is outside
                 // of the screen, show a line between current position and track to indicate the direction to follow
                 if (CurrentX <= 0 || CurrentX >= ScreenX || CurrentY <= 0 || CurrentY >= ScreenY ||
                      MinDistanceX <= 0 || MinDistanceX >= ScreenX || MinDistanceY <= 0 || MinDistanceY >= ScreenY)    //only points within screen
                 {
-                    //float OldPenWidth = p.Width;
-                    //Color OldPenColor = p.Color;
-                    Font drawFont = new Font("Arial", 8, FontStyle.Regular);
-
-                    // Calculate the distance between track and current position
-					double xCurPos, yCurPos, xMinPos, yMinPos;
-                    utmUtil.getXY(CurLat, CurLong, out xCurPos, out yCurPos);
-					utmUtil.getXY(PlotLat[MinDistanceIndex], PlotLong[MinDistanceIndex], out xMinPos, out yMinPos);
-                    double deltaS = Math.Sqrt((xCurPos - xMinPos) * (xCurPos - xMinPos) + (yCurPos - yMinPos) * (yCurPos - yMinPos));
-					deltaS = deltaS * unit_cff;
-
-                    string strDistance = "Distance to T2F: " + deltaS.ToString("0.0") + unit_name;
-                    SizeF TextSize = g.MeasureString(strDistance, drawFont);
-
                     // We draw the line between current position and T2F with half of the T2F width and somewhat lighter
-                    p.Width = Math.Max( 2, p.Width / 2 );
+                    p.Width = Math.Max(2, p.Width / 2);
                     p.Color = modifyColor(p.Color, +100);
                     // not supported by .NET CF??? p.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
-                    g.DrawLine( p, CurrentX, CurrentY, MinDistanceX, MinDistanceY );
-                    
-                    // Draw a black box to show distance between current position and track2follow
-                    p.Color = Color.Gray;
-                    const int LineWidth = 1;
-                    p.Width = LineWidth;
-                    int TextBoxHeigth = (int) (TextSize.Height + 0.5);
-                    drawBrush.Color = Color.Black;
-                    g.FillRectangle(drawBrush, 0, ScreenY - TextBoxHeigth - LineWidth, ScreenX, ScreenY);
-                    g.DrawLine(p, 0, ScreenY - TextBoxHeigth - LineWidth, ScreenX, ScreenY - TextBoxHeigth - LineWidth);
-
-                    // Draw Distance to Track information
-                    drawBrush.Color = Color.White;
-                    g.DrawString(strDistance, drawFont, drawBrush, 2, ScreenY - TextBoxHeigth);
-
-                    // restore old pen settings for further use
-                    //p.Width = OldPenWidth;
-                    //p.Color = OldPenColor;
+                    g.DrawLine(p, CurrentX, CurrentY, MinDistanceX, MinDistanceY);
+                }
+                else  // both points are inside of the visible screen area
+                {
+                    IndexMinDistance = -1;  // Index to min Distance not required.
                 }
             }
 
@@ -1404,8 +1383,85 @@ User-defined server (read server name from osm_server.txt)
             //g.DrawString("Length=" + PlotSize, drawFont, drawBrush, 0, 20);
             //g.DrawString("d=" + str, drawFont, drawBrush, 0, 40);
             //g.DrawString("ticks=" + (end - begin), drawFont, drawBrush, 0, 60);
+
+            return IndexMinDistance;
         }
 
+        private void DrawDistanceToTrack2Follow(Graphics g, Pen p, float CurLong, float CurLat, float t2fLong, float t2fLat, double unit_cff, string unit_name) 
+        {
+            float OldPenWidth = p.Width;
+            Color OldPenColor = p.Color;
+            Font drawFont = new Font("Arial", 8, FontStyle.Regular);
+            SolidBrush drawBrush = new SolidBrush(Color.Black); // brush to draw rectangle
+
+            // Calculate the distance between track and current position
+			double xMinDist, yMinDist;
+            utmUtil.setReferencePoint(CurLat, CurLong);
+			utmUtil.getXY(t2fLat, t2fLong, out xMinDist, out yMinDist);
+            double deltaS = Math.Sqrt(xMinDist * xMinDist + yMinDist * yMinDist);
+			deltaS = deltaS * unit_cff;
+
+            string strDistance = "Distance to T2F: " + deltaS.ToString("0.0") + unit_name;
+            SizeF TextSize = g.MeasureString(strDistance, drawFont);
+
+            // Draw a black box to show distance between current position and track2follow
+            p.Color = Color.Gray;
+            const int LineWidth = 1;
+            p.Width = LineWidth;
+            int TextBoxHeight = (int) (TextSize.Height + 0.5);
+            g.FillRectangle(drawBrush, 0, ScreenY - TextBoxHeight - LineWidth, ScreenX, TextBoxHeight + LineWidth);
+            g.DrawLine(p, 0, ScreenY - TextBoxHeight - LineWidth, ScreenX, ScreenY - TextBoxHeight - LineWidth);
+
+            // Draw Distance to Track information
+            drawBrush.Color = Color.White;
+            g.DrawString(strDistance, drawFont, drawBrush, 2, ScreenY - TextBoxHeight);
+
+            // restore old pen settings for further use
+            p.Width = OldPenWidth;
+            p.Color = OldPenColor;
+        }
+
+        private void DrawCheckPoints(Graphics g, Pen p, Form1.WayPointInfo WayPoints, Color col )
+        {
+            int i = 0;      //0..Plotsize
+            SolidBrush br = new SolidBrush(col);
+            Font drawFont = new Font("Arial", 8, FontStyle.Regular);
+            // draw heading - 4 points arrow
+            // needle
+            Point[] pa = new Point[6];
+
+            while (i < WayPoints.WayPointCount)
+            {
+                int x = ToScreenX(WayPoints.lon[i]);
+                int y = ToScreenY(WayPoints.lat[i]);
+
+                if (x >= 0 && x < ScreenX && y >= 0 && y < ScreenY)    //only points within screen
+                {
+                   pa[0].X = x;
+                   pa[0].Y = y;
+                   pa[1].X = x;
+                   pa[1].Y = y - 18;
+                   pa[2].X = x + 2;
+                   pa[2].Y = y - 18;
+                   pa[3].X = x + 8;
+                   pa[3].Y = y - 14;
+                   pa[4].X = x + 2;
+                   pa[4].Y = y - 10;
+                   pa[5].X = x + 2;
+                   pa[5].Y = y;
+
+                   SizeF TextSize = g.MeasureString(WayPoints.name[i], drawFont);
+                   br.Color = Color.Black;
+                   g.FillRectangle(br, x + 9, y - 12, (int)TextSize.Width + 2, (int)TextSize.Height);
+
+                   // br.Color = p.Color;
+                   br.Color = col; 
+                   g.FillPolygon(br, pa);
+                   g.DrawString(WayPoints.name[i], drawFont, br, x + 10, y - 12);
+                }
+                i++;
+            }
+        }
 
 
         private void DrawTickLabel(Graphics g, Pen p, int tick_dist_screen, double tick_dist_units, string unit_name)
@@ -1542,6 +1598,7 @@ User-defined server (read server name from osm_server.txt)
                              bool MouseMoving, bool lifeview, int MapMode, 
                              double unit_cff, string unit_name,
                              float[] PlotLong, float[] PlotLat, int PlotSize, Color line_color, int line_width, bool plot_dots,
+                             Form1.WayPointInfo WayPoints,
                              float[] PlotLong2, float[] PlotLat2, int PlotSize2, Color line_color2, int line_width2, bool plot_dots2,
                              float[] CurLong, float[] CurLat, int heading, Color CurrentGpsLedColor)
         {
@@ -1563,6 +1620,7 @@ User-defined server (read server name from osm_server.txt)
                 g.DrawString(tmpStr, tmpFont, tmpBrush, 3, 5 + size.Height*2);
                 return;
             }*/
+            int IndexMinDistance = -1;
 
             // if back buffer exists and picture is moving - draw existing picture
             if (MouseMoving && (BackBuffer != null))
@@ -1631,7 +1689,7 @@ User-defined server (read server name from osm_server.txt)
             {
                 pen.Color = line_color2;
                 pen.Width = line_width2;
-                DrawTrackLine(BackBufferGraphics, pen, PlotLong2, PlotLat2, PlotSize2, plot_dots2, CurLong[0], CurLat[0], true, unit_cff, unit_name);
+                IndexMinDistance = DrawTrackLine(BackBufferGraphics, pen, PlotLong2, PlotLat2, PlotSize2, plot_dots2, CurLong[0], CurLat[0], true );
                 DrawCurrentPoint(BackBufferGraphics, PlotLong2[PlotSize2 - 1], PlotLat2[PlotSize2 - 1], line_width2, line_color2);
             }
 
@@ -1640,10 +1698,20 @@ User-defined server (read server name from osm_server.txt)
             {
                 pen.Color = line_color;
                 pen.Width = line_width;
-                DrawTrackLine(BackBufferGraphics, pen, PlotLong, PlotLat, PlotSize, plot_dots, 0, 0, false, unit_cff, unit_name);
+                DrawTrackLine(BackBufferGraphics, pen, PlotLong, PlotLat, PlotSize, plot_dots, 0, 0, false );
                 // draw last point larger by 5 points
                 DrawCurrentPoint(BackBufferGraphics, PlotLong[PlotSize - 1], PlotLat[PlotSize - 1], line_width + 5, line_color);
             }
+            
+            // Draw the Checkpoints (on top of track2follow and track line)
+            DrawCheckPoints(BackBufferGraphics, pen, WayPoints, Color.White);
+            
+            // Draw the Distance between track2follow and current position (we have to draw after the main track line, to avoid overwriting of the text string)
+            if( PlotSize2 != 0 && IndexMinDistance >= 0 && IndexMinDistance < PlotSize2 )
+            {
+                DrawDistanceToTrack2Follow(BackBufferGraphics, pen, CurLong[0], CurLat[0], PlotLong2[IndexMinDistance], PlotLat2[IndexMinDistance], unit_cff, unit_name); 
+            }
+
             if (lifeview)
             {
                 DrawArrow(BackBufferGraphics, CurLong[0], CurLat[0], heading, line_width * 2 + 5, line_color);

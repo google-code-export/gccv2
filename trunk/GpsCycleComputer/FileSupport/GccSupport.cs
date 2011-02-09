@@ -3,12 +3,14 @@
 using System.IO;
 using System.Windows.Forms;
 using GpsUtils;
+using GpsCycleComputer;
 
 namespace GpsSample.FileSupport
 {
     class GccSupport : IFileSupport
     {
-        public bool Load(string filename, int vector_size, ref float[] dataLat, ref float[] dataLong, ref int[] dataT, out int data_size)
+        public bool Load(string filename, ref Form1.WayPointInfo WayPoints,
+            int vector_size, ref float[] dataLat, ref float[] dataLong, ref int[] dataT, out int data_size)
         {
             int Counter = 0;
             double OriginShiftX = 0.0;
@@ -18,6 +20,7 @@ namespace GpsSample.FileSupport
             UtmUtil utmUtil = new UtmUtil();
 
             data_size = 0;
+            WayPoints.WayPointCount = 0;
 
             Cursor.Current = Cursors.WaitCursor;
 
@@ -45,6 +48,7 @@ namespace GpsSample.FileSupport
 
                     Int16 x_int = 0; Int16 y_int = 0; Int16 z_int = 0; Int16 s_int = 0;
                     UInt16 t_16 = 0; UInt16 t_16last = 0; Int32 t_high = 0;
+                    double out_lat = 0.0, out_long = 0.0;
 
                     while (rd.PeekChar() != -1)
                     {
@@ -82,9 +86,18 @@ namespace GpsSample.FileSupport
                         else if ((s_int == -1) && (t_16 == 0xFFFF) && (z_int == 3))
                         {
                             // read checkpoint name, if not blank
+                            string name = "";
                             for (int i = 0; i < x_int; i++)
                             {
-                                if (rd.PeekChar() != -1) { rd.ReadUInt16(); }
+                                name += (char)(rd.ReadUInt16());
+                            }
+                            // store new checkpoint
+                            if (WayPoints.WayPointCount < (WayPoints.WayPointDataSize - 1))
+                            {
+                                WayPoints.name[WayPoints.WayPointCount] = name;
+                                WayPoints.lat[WayPoints.WayPointCount] = (float)out_lat;
+                                WayPoints.lon[WayPoints.WayPointCount] = (float)out_long;
+                                WayPoints.WayPointCount++;
                             }
                         }
                         // "normal" record
@@ -106,8 +119,6 @@ namespace GpsSample.FileSupport
                                 Counter /= 2;
                             }
 
-                            double out_lat;
-                            double out_long;
                             utmUtil.getLatLong(real_x, real_y, out out_lat, out out_long);
 
                             dataLat[Counter] = (float)out_lat;
