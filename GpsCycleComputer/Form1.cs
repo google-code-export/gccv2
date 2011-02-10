@@ -4986,18 +4986,27 @@ namespace GpsCycleComputer
 
             if (MainConfigDistance != eConfigDistance.eDistanceTrip && Counter2nd != 0)
             {
-                double xDist, yDist;
-                utmUtil.setReferencePoint(CurrentLat, CurrentLong);
+                double xCurrent = 0, yCurrent = 0, xTrack, yTrack;
+                // If we have no valid GPS connection, and no current gcc file loaded, the reference point is not 
+                // set. But if the reference point is set, we are not allowed to change it.
+                if (ReferenceSet == false)
+                {
+                    utmUtil.setReferencePoint(CurrentLat, CurrentLong);
+                }
+                else // reference point ist set
+                {
+                    utmUtil.getXY(CurrentLat, CurrentLong, out xCurrent, out yCurrent);
+                }
                 if (MainConfigDistance == eConfigDistance.eDistanceTrack2FollowStart)    // show distance to track2follow start
                 {
-                    utmUtil.getXY(Plot2ndLat[0], Plot2ndLong[0], out xDist, out yDist);
+                    utmUtil.getXY(Plot2ndLat[0], Plot2ndLong[0], out xTrack, out yTrack);
                 }
                 else  // show Distance to track2follow end
                 {
-                    utmUtil.getXY(Plot2ndLat[Counter2nd - 1], Plot2ndLong[Counter2nd - 1], out xDist, out yDist);
+                    utmUtil.getXY(Plot2ndLat[Counter2nd - 1], Plot2ndLong[Counter2nd - 1], out xTrack, out yTrack);
                 }
                 // Calculate the distance between track and current position
-                double deltaS = Math.Sqrt(xDist * xDist + yDist * yDist);
+                double deltaS = Math.Sqrt( (xTrack - xCurrent) * (xTrack - xCurrent) + (yTrack - yCurrent) * (yTrack - yCurrent));
                 dist = PrintDist(deltaS * GetUnitsConversionCff());
             }    
             DrawMainValues(BackBufferGraphics, dist, (MGridX[0] + MGridX[1]) / 2, MGridY[5], 26.0f * df);
