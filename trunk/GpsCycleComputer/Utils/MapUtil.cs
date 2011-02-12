@@ -1426,9 +1426,7 @@ User-defined server (read server name from osm_server.txt)
             int i = 0;      //0..Plotsize
             SolidBrush br = new SolidBrush(col);
             Font drawFont = new Font("Arial", 8, FontStyle.Regular);
-            // draw heading - 4 points arrow
-            // needle
-            Point[] pa = new Point[6];
+            Point[] pa = new Point[3];
 
             while (i < WayPoints.WayPointCount)
             {
@@ -1437,27 +1435,38 @@ User-defined server (read server name from osm_server.txt)
 
                 if (x >= 0 && x < ScreenX && y >= 0 && y < ScreenY)    //only points within screen
                 {
-                   pa[0].X = x;
-                   pa[0].Y = y;
-                   pa[1].X = x;
-                   pa[1].Y = y - 18;
-                   pa[2].X = x + 2;
-                   pa[2].Y = y - 18;
-                   pa[3].X = x + 8;
-                   pa[3].Y = y - 14;
-                   pa[4].X = x + 2;
-                   pa[4].Y = y - 10;
-                   pa[5].X = x + 2;
-                   pa[5].Y = y;
+                    int MarkerSize;
 
-                   SizeF TextSize = g.MeasureString(WayPoints.name[i], drawFont);
-                   br.Color = Color.Black;
-                   g.FillRectangle(br, x + 9, y - 12, (int)TextSize.Width + 2, (int)TextSize.Height);
+                    // Size of Marker dependend on the screen size
+                    if (ScreenX > 320)
+                        MarkerSize = 36;
+                    else
+                        MarkerSize = 20;
 
-                   // br.Color = p.Color;
-                   br.Color = col; 
-                   g.FillPolygon(br, pa);
-                   g.DrawString(WayPoints.name[i], drawFont, br, x + 10, y - 12);
+                    p.Color = col;
+                    p.Width = 2.0F;
+                    g.DrawLine(p, x, y, x, y - MarkerSize);
+                    p.Width = 1.0F;
+                    p.Color = Color.Black;
+                    g.DrawLine(p, x + 2, y, x + 2, y - MarkerSize / 2);
+ 
+                    pa[0].X = x + 1;
+                    pa[0].Y = y - MarkerSize;
+                    pa[1].X = x + 1 + MarkerSize / 2;
+                    pa[1].Y = y - MarkerSize * 3 / 4;
+                    pa[2].X = x + 1;
+                    pa[2].Y = y - MarkerSize / 2;
+                    g.DrawLine(p, x + 2, y - MarkerSize / 2, x + 2 + MarkerSize / 2, y - MarkerSize * 3 / 4);
+
+                    SizeF TextSize = g.MeasureString(WayPoints.name[i], drawFont);
+                    br.Color = Color.Black;
+                    g.FillRectangle(br, x + MarkerSize / 3, y - MarkerSize / 2, (int)TextSize.Width + 3, (int)TextSize.Height);
+
+                    // br.Color = p.Color;
+                    br.Color = col; 
+                    g.FillPolygon(br, pa);
+                    br.Color = Color.White;
+                    g.DrawString(WayPoints.name[i], drawFont, br, x + 1 + MarkerSize / 3, y - MarkerSize / 2);
                 }
                 i++;
             }
@@ -1706,7 +1715,7 @@ User-defined server (read server name from osm_server.txt)
             if (ShowWaypoints == true)
             {
                 // Draw the Checkpoints (on top of track2follow and track line)
-                DrawCheckPoints(BackBufferGraphics, pen, WayPoints, Color.White);
+                DrawCheckPoints(BackBufferGraphics, pen, WayPoints, Color.Orange);
             }
 
             // Draw the Distance between track2follow and current position (we have to draw after the main track line, to avoid overwriting of the text string)
