@@ -231,7 +231,7 @@ content="text/html; charset=iso-8859-1"/>
             <li><strong>Options</strong>: (see below)</li>
             <li><strong>Altitude</strong>: show altitude graph over time (see Graph below)&nbsp;</li>
             <li><strong>Speed</strong>: show speed graph over time (see Graph below)&nbsp;</li>
-            <li><strong>CheckPoint</strong>: add a named waypoint to the track log </li>
+            <li><strong>Waypoint</strong>: add a named waypoint to the track log </li>
             <li><strong>File/Export</strong>: file operations like load GCC files and save KML or GPX files&nbsp;</li>
             <li><strong>Track2Follow</strong>: load a track as second line in map which you can follow. Valid file
                 formats are GCC, KML and GPX.</li>
@@ -330,9 +330,6 @@ content="text/html; charset=iso-8859-1"/>
         pages, so press &quot;next&quot; or &quot;previous&quot;
         (center or right buttons) on options tab to switch
         between option pages.</font></p>
-            <p><font size="2" face="Arial">
-                Some fields in Main page can be configured by context menu (press and hold to open
-                the context menu). By context menu of the clock you can activate day and night scheme.</font></p>
         <p><font size="2" face="Arial"><strong><u>The first
         options you see:</u></strong></font></p>
         <ul>
@@ -453,14 +450,6 @@ content="text/html; charset=iso-8859-1"/>
                 screen, show altitude relative to the starting
                 point, instead of the absolute altitude. Default
                 off.</font></li>
-            <li><font size="2" face="Arial">Direct in the main screen by context menu of the <strong>Speed</strong> field you
-                can choose if speed is taken from the corresponding GPS sentence or if is calculated
-                from the moving position (or both).</font></li>
-            <li><font size="2" face="Arial">In the Altitude field you can choose between <strong>"Altitude gain"</strong> (sum
-                of increasing altitude), <strong>"Altitude loss"</strong> (sum of falling altitude),
-                <strong>"Altitude delta"</strong> (current - starting altitude)
-                and <strong>"Slope"</strong>
-                in percent.&nbsp;</font></li>
         </ul>
         <p><font size="2" face="Arial"><strong><u>Page &quot;Maps
         screen options&quot;</u></strong><strong>:</strong></font></p>
@@ -622,11 +611,56 @@ content="text/html; charset=iso-8859-1"/>
                 version and see other important info including a button to
                 display this readme file..</font></li>
         </ul>
-        
-            <h2>
+		
+        <p><font size="2" face="Arial">
+                Some fields in Main page or map screen can be configured by context menu (press and hold 
+				for about 2 seconds to open the context menu).</font></p>
+        <p><font size="2" face="Arial"><strong><u>Context menu &quot;Main page&quot;:</u></strong></font></p>
+		<ul>
+			<li><font size="2" face="Arial">&quot;<strong>Clock</strong>&quot;:
+				By context menu of the clock you can activate day and night scheme.</font></li>
+			<li><font size="2" face="Arial">&quot;<strong>Speed</strong>&quot;:
+				Directly in the main screen by context menu of the <strong>Speed</strong> field you
+                can choose if speed is taken from the corresponding GPS sentence or if it is calculated
+                from the moving position (or both).</font></li>
+			<li><font size="2" face="Arial">&quot;<strong>Altitude</strong>&quot;:
+				In the <strong>Altitude</strong> field you can choose between <strong>"Altitude gain"</strong> (sum
+                of increasing altitude), <strong>"Altitude loss"</strong> (sum of falling altitude),
+                <strong>"Altitude delta"</strong> (current - starting altitude)
+                and <strong>"Slope"</strong>
+                in percent.&nbsp;</font></li>
+			<li><font size="2" face="Arial">&quot;<strong>Distance</strong>&quot;:
+				In the context menu of the <strong>Distance</strong> field, you can choose between the 
+				distance <strong>since start of the trip</strong> or the distance between the current 
+				position and the <strong>track to follow start</strong> or <strong>track to follow end</strong>
+				position (air-line, not real remaining length of the track).</font></li>
+		</ul>
+        <p><font size="2" face="Arial"><strong><u>Context menu &quot;Map screen&quot;:</u></strong></font></p>
+        <p><font size="2" face="Arial">
+                On the <strong>Map screen</strong> you have the following options in the context menu:
+				</font></p>
+		<ul>
+			<li><font size="2" face="Arial">&quot;<strong>Show track to follow - start / end:</strong>&quot;:
+				By selecting this option, the start / end position of the track to follow is displayed in the
+				center of the map screen.<br>
+				If one of this options is activated, the map screen will not follow the current position, 
+				even if you move.
+				This options are only available, if a track to follow is loaded.</font></li>
+			<li><font size="2" face="Arial">&quot;<strong>Reset map (GPS/last)</strong>&quot;:
+				The current or last position is displayed in the center of the screen. If you move, the screen 
+				will follow your movement. This option has the same effect as an double click on the 
+				map screen.</font></li>
+			<li><font size="2" face="Arial">&quot;<strong>Add waypoint</strong>&quot;:
+				You can directly add a waypoint to your current tracklog. This option is only available, 
+				if a tracklog is recorded.</font></li>
+			<li><font size="2" face="Arial">&quot;<strong>Show waypoints</strong>&quot;:
+				If a track to follow is loaded and includes waypoints, you can select to show or hide displaying 
+				waypoints.</font></li>
+		</ul>
+        <h2>
                 <span style="font-size: 12pt; font-family: Arial"></span>&nbsp;</h2>
         <a name="graph"></a>
-            <h2>
+        <h2>
                 <span style="font-size: 12pt; font-family: Arial">8. Graph</span></h2>
             <p>
                 <span style="font-size: 10pt"><span style="font-family: Arial">Display graph of altitude or speed over time or distance. You can
@@ -650,9 +684,9 @@ content="text/html; charset=iso-8859-1"/>
                     based (400m, 1km, 2km, 5km) or time based (1min, 2min, 5min). The statistics of all your
                     laps are displayed on the lap screen. You can export the data in csv format by clicking
                     "export .csv". The directory and file name is the same as the track but with extension
-                    .csv. In addition after every lap a checkpoint with the lap data is created in the
+                    .csv. In addition after every lap a waypoint with the lap data is created in the
                     track (except in manual mode because this is used usually on a round trip and the
-                    checkpoints would fall all on the same place).</span></p>
+                    waypoints would fall all on the same place).</span></p>
             <p>
                 <span style="font-size: 10pt; font-family: Arial">If the lap function is enabled the
                     "Altitude" field in the main screen changes to "Lap" field. It displays the time
