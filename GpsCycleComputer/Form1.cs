@@ -414,8 +414,9 @@ namespace GpsCycleComputer
         private ContextMenu cMenu1 = new ContextMenu();
         private CheckBox checkGPSOffOnPowerOff;
         private CheckBox checkKeepBackLightOn;
-        private CheckBox checkDispWaypoints; 
-        private MenuItem[] cMenuItem = new MenuItem[] { new MenuItem(), new MenuItem(), new MenuItem(), new MenuItem() };
+        private CheckBox checkDispWaypoints;
+        private const int MenuItemSize = 5;
+        private MenuItem[] cMenuItem = new MenuItem[]{ new MenuItem(), new MenuItem(), new MenuItem(), new MenuItem(), new MenuItem()};
 
         // c-tor. Create classes used, init some components
         public Form1()
@@ -463,7 +464,7 @@ namespace GpsCycleComputer
             LockResize = false;
 
             cMenu1.Popup += new EventHandler(cMenu1_Popup);
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < MenuItemSize; i++)
             { cMenuItem[i].Click += new EventHandler(cMenuItem_Click); }
             this.NoBkPanel.ContextMenu = cMenu1;
             mPage.ContextMenu = cMenu1;
@@ -473,7 +474,7 @@ namespace GpsCycleComputer
         private void cMenu1_Popup(object sender, EventArgs e)
         {
             cMenu1.MenuItems.Clear();
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < MenuItemSize; i++)
             { cMenuItem[i].Checked = false; }
             int ClientMouseY = MousePosition.Y - Screen.PrimaryScreen.WorkingArea.Top;
             int numItems = 0;
