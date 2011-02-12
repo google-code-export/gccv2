@@ -44,7 +44,7 @@ namespace GpsCycleComputer
 
                                                   new MButton ("graph.jpg", "Altitude"),
                                                   new MButton ("graph.jpg", "Speed"),
-                                                  new MButton ("checkpoint.jpg", "CheckPoint", false),
+                                                  new MButton ("checkpoint.jpg", "Add Waypoint", false),
 
                                                   new MButton ("edit.jpg", "File/Export"),
                                                   new MButton ("edit.jpg", "Track2Follow"),

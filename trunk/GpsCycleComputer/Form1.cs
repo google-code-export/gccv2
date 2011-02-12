@@ -240,24 +240,15 @@ namespace GpsCycleComputer
             public string[] name;
             public WayPointInfo(int size)
             {
-                WayPointDataSize = 0;
-                SetSize(size);
-            }
-            public void SetSize(int size)
-            {
-                // only if the size changes, allocate new memory
-                if( size != 0 && size != WayPointDataSize )
-                {
-                    lat = new float[size];
-                    lon = new float[size];
-                    name = new string[size];
-                }
                 WayPointDataSize = size;
                 WayPointCount = 0;
+                lat = new float[size];
+                lon = new float[size];
+                name = new string[size];
             }
         };
         // Use same datasize for Waypoints and Checkpoints
-        WayPointInfo WayPoints = new WayPointInfo(0);        
+        WayPointInfo WayPoints = new WayPointInfo(CheckPointDataSize);        
 
         // lap statistics
         int LapNumber = 0;
@@ -627,13 +618,20 @@ namespace GpsCycleComputer
                             numItems++;
                         }
                         // Alternative method to reset map position (same functionality as double click)
-                        cMenuItem[numItems].Text = "reset map position (GPS/last)";
+                        cMenuItem[numItems].Text = "reset map (GPS/last)";
                         if (mapUtil.ShowTrackToFollowMode == MapUtil.ShowTrackToFollow.T2FOff) cMenuItem[numItems].Checked = true;
                         numItems++;
-                        // If logging is activated, we can add a check point (faster access as menu page)
+                        // If logging is activated, we can add a waypoint (faster access as menu page)
                         if (Logging || Paused)
                         {
-                            cMenuItem[numItems].Text = "add check point";
+                            cMenuItem[numItems].Text = "add waypoint";
+                            numItems++;
+                        }
+                        // If a track with waypoints is loaded, we can switch on / off the waypoints in the map view
+                        if( WayPoints.WayPointCount > 0 )
+                        {
+                            cMenuItem[numItems].Text = "show waypoints";
+                            if (checkDispWaypoints.Checked == true) cMenuItem[numItems].Checked = true;
                             numItems++;
                         }
                         break;
@@ -737,17 +735,19 @@ namespace GpsCycleComputer
                     NoBkPanel.Invalidate();     // Update Screen
                 }
             }
-			else if (((MenuItem)sender).Text == "add check point")
+			else if (((MenuItem)sender).Text == "add waypoint")
 			{
-                string checkpoint = "";
-                DialogResult Result = Utils.InputBox(null, "Enter Checkpoint name", ref checkpoint);
+                string wayPoint = "";
+                DialogResult Result = Utils.InputBox(null, "Enter waypoint name", ref wayPoint);
                 if (Result == DialogResult.OK)
 				{
-                    WriteCheckPoint(checkpoint);
+                    WriteCheckPoint(wayPoint);
                 }
  			}
-            else if (((MenuItem)sender).Text == "reset map position (GPS/last)")
+            else if (((MenuItem)sender).Text == "reset map (GPS/last)")
                 ResetMapPosition();
+            else if (((MenuItem)sender).Text == "show waypoints")
+                checkDispWaypoints.Checked = !checkDispWaypoints.Checked;
             else
                 MessageBox.Show("no method for menu: " + ((MenuItem)sender).Text);
         }
@@ -2093,7 +2093,6 @@ namespace GpsCycleComputer
             this.checkDispWaypoints.Size = new System.Drawing.Size(261, 33);
             this.checkDispWaypoints.TabIndex = 59;
             this.checkDispWaypoints.Text = "Display waypoints";
-            this.checkDispWaypoints.Click += new System.EventHandler(this.CheckDispWayPoints_click);
             // 
             // labelDefaultZoom
             // 
@@ -2298,7 +2297,6 @@ namespace GpsCycleComputer
             // select option pages to show and apply map bkground option
             FillPagesToShow();
             checkMapsWhiteBk_Click(checkMapsWhiteBk, EventArgs.Empty);
-            CheckDispWayPoints_click(checkDispWaypoints, EventArgs.Empty);
 
             if (importantNewsId != 404)
             {
@@ -3654,11 +3652,11 @@ namespace GpsCycleComputer
                     if (Logging || Paused)
                     {
                         string checkpoint = "";
-                        DialogResult Result = Utils.InputBox(null, "Enter Checkpoint name", ref checkpoint);
+                        DialogResult Result = Utils.InputBox(null, "Enter waypoint name", ref checkpoint);
                         if (Result == DialogResult.OK)
                             WriteCheckPoint(checkpoint);
                     }
-                    else MessageBox.Show("Can't add a checkpoint when no Logging is active");
+                    else MessageBox.Show("Can't add a waypoint when logging is not activated");
                     goto case MenuPage.BFkt.main;
 
                 case MenuPage.BFkt.options:
@@ -5409,7 +5407,7 @@ namespace GpsCycleComputer
                 mapUtil.DrawMaps(e.Graphics, BackBuffer, BackBufferGraphics, MouseMoving,
                                  gps.OpenedOrSuspended, comboMultiMaps.SelectedIndex, GetUnitsConversionCff(), GetUnitsName(),
                                  PlotLong, PlotLat, PlotCount, GetLineColor(comboBoxKmlOptColor), GetLineWidth(comboBoxKmlOptWidth),
-                                 checkPlotTrackAsDots.Checked, WayPoints,
+                                 checkPlotTrackAsDots.Checked, WayPoints, checkDispWaypoints.Checked,
                                  Plot2ndLong, Plot2ndLat, Counter2nd, GetLineColor(comboBoxLine2OptColor), GetLineWidth(comboBoxLine2OptWidth),
                                  checkPlotLine2AsDots.Checked,
                                  CurLong, CurLat, Heading, CurrentGpsLedColor);
@@ -6477,18 +6475,6 @@ namespace GpsCycleComputer
             { mapUtil.Back_Color = Color.White; mapUtil.Fore_Color = Color.Black; }
             else
             { mapUtil.Back_Color = bkColor; mapUtil.Fore_Color = foColor; }
-        }
-
-        private void CheckDispWayPoints_click(object sender, EventArgs e)
-        {
-            if( checkDispWaypoints.Checked)
-            {
-                WayPoints.SetSize( CheckPointDataSize );
-            }
-            else
-            {
-                WayPoints.SetSize( 0 );
-            }
         }
 
         private void comboMapDownload_SelectedIndexChanged(object sender, EventArgs e)

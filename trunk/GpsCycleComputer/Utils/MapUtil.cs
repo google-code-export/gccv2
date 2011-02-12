@@ -1598,7 +1598,7 @@ User-defined server (read server name from osm_server.txt)
                              bool MouseMoving, bool lifeview, int MapMode, 
                              double unit_cff, string unit_name,
                              float[] PlotLong, float[] PlotLat, int PlotSize, Color line_color, int line_width, bool plot_dots,
-                             Form1.WayPointInfo WayPoints,
+                             Form1.WayPointInfo WayPoints, bool ShowWaypoints,
                              float[] PlotLong2, float[] PlotLat2, int PlotSize2, Color line_color2, int line_width2, bool plot_dots2,
                              float[] CurLong, float[] CurLat, int heading, Color CurrentGpsLedColor)
         {
@@ -1702,10 +1702,13 @@ User-defined server (read server name from osm_server.txt)
                 // draw last point larger by 5 points
                 DrawCurrentPoint(BackBufferGraphics, PlotLong[PlotSize - 1], PlotLat[PlotSize - 1], line_width + 5, line_color);
             }
-            
-            // Draw the Checkpoints (on top of track2follow and track line)
-            DrawCheckPoints(BackBufferGraphics, pen, WayPoints, Color.White);
-            
+
+            if (ShowWaypoints == true)
+            {
+                // Draw the Checkpoints (on top of track2follow and track line)
+                DrawCheckPoints(BackBufferGraphics, pen, WayPoints, Color.White);
+            }
+
             // Draw the Distance between track2follow and current position (we have to draw after the main track line, to avoid overwriting of the text string)
             if( PlotSize2 != 0 && IndexMinDistance >= 0 && IndexMinDistance < PlotSize2 )
             {

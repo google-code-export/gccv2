@@ -2,8 +2,10 @@ GPS Cycle Computer GCC
 ********* version 4.6 *********
 new features:
 - Waypoint support for GCC and GPX files. Display Waypoints - position and name - on the map screen
-- Distance on the main screen with the new options: distance trip, distance to start of track to follow and distance 
-  to end of track to follow (air line distance, not real track line distance)
+- Distance on the main screen with the new options in the context menu: 
+  * distance trip
+  * distance to start/end of track to follow or (air line distance, not real track line distance)
+- Checkpoint renamed to waypoint
   
 bugfixes:
 - if the distance between track2follow and current position is displayed, it may be overwritten by the current track line
