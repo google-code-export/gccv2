@@ -5,10 +5,13 @@ new features:
 - Distance on the main screen with the new options in the context menu: 
   * distance trip
   * distance to start/end of track to follow or (air line distance, not real track line distance)
-- Checkpoint renamed to waypoint
+- Checkpoint renamed to waypoint in the GUI
+- if the track log is stopped (or loaded from disk), and the start log button is pressed again, 
+  the user is now asked, if he want´s to continue logging into the existing log file. 
   
 bugfixes:
 - if the distance between track2follow and current position is displayed, it may be overwritten by the current track line
+- if the "exclude stop time" option is selected, the stop time is not included in the track log and live logging.
 
 ********* version 4.5 *********
 new features:

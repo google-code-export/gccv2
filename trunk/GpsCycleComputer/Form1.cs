@@ -2916,10 +2916,15 @@ namespace GpsCycleComputer
 
                                         // write battery info every 3 min
                                         WriteBatteryInfo();
-                                        WriteRecord(CurrentX, CurrentY);
-                                        AddPlotData((float)CurrentLat, (float)CurrentLong, (Int16)CurrentAlt, CurrentTimeSec, (Int16)(CurrentSpeed * 10.0), (Int16)(CurrentV * 10), (Int32)Distance);
-                                        DoLapStats();
-                                        DoLiveLogging();
+                                        // if exclude stop time is activated, do not log stop time in file, and
+                                        // do not include stop time in live logging.
+                                        if (checkExStopTime.Checked == false || moving == true)
+                                        {
+                                            WriteRecord(CurrentX, CurrentY);
+                                            AddPlotData((float)CurrentLat, (float)CurrentLong, (Int16)CurrentAlt, CurrentTimeSec, (Int16)(CurrentSpeed * 10.0), (Int16)(CurrentV * 10), (Int32)Distance);
+                                            DoLapStats();
+                                            DoLiveLogging();
+                                        }
                                     }// Logging
                                 }
                                 break;
@@ -3338,7 +3343,7 @@ namespace GpsCycleComputer
                 if (MessageBox.Show("Safe energy option activated. GPS is switched off on power off.\nLogging will be interrupted on power off. Do you want to keep GPS always on?", "GPS always on",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
                 {
-                    // Cancel the Closing event from closing the form.
+                    // Keep GPS on.
                     checkGPSOffOnPowerOff.Checked = false;
                     KeepToolRunning(true);
                 }
@@ -3355,6 +3360,19 @@ namespace GpsCycleComputer
                 }
             }
            
+            // If a tracklog already exists, and the distance to the last log point is about max. 1km  
+            // than ask, if the current track log should be continued.
+            if (PlotCount > 0 && CurrentFileName != "" && 
+                Math.Abs(PlotLat[PlotCount - 1] - CurrentLat) < 0.005F && Math.Abs(PlotLong[PlotCount - 1] - CurrentLong) < 0.005F)
+            {
+                if (MessageBox.Show("Do you wan´t to continue the track log into file:\n" + CurrentFileName, "Continue log file",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
+                {
+                    buttonContinue_Click();
+                    return;
+                }
+            }
+
             GenerateFileName();
             
             // check if we need to show the custom file name panel, or can start loging with default name
