@@ -2,18 +2,23 @@
 
 = GPS Cycle Computer =
 ----
-  * GPS tracing application for VGA Windows Mobile (tested on HTC Diamond).
+*Features*
+  * GPS tracking application for Windows Mobile (WM5.0-WM6.5) devices 
+  * Tested on HTC Diamond, Touch Diamond 2, Samsung Omnia2, Asus P320...
   * Logs GPS data into binary files with `.gcc` extension.
-  * `*.gcc` files can be loaded back for viewing, or saved  into `.kml` or `.gpx` format, to view in e.g. GoogleEarth.
-
-  * Does not use any data network connection.
-
+  * `*.gcc` files can be loaded back for viewing, or exported into `.kml` or `.gpx` format, to view in e.g. GoogleEarth.
+  * Direct download of Open Street Map tiles, or offline download to avoid any data connection
+  * Map display with automatic zoom of maps, if current zoom level is not downloaded
+  * Waypoint support (GPX and GCC file format)
+  * Cycle computer data screen (main display)
+  * Direct input of destination position for e. g. geocaching
   * To save battery power, GPS can be switched on/off at pre-defined intervals (5 sec ... 10 min)
-
   * Does not required any other GPS software to be installed, i.e. works directly with Windows GPS driver.
+  * Automatic power off, on low battery
+  * Live loggin option, using www.crossingways.com server
 
-*Main display data*
-  * trip distance,
+*Main display*
+  * trip distance, distance to start/end of track
   * trip time (including or excluding "stop time", i.e. when speed is zero)
   * current / average / max speed
   * current position relative to starting point (as x/y)
@@ -21,8 +26,15 @@
   * battery usage
   * display units are miles / mph, km / km/h or nautical miles / knots
 
-*Graph display data*
-  * x/y coordinates relative to starting point
+*Map display*
+  * Current position
+  * Track to follow
+  * Current tracklog
+  * Waypoints
+  * Distance between current potision and track to follow
+ 
+*Graph display*
+  * Altitude or speed graph of tracklog or track to follow
 ----
 == Installation ==
 
