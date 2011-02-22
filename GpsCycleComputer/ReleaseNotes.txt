@@ -12,6 +12,8 @@ new features:
 bugfixes:
 - if the distance between track2follow and current position is displayed, it may be overwritten by the current track line
 - if the "exclude stop time" option is selected, the stop time is not included in the track log and live logging.
+- if map folders are available for several zoom levels, but some map tiles are missing, the best map was not
+  in any case used 
 
 ********* version 4.5 *********
 new features:
