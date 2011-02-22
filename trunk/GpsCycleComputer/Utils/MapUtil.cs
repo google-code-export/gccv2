@@ -876,7 +876,8 @@ User-defined server (read server name from osm_server.txt)
                 bool completely_covered = false;
                 for (int j = 0; j < i; j++)
                 {
-                    if (IsMapCompletelyCovered(i, j))
+                    // Covering the map is only possible if the map is not removed
+                    if (Maps[j].was_removed == false && IsMapCompletelyCovered(i, j))
                     {
                         completely_covered = true;
                         break;
