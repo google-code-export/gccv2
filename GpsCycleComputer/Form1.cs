@@ -2918,7 +2918,10 @@ namespace GpsCycleComputer
                                         WriteBatteryInfo();
                                         // if exclude stop time is activated, do not log stop time in file, and
                                         // do not include stop time in live logging.
-                                        if (checkExStopTime.Checked == false || moving == true)
+                                        // Bugfix: even if not moving, the first call must be logged, otherwise
+                                        // the start position is logged more than once (because PlotCount=0), which leads 
+                                        // to an corrupt log file.
+                                        if (checkExStopTime.Checked == false || moving == true || PlotCount == 0)
                                         {
                                             WriteRecord(CurrentX, CurrentY);
                                             AddPlotData((float)CurrentLat, (float)CurrentLong, (Int16)CurrentAlt, CurrentTimeSec, (Int16)(CurrentSpeed * 10.0), (Int16)(CurrentV * 10), (Int32)Distance);
