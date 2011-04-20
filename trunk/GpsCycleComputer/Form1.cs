@@ -178,6 +178,8 @@ namespace GpsCycleComputer
         double ReferencAltSlope = Int16.MinValue;
         double ReferenceXSlope = 0.0;
         double ReferenceYSlope = 0.0;
+        double AltitudeMax = Int16.MinValue;
+        double AltitudeMin = Int16.MaxValue;
         double CurrentSpeed = Int16.MinValue*0.1;
         string CurrentFileName = "";
         string CurrentStatusString = "gps off ";
@@ -186,16 +188,18 @@ namespace GpsCycleComputer
         double CurrentVx = 0.0;     //speed in x direction in m/s
         double CurrentVy = 0.0;     //speed in y direction in m/s
         double CurrentV = Int16.MinValue * 0.1;      //speed in km/h
+        int Heading = 720;          //current heading 720=invalid, but still up
 
-        int MainConfigAlt2display = 0;  // 0=gain; 1=loss; 2=delta; 3=slope
+        int MainConfigAlt2display = 0;  // 0=gain; 1=loss; 2=max; 3=min; 4=slope
         int MainConfigSpeedSource = 0;  // 0=from gps; 1=from position; 2=both
         public enum eConfigDistance
         {
-            eDistanceTrip = 0,          // no not change order, because used in string array and for option check
+            eDistanceTrip = 0,          // do not change order, because used in string array and for option check
             eDistanceTrack2FollowStart,
             eDistanceTrack2FollowEnd,
         }
-        eConfigDistance MainConfigDistance = eConfigDistance.eDistanceTrip;     
+        eConfigDistance MainConfigDistance = eConfigDistance.eDistanceTrip;
+        int MainConfigLatFormat = 0;    // 0=00.000000 1=N00°00.0000' 2=N00°00'00.00"
 
         // baud rates
         int[] BaudRates = new int[6] { 4800, 9600, 19200, 38400, 57600, 115200 };
@@ -415,8 +419,8 @@ namespace GpsCycleComputer
         private CheckBox checkGPSOffOnPowerOff;
         private CheckBox checkKeepBackLightOn;
         private CheckBox checkDispWaypoints;
-        private const int MenuItemSize = 5;
-        private MenuItem[] cMenuItem = new MenuItem[]{ new MenuItem(), new MenuItem(), new MenuItem(), new MenuItem(), new MenuItem()};
+        private const int MenuItemSize = 6;
+        private MenuItem[] cMenuItem = new MenuItem[]{ new MenuItem(), new MenuItem(), new MenuItem(), new MenuItem(), new MenuItem(), new MenuItem()};
 
         // c-tor. Create classes used, init some components
         public Form1()
@@ -553,9 +557,10 @@ namespace GpsCycleComputer
                                 {
                                     cMenuItem[0].Text = "gain";     //Altitude gain
                                     cMenuItem[1].Text = "loss";
-                                    cMenuItem[2].Text = "delta";
-                                    cMenuItem[3].Text = "slope";
-                                    numItems = 4;
+                                    cMenuItem[2].Text = "max";
+                                    cMenuItem[3].Text = "min";
+                                    cMenuItem[4].Text = "slope";
+                                    numItems = 5;
                                     cMenuItem[MainConfigAlt2display].Checked = true;
                                 }
                             }
@@ -574,9 +579,13 @@ namespace GpsCycleComputer
                             {
                                 cMenuItem[0].Text = "beep on gps fix";         //GPS
                                 cMenuItem[1].Text = "log raw nmea";
-                                numItems = 2;
+                                cMenuItem[2].Text = "LatLon dd.dddddd°";
+                                cMenuItem[3].Text = "LatLon Ndd°mm.mmmm'";
+                                cMenuItem[4].Text = "LatLon Ndd°mm'ss.ss\"";
+                                numItems = 5;
                                 if (checkBeepOnFix.Checked) { cMenuItem[0].Checked = true; }
                                 if (logRawNmea) { cMenuItem[1].Checked = true; }
+                                cMenuItem[2+MainConfigLatFormat].Checked = true;
                             }
                         }
                         break;
@@ -635,6 +644,13 @@ namespace GpsCycleComputer
                             if (checkDispWaypoints.Checked == true) cMenuItem[numItems].Checked = true;
                             numItems++;
                         }
+                        if (PlotCount > 0)
+                        {
+                            cMenuItem[numItems].Text = "hide track";
+                            if (mapUtil.hideTrack) cMenuItem[numItems].Checked = true;
+                            numItems++;
+                        }
+
                         break;
                     }
             }
@@ -687,15 +703,23 @@ namespace GpsCycleComputer
                 MainConfigAlt2display = 0;
             else if (((MenuItem)sender).Text == "loss")
                 MainConfigAlt2display = 1;
-            else if (((MenuItem)sender).Text == "delta")
+            else if (((MenuItem)sender).Text == "max")
                 MainConfigAlt2display = 2;
-            else if (((MenuItem)sender).Text == "slope")
+            else if (((MenuItem)sender).Text == "min")
                 MainConfigAlt2display = 3;
+            else if (((MenuItem)sender).Text == "slope")
+                MainConfigAlt2display = 4;
 
             else if (((MenuItem)sender).Text == "beep on gps fix")
                 checkBeepOnFix.Checked = !checkBeepOnFix.Checked;
             else if (((MenuItem)sender).Text == "log raw nmea")
                 logRawNmea = !logRawNmea;
+            else if (((MenuItem)sender).Text == "LatLon dd.dddddd°")
+                MainConfigLatFormat = 0;
+            else if (((MenuItem)sender).Text == "LatLon Ndd°mm.mmmm'")
+                MainConfigLatFormat = 1;
+            else if (((MenuItem)sender).Text == "LatLon Ndd°mm'ss.ss\"")
+                MainConfigLatFormat = 2;
             // menu page
             else if (((MenuItem)sender).Text == "save settings")
             {
@@ -703,13 +727,13 @@ namespace GpsCycleComputer
                 // PopUp selection and not of the Button itself. The result will be, it´s not possible to 
                 // change the name, or safe the data. 
                 // Bugfix: Store the the position of the button before opening the popup menu.
-                SaveSettings(CurrentDirectory + "\\" + mPage.mBAr[(int) mPage.lastSelectedBFkt].text + ".dat");
+                SaveSettings(CurrentDirectory + "\\" + mPage.mBAr[(int)mPage.lastSelectedBFkt].text + ".dat");
             }
             else if (((MenuItem)sender).Text == "change name")
             {
-                string name = mPage.mBAr[(int) mPage.lastSelectedBFkt].text; 
+                string name = mPage.mBAr[(int)mPage.lastSelectedBFkt].text;
                 if (Utils.InputBox("Rename", "input name", ref name) == DialogResult.OK)
-                    mPage.mBAr[(int) mPage.lastSelectedBFkt].text = name;
+                    mPage.mBAr[(int)mPage.lastSelectedBFkt].text = name;
             }
             // graph page
             else if (((MenuItem)sender).Text == "autoscale")
@@ -736,19 +760,22 @@ namespace GpsCycleComputer
                     NoBkPanel.Invalidate();     // Update Screen
                 }
             }
-			else if (((MenuItem)sender).Text == "add waypoint")
-			{
+            else if (((MenuItem)sender).Text == "add waypoint")
+            {
                 string wayPoint = "";
                 DialogResult Result = Utils.InputBox(null, "Enter waypoint name", ref wayPoint);
                 if (Result == DialogResult.OK)
-				{
+                {
                     WriteCheckPoint(wayPoint);
                 }
- 			}
+            }
             else if (((MenuItem)sender).Text == "reset map (GPS/last)")
                 ResetMapPosition();
             else if (((MenuItem)sender).Text == "show waypoints")
                 checkDispWaypoints.Checked = !checkDispWaypoints.Checked;
+            else if (((MenuItem)sender).Text == "hide track")
+                mapUtil.hideTrack = !mapUtil.hideTrack;
+
             else
                 MessageBox.Show("no method for menu: " + ((MenuItem)sender).Text);
         }
@@ -2493,6 +2520,7 @@ namespace GpsCycleComputer
                 checkKeepBackLightOn.Checked = 1 == wr.ReadInt32();
                 checkDispWaypoints.Checked = 1 == wr.ReadInt32();
 				MainConfigDistance = (eConfigDistance) wr.ReadInt32();
+                MainConfigLatFormat = wr.ReadInt32();
 				
             }
             catch (FileNotFoundException)
@@ -2631,6 +2659,8 @@ namespace GpsCycleComputer
                 wr.Write(checkKeepBackLightOn.Checked ? 1 : 0);
                 wr.Write(checkDispWaypoints.Checked ? 1 : 0);
 				wr.Write((int)MainConfigDistance);
+                wr.Write(MainConfigLatFormat);
+
             }
             catch (Exception e)
             {
@@ -2668,6 +2698,9 @@ namespace GpsCycleComputer
                     positionAltitude = position.SeaLevelAltitude;
                     positionAltitudeValid = position.SeaLevelAltitudeValid;
                 }
+                Heading = 720;      //invalid, but still head up
+                if (position.HeadingValid)
+                    Heading = (int)position.Heading;
                 if (position.TimeValid && position.LatitudeValid && position.LongitudeValid)
                 {
                     if (LastPointUtc < position.Time)
@@ -2826,6 +2859,8 @@ namespace GpsCycleComputer
                                             StartAlt = Int16.MinValue;
                                             ReferenceXDist = CurrentX; ReferenceYDist = CurrentY;
                                             ReferenceAlt = Int16.MaxValue;
+                                            AltitudeMax = Int16.MinValue;
+                                            AltitudeMin = Int16.MaxValue;
                                             LapStartD = 0; LapStartT = 0; LapNumber = 0;
                                             lapManualDistance = 0; lapManualClick = false;
                                             currentLap = ""; lastLap = "";
@@ -2898,7 +2933,7 @@ namespace GpsCycleComputer
                                         Distance += Math.Sqrt((CurrentX - ReferenceXDist) * (CurrentX - ReferenceXDist) + (CurrentY - ReferenceYDist) * (CurrentY - ReferenceYDist));
                                         ReferenceXDist = CurrentX; ReferenceYDist = CurrentY;
 
-                                        // compute elevation gain
+                                        // compute elevation gain and min max
                                         if (positionAltitudeValid)
                                         {
                                             if (StartAlt == Int16.MinValue) StartAlt = CurrentAlt;
@@ -2912,6 +2947,8 @@ namespace GpsCycleComputer
                                             {
                                                 ReferenceAlt = CurrentAlt;
                                             }
+                                            if (CurrentAlt > AltitudeMax) AltitudeMax = CurrentAlt;
+                                            if (CurrentAlt < AltitudeMin) AltitudeMin = CurrentAlt;
                                         }
 
                                         // write battery info every 3 min
@@ -3723,37 +3760,47 @@ namespace GpsCycleComputer
                 case MenuPage.BFkt.backlight_off:
                     Utils.SwitchBacklight(); break;
                 case MenuPage.BFkt.inputLatLon:
-                    string[] LatLon = { CurrentLat.ToString() + "; " + CurrentLong.ToString(), "" };
-                    if (Utils.InputBox("Input", "Lat; Lon (separated with semicolon)", ref LatLon[0]) == DialogResult.OK)
+                    string LatLon = Lat2String(CurrentLat, false) + "; " + Lat2String(CurrentLong, true);
+                    retry:
+                    if (Utils.InputBox("Input", "Lat; Lon (separated with semicolon)", ref LatLon) == DialogResult.OK)
                     {
-                        LatLon = LatLon[0].Split(';');
-                        // The current Lat/Long values will only be usefull, if GPS is switched off.
-                        // If GPS is on, the values are directly overwritten.
-                        CurrentLat = Convert.ToDouble(LatLon[0]);
-                        CurrentLong = Convert.ToDouble(LatLon[1]);
-
-                        // If a track to follow consists of more than 1 point, (one point is used for this button...)
-                        // ask, if the user wants to replace the loaded track to follow 
-                        if (Counter2nd > 1)
+                        int i=0;
+                        double Lat, Lon;
+                        if (LatString2Double(LatLon, ref i, out Lat) && LatString2Double(LatLon, ref i, out Lon))
                         {
-                            if (MessageBox.Show("Do you want to replace loaded track to follow with the new Lat/Long values?",
-                                "Overwrite Track2Follow", MessageBoxButtons.YesNo, MessageBoxIcon.Asterisk, MessageBoxDefaultButton.Button1)
-                                == DialogResult.No)
+                            // The current Lat/Long values will only be usefull, if GPS is switched off.
+                            // If GPS is on, the values are directly overwritten, and will distort an active log
+                            if (!Logging)
                             {
-                                break;
+                                CurrentLat = Lat;
+                                CurrentLong = Lon;
                             }
+                            // If a track to follow consists of more than 1 point, (one point is used for this button...)
+                            // ask, if the user wants to replace the loaded track to follow 
+                            if (Counter2nd > 1)
+                            {
+                                if (MessageBox.Show("Do you want to replace loaded track to follow with the new Lat/Long values?",
+                                    "Overwrite Track2Follow", MessageBoxButtons.YesNo, MessageBoxIcon.Asterisk, MessageBoxDefaultButton.Button1)
+                                    == DialogResult.No)
+                                {
+                                    return;
+                                }
+                            }
+                            // Replace the existing track2follow with the new coordinates
+                            Plot2ndLat[0] = (float)Lat;
+                            Plot2ndLong[0] = (float)Lon;
+                            Counter2nd = 1;
+                            // And Jump in the Map screen directly to the track to follow start position
+                            ResetMapPosition();
+                            mapUtil.ShowTrackToFollowMode = MapUtil.ShowTrackToFollow.T2FStart;
+                            // Jump Directly to the Map view
+                            buttonMap_Click(null, null);
                         }
-                        // Replace the existing track2follow with the new coordinates
-                        Plot2ndLat[0] = (float) CurrentLat;
-                        Plot2ndLong[0] = (float) CurrentLong;
-                        Counter2nd = 1;
-                        // And Jump in the Map screen directly to the track to follow start position
-                        ResetMapPosition();
-                        mapUtil.ShowTrackToFollowMode = MapUtil.ShowTrackToFollow.T2FStart;
-                        // Jump Directly to the Map view
-                        buttonMap_Click(null, null);
+                        else goto retry;
+
                     }
                     break;
+
                 case MenuPage.BFkt.help:
                     buttonHelp_Click(null, null); break;
 
@@ -3815,6 +3862,232 @@ namespace GpsCycleComputer
             }
         }
 
+        private string Lat2String(double lat, bool isLon)
+        {
+            switch (MainConfigLatFormat)
+            {
+                case 0:
+                    return lat.ToString("0.000000°");
+                case 1:
+                case 2:
+                    string str = "";
+                    if (lat < 0)
+                    {
+                        lat = -lat;
+                        if (isLon) str += 'W'; else str += 'S';
+                    }
+                    else
+                        if (isLon) str += 'E'; else str += 'N';
+                    double min = (lat % 1 * 60);
+                    str += ((int)lat).ToString() + '°';
+                    if(MainConfigLatFormat == 1)
+                        str += min.ToString("00.0000") + '\'';
+                    else
+                        str += ((int)min).ToString("00") + '\'' + (min % 1 * 60).ToString("00.00") + '"';
+                    return str;
+                default:
+                    return "";
+            }
+            
+        }
+
+        private bool LatString2Double(string str, ref int i, out double lat)
+        {
+            int state = 0;
+            int numberstart = 0;
+            double dez;
+            lat = 1.0;
+            str += ";";      //add end character to make it work
+            for (; i < str.Length; i++)
+            {
+                switch (state)
+                {
+                    case 0:
+                        if (str[i] == ' ' || str[i] == ';') continue;
+                        if (str[i] == 'N' || str[i] == 'E') continue;
+                        if (str[i] == 'S' || str[i] == 'W') { lat = -1.0; continue; }
+                        if (Char.IsDigit(str[i]) || str[i] == '-' || str[i] == '.' || str[i] == ',')
+                        {
+                            numberstart = i;
+                            state = 1;
+                            continue;
+                        }
+                        break;
+                    case 1:
+                        if (Char.IsDigit(str[i]) || str[i] == '-' || str[i] == '.' || str[i] == ',') continue;
+                        lat *= Convert.ToDouble(str.Substring(numberstart, i - numberstart));     //read degree
+                        if (str[i] == '°' || str[i] == 'd' || str[i] == ' ') { state = 2; continue; }
+                        if (str[i] == ';' || str[i] == 'E' || str[i] == 'W') return true;
+                        else break;
+                    case 2:
+                        if (str[i] == ' ') continue;
+                        if (Char.IsDigit(str[i]) || str[i] == '.' || str[i] == ',')
+                        {
+                            numberstart = i;
+                            state = 3;
+                            continue;
+                        }
+                        if (str[i] == ';' || str[i] == 'E' || str[i] == 'W') return true;
+                        break;
+                    case 3:
+                        if (Char.IsDigit(str[i]) || str[i] == '.' || str[i] == ',') continue;
+                        dez = Convert.ToDouble(str.Substring(numberstart, i - numberstart)) / 60;    //minutes
+                        if (lat < 0) lat -= dez;
+                        else lat += dez;
+                        if (str[i] == '\'' || str[i] == 'm' || str[i] == ' ') { state = 4; continue; }
+                        if (str[i] == ';' || str[i] == 'E' || str[i] == 'W') return true;
+                        else break;
+                    case 4:
+                        if (str[i] == ' ') continue;
+                        if (Char.IsDigit(str[i]) || str[i] == '.' || str[i] == ',')
+                        {
+                            numberstart = i;
+                            state = 5;
+                            continue;
+                        }
+                        if (str[i] == ';' || str[i] == 'E' || str[i] == 'W') return true;
+                        break;
+                    case 5:
+                        if (Char.IsDigit(str[i]) || str[i] == '.' || str[i] == ',') continue;
+                        dez = Convert.ToDouble(str.Substring(numberstart, i - numberstart)) / (60*60);    //seconds
+                        if (lat < 0) lat -= dez;
+                        else lat += dez;
+                        if (str[i] == '"' || str[i] == 's' || str[i] == ' ') { state = 6; continue; }
+                        if (str[i] == ';' || str[i] == 'E' || str[i] == 'W') return true;
+                        else break;
+                    case 6:
+                        if (str[i] == ';' || str[i] == 'E' || str[i] == 'W') return true;
+                        else break;
+                    default:
+                        break;
+                }
+                MessageBox.Show("Format error at index " + i);
+                return false;
+            }
+            return false;
+        }
+
+
+        private void InputLatLon()
+        {
+            string LatLon =  CurrentLat.ToString() + "; " + CurrentLong.ToString();
+        retry:
+            if (Utils.InputBox("Input", "Lat; Lon (separated with semicolon)", ref LatLon) == DialogResult.OK)
+            {
+                int state = 0;
+                int numberstart = 0;
+                double Lat = 1.0, Lon = 1.0, dez;
+                int i;
+                LatLon += " ";      //add a character to make it work
+                for (i = 0; i < LatLon.Length; i++)
+                {
+                    switch (state)
+                    {
+                        case 0:
+                            if (LatLon[i] == ' ') continue;
+                            if (LatLon[i] == 'N') continue;
+                            if (LatLon[i] == 'S') { Lat = -1.0; continue; }
+                            if (Char.IsDigit(LatLon[i]) || LatLon[i] == '-' || LatLon[i] == '.' || LatLon[i] == ',')
+                            {
+                                numberstart = i;
+                                state = 1;
+                                continue;
+                            }
+                            break;
+                        case 1:
+                            if (Char.IsDigit(LatLon[i]) || LatLon[i] == '-' || LatLon[i] == '.' || LatLon[i] == ',') continue;
+                            if (LatLon[i] == '°' || LatLon[i] == 'd') state = 2;
+                            else state = 10;
+                            Lat *= Convert.ToDouble(LatLon.Substring(numberstart, i - numberstart));     //read degree
+                            continue;
+                        case 2:
+                            if (LatLon[i] == ' ') continue;
+                            if (Char.IsDigit(LatLon[i]) || LatLon[i] == '.' || LatLon[i] == ',')
+                            {
+                                numberstart = i;
+                                state = 3;
+                                continue;
+                            }
+                            break;
+                        case 3:
+                            if (Char.IsDigit(LatLon[i]) || LatLon[i] == '.' || LatLon[i] == ',') continue;
+                            dez = Convert.ToDouble(LatLon.Substring(numberstart, i - numberstart)) / 60;    //minutes
+                            if (Lat < 0) Lat -= dez;
+                            else Lat += dez;
+                            state = 10;
+                            continue;
+
+                        case 10:
+                            if (LatLon[i] == ' ') continue;
+                            if (LatLon[i] == 'E') continue;
+                            if (LatLon[i] == 'W') { Lon = -1.0; continue; }
+                            if (Char.IsDigit(LatLon[i]) || LatLon[i] == '-' || LatLon[i] == '.' || LatLon[i] == ',')
+                            {
+                                numberstart = i;
+                                state = 11;
+                                continue;
+                            }
+                            break;
+                        case 11:
+                            if (Char.IsDigit(LatLon[i]) || LatLon[i] == '-' || LatLon[i] == '.' || LatLon[i] == ',') continue;
+                            if (LatLon[i] == '°' || LatLon[i] == 'd') state = 12;
+                            else state = 20;
+                            Lon *= Convert.ToDouble(LatLon.Substring(numberstart, i - numberstart));
+                            continue;
+                        case 12:
+                            if (LatLon[i] == ' ') continue;
+                            if (Char.IsDigit(LatLon[i]) || LatLon[i] == '.' || LatLon[i] == ',')
+                            {
+                                numberstart = i;
+                                state = 13;
+                                continue;
+                            }
+                            break;
+                        case 13:
+                            if (Char.IsDigit(LatLon[i]) || LatLon[i] == '.' || LatLon[i] == ',') continue;
+                            dez = Convert.ToDouble(LatLon.Substring(numberstart, i - numberstart)) / 60;    //minutes
+                            if (Lon < 0) Lon -= dez;
+                            else Lon += dez;
+                            state = 20;
+                            continue;
+                        case 20:
+                            i = 1000;   //end for()
+                            continue;
+                        default:
+                            break;
+                    }
+                    MessageBox.Show("Format error");
+                    goto retry;
+                }
+
+                // The current Lat/Long values will only be usefull, if GPS is switched off.
+                // If GPS is on, the values are directly overwritten.
+                CurrentLat = Lat;
+                CurrentLong = Lon;
+
+                // If a track to follow consists of more than 1 point, (one point is used for this button...)
+                // ask, if the user wants to replace the loaded track to follow 
+                if (Counter2nd > 1)
+                {
+                    if (MessageBox.Show("Do you want to replace loaded track to follow with the new Lat/Long values?",
+                        "Overwrite Track2Follow", MessageBoxButtons.YesNo, MessageBoxIcon.Asterisk, MessageBoxDefaultButton.Button1)
+                        == DialogResult.No)
+                    {
+                        return;
+                    }
+                }
+                // Replace the existing track2follow with the new coordinates
+                Plot2ndLat[0] = (float)CurrentLat;
+                Plot2ndLong[0] = (float)CurrentLong;
+                Counter2nd = 1;
+                // And Jump in the Map screen directly to the track to follow start position
+                ResetMapPosition();
+                mapUtil.ShowTrackToFollowMode = MapUtil.ShowTrackToFollow.T2FStart;
+                // Jump Directly to the Map view
+                buttonMap_Click(null, null);
+            }
+        }
+
         private void RecallSettings(string filename)
         {
             if (File.Exists(filename))
@@ -3841,6 +4114,8 @@ namespace GpsCycleComputer
             OldX = 0.0; OldY = 0.0; OldT = 0;
             OriginShiftX = 0.0; OriginShiftY = 0.0;
             ElevationGain = 0.0; ReferenceAlt = Int16.MaxValue;
+            AltitudeMax = Int16.MinValue;
+            AltitudeMin = Int16.MaxValue;
 
             int gps_poll_sec = 0;
 
@@ -3875,6 +4150,7 @@ namespace GpsCycleComputer
                     // read lat/long
                     StartLat = rd.ReadDouble(); StartLong = rd.ReadDouble();
                     utmUtil.setReferencePoint(StartLat, StartLong);
+                    ReferenceSet = true;
                     StartAlt = Int16.MinValue;
 
                     bool is_battery_printed = false;
@@ -3997,6 +4273,8 @@ namespace GpsCycleComputer
                                 {
                                     ReferenceAlt = z_int;
                                 }
+                                if (z_int > AltitudeMax) AltitudeMax = z_int;
+                                if (z_int < AltitudeMin) AltitudeMin = z_int;
                             }
 
                             // convert to lat/long, used in plot arrays
@@ -4982,7 +5260,8 @@ namespace GpsCycleComputer
             {
                 if (MainConfigAlt2display == 0) label1 = "gain";
                 else if (MainConfigAlt2display == 1) label1 = "loss";
-                else if (MainConfigAlt2display == 2) label1 = "delta";
+                else if (MainConfigAlt2display == 2) label1 = "max";
+                else if (MainConfigAlt2display == 3) label1 = "min";
                 else label1 = "slope";
                 DrawMainLabelOnRight(BackBufferGraphics, label1, MGridX[3], MGridY[4], 9.0f);
             }
@@ -5012,6 +5291,7 @@ namespace GpsCycleComputer
                 if (ReferenceSet == false)
                 {
                     utmUtil.setReferencePoint(CurrentLat, CurrentLong);
+                    //ReferenceSet = true;      ReferencePoint only temporarily necessary; better not fix it to an old CurrentLatLong
                 }
                 else // reference point ist set
                 {
@@ -5034,7 +5314,7 @@ namespace GpsCycleComputer
             DrawMainValues(BackBufferGraphics, speed_max, (MGridX[1] + MGridX[3]) / 2, MGridY[3], 20.0f * df);
 
             string altitude2;
-            if(MainConfigAlt2display == 0)      //gain
+            if(MainConfigAlt2display == 0)            //gain
                 altitude2 = (ElevationGain * m2feet).ToString("0.0");
             else if (MainConfigAlt2display == 1)        //loss
             {
@@ -5042,11 +5322,17 @@ namespace GpsCycleComputer
                 if (StartAlt != Int16.MinValue) ElevationLoss = CurrentAlt - StartAlt - ElevationGain;
                 altitude2 = (ElevationLoss * m2feet).ToString("0.0");
             }
-            else if (MainConfigAlt2display == 2)        //delta
+            else if (MainConfigAlt2display == 2)        //max
             {
-                double ElevationDelta = 0.0;
-                if (StartAlt != Int16.MinValue) ElevationDelta = CurrentAlt - StartAlt;
-                altitude2 = (ElevationDelta * m2feet).ToString("0.0");
+                if (AltitudeMax != Int16.MinValue)
+                    altitude2 = (AltitudeMax * m2feet).ToString("0.0");
+                else altitude2 = "---";
+            }
+            else if (MainConfigAlt2display == 3)        //min
+            {
+                if (AltitudeMin != Int16.MaxValue)
+                    altitude2 = (AltitudeMin * m2feet).ToString("0.0");
+                else altitude2 = "---";
             }
             else                                //slope
             {
@@ -5076,10 +5362,10 @@ namespace GpsCycleComputer
                 DrawMainLabelOnLeft(BackBufferGraphics, gps_status2, MGridX[1], MGridY[6] + MHeightDelta * 2, 8.0f);
             }
 
-            DrawMainLabelOnLeft(BackBufferGraphics, "latitude", MGridX[1], MGridY[6] + MHeightDelta * 3, 8.0f);
-            DrawMainLabelOnRight(BackBufferGraphics, CurrentLat.ToString("0.000000"), MGridX[3], MGridY[6] + MHeightDelta * 3, 8.0f);
-            DrawMainLabelOnLeft(BackBufferGraphics, "longitude", MGridX[1], MGridY[6] + MHeightDelta * 4, 8.0f);
-            DrawMainLabelOnRight(BackBufferGraphics, CurrentLong.ToString("0.000000"), MGridX[3], MGridY[6] + MHeightDelta * 4, 8.0f);
+            DrawMainLabelOnLeft(BackBufferGraphics, "latitu.", MGridX[1], MGridY[6] + MHeightDelta * 3, 8.0f);
+            DrawMainLabelOnRight(BackBufferGraphics, Lat2String(CurrentLat, false), MGridX[3], MGridY[6] + MHeightDelta * 3, 8.0f);
+            DrawMainLabelOnLeft(BackBufferGraphics, "longit.", MGridX[1], MGridY[6] + MHeightDelta * 4, 8.0f);
+            DrawMainLabelOnRight(BackBufferGraphics, Lat2String(CurrentLong, true), MGridX[3], MGridY[6] + MHeightDelta * 4, 8.0f);
             
             SolidBrush br = new SolidBrush(CurrentGpsLedColor);
             BackBufferGraphics.FillRectangle(br, ((MGridX[1] + MGridX[3]) / 2) - MHeightDelta, MGridY[5] + MGridDelta, MHeightDelta, MHeightDelta);
@@ -5103,13 +5389,8 @@ namespace GpsCycleComputer
             Utils.DrawClock(BackBufferGraphics, foColor, (MGridX[2] + MGridX[3]) / 2, (MGridY[0] + MGridY[1]) / 2, Math.Min(MGridY[1] - MGridY[0], MGridX[3] - MGridX[2]), 16.0f * df);
 
             // compass
-            int heading = 720;  //invalid, but still head up
-            if (position != null)
-            {
-                if (position.HeadingValid) { heading = (int)position.Heading; }
-            }
             int compass_size = (MGridY[6] + MHeightDelta * 3) - MGridY[5];
-            Utils.DrawCompass(BackBufferGraphics, foColor, MGridX[3] - compass_size / 2, MGridY[5] + compass_size / 2, compass_size, heading);
+            Utils.DrawCompass(BackBufferGraphics, foColor, MGridX[3] - compass_size / 2, MGridY[5] + compass_size / 2, compass_size, Heading);
 
             g.DrawImage(BackBuffer, 0, 0); // draw back buffer on screen
         }
@@ -5422,9 +5703,6 @@ namespace GpsCycleComputer
             {
                 float[] CurLong = { (float)CurrentLong };
                 float[] CurLat = { (float)CurrentLat };
-                int Heading = 720;      //invalid, but still head up
-                if (position != null && position.HeadingValid)
-                    Heading = (int)position.Heading;
                 // plotting in Long (as X) / Lat (as Y) coordinates
                 mapUtil.DrawMaps(e.Graphics, BackBuffer, BackBufferGraphics, MouseMoving,
                                  gps.OpenedOrSuspended, comboMultiMaps.SelectedIndex, GetUnitsConversionCff(), GetUnitsName(),
@@ -6015,8 +6293,7 @@ namespace GpsCycleComputer
 
             // proceed with live logging
             string servermessage = CWUtils.UpdatePositionOnCrossingwaysViaHTTP(textBoxCwUrl.Text, textBoxCw1.Text, CwHashPassword,
-                CurrentLat, CurrentLong, (CurrentAlt == Int16.MinValue) ? 0.0 : CurrentAlt,
-                                   (position.HeadingValid ? position.Heading : 0.0), "GpsCC");
+                CurrentLat, CurrentLong, (CurrentAlt == Int16.MinValue) ? 0.0 : CurrentAlt, (Heading == 720)? 0.0 : (double)Heading, "GpsCC");
 
             if (servermessage.IndexOf("90 - Could not establish a connection") != -1)
                 { CurrentLiveLoggingString = "livelog error! " + DateTime.Now.ToString("t"); }
@@ -6301,7 +6578,15 @@ namespace GpsCycleComputer
                     Decimation = 1; DecimateCount = 0;
                     StartTime = DateTime.Now;       StartTimeUtc = DateTime.UtcNow;
                     LastBatterySave = StartTimeUtc; LastLiveLogging = StartTimeUtc;
-                    MaxSpeed = 0.0; Distance = 0.0; CurrentStoppageTimeSec = 0;
+                    CurrentTimeSec = 0; CurrentStoppageTimeSec = 0;
+                    CurrentSpeed = 0.0; CurrentV = 0.0;
+                    MaxSpeed = 0.0; Distance = 0.0;
+                    CurrentAlt = Int16.MinValue;
+                    StartAlt = Int16.MinValue;
+                    AltitudeMax = Int16.MinValue;
+                    AltitudeMin = Int16.MaxValue;
+                    Heading = 720;
+                    ReferenceSet = false;
                     //FirstSampleValidCount = 1;      GpsSearchCount = 0;
                     //CurrentStatusString = "gps off"; CurrentLiveLoggingString = "";
 
