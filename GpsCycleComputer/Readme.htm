@@ -12,9 +12,9 @@ content="text/html; charset=iso-8859-1"/>
 
 <table border="0" width="450">
     <tr>
-        <td style="width: 536px"><h1><font face="Arial">GPS Cycle Computer 4.6</font></h1>
+        <td style="width: 669px"><h1><font face="Arial">GPS Cycle Computer 4.6</font></h1>
         <h2><font size="3" face="Arial">1. General Description</font></h2>
-        <p><font size="2" face="Arial">This is a GPS tracing
+        <p><font size="2" face="Arial">This is a GPS tracking
         application for Windows Mobile. You do not need any other
         GPS software to be installed, i.e. it works directly with
         Windows GPS driver. You do not need any data network
@@ -254,7 +254,12 @@ content="text/html; charset=iso-8859-1"/>
                 directly&quot; settings) - then you shall use this button
                 to switch off the screen during logging. Remark: the buttons keep enabled so
                 you can reactivate your device.</li>
-            <li><strong>Input LatLon</strong>: is useful to browse map on a specific place or to navigate to a specific position (e. g. Geocaching)&nbsp;</li>
+            <li><strong>Input LatLon</strong>: is useful to browse map on a specific place or to navigate to a specific position (e. g. Geocaching).
+                <br />
+                The input is allowed in any format (dd.dddddd or Ndd°mm.mmmm' or Ndd°mm'ss.ss").
+                The characters (N,S,E,W and ° ' ") can be omitted or replaced by sign or blank respectively.
+                Lat and Long are separated by semicolon or by the first Letter of Longitude (E,
+                W).</li>
             <li><strong>Help</strong></li></font>
            </ul>
         <p><font size="2" face="Arial"></font>&nbsp;</p>
@@ -471,7 +476,7 @@ content="text/html; charset=iso-8859-1"/>
                 the color and width.</font></li>
             <li><font size="2" face="Arial"><strong>Display 
                 waypoints</strong> - if this option is checked, and 
-				the track 2 follow contains waipoints, the position and
+				the track 2 follow contains waypoints, the position and
 				name of the waypoint is displayed on the map screen.</font></li>
             <li><font size="2" face="Arial"><strong>White
                 background</strong> - By default, the tool
@@ -626,9 +631,9 @@ content="text/html; charset=iso-8859-1"/>
 			<li><font size="2" face="Arial">&quot;<strong>Altitude</strong>&quot;:
 				In the <strong>Altitude</strong> field you can choose between <strong>"Altitude gain"</strong> (sum
                 of increasing altitude), <strong>"Altitude loss"</strong> (sum of falling altitude),
-                <strong>"Altitude delta"</strong> (current - starting altitude)
-                and <strong>"Slope"</strong>
-                in percent.&nbsp;</font></li>
+                <strong>"Altitude max"</strong> (highest altitude), <strong>"Altitude min"</strong>
+                (lowest altitude),and <strong>"Slope"</strong>
+                in percent.</font></li>
 			<li><font size="2" face="Arial">&quot;<strong>Distance</strong>&quot;:
 				In the context menu of the <strong>Distance</strong> field, you can choose between the 
 				distance <strong>since start of the trip</strong> or the distance between the current 
@@ -656,6 +661,8 @@ content="text/html; charset=iso-8859-1"/>
 			<li><font size="2" face="Arial">&quot;<strong>Show waypoints</strong>&quot;:
 				If a track to follow is loaded and includes waypoints, you can select to show or hide displaying 
 				waypoints.</font></li>
+            <li><font size="2" face="Arial">&quot;<strong>Hide track</strong>&quot;: here you can hide the track in order to see better the track to follow
+                or the map. This setting is not stored permanently.&nbsp;</li>
 		</ul>
         <h2>
                 <span style="font-size: 12pt; font-family: Arial"></span>&nbsp;</h2>

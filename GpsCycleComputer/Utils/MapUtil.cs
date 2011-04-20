@@ -68,6 +68,8 @@ namespace GpsUtils
         // Show the current position on the map or the start/stop position of the track
         public ShowTrackToFollow ShowTrackToFollowMode = ShowTrackToFollow.T2FOff;
 
+        public bool hideTrack = false;
+
         private int ScreenX = 100;         // screen (drawing) size in pixels
         private int ScreenY = 100;
         private double Data2Screen = 1.0;  // Coefficient to convert from data to screen values
@@ -1390,8 +1392,8 @@ User-defined server (read server name from osm_server.txt)
 
         private void DrawDistanceToTrack2Follow(Graphics g, Pen p, float CurLong, float CurLat, float t2fLong, float t2fLat, double unit_cff, string unit_name) 
         {
-            float OldPenWidth = p.Width;
-            Color OldPenColor = p.Color;
+            //float OldPenWidth = p.Width;
+            //Color OldPenColor = p.Color;
             Font drawFont = new Font("Arial", 8, FontStyle.Regular);
             SolidBrush drawBrush = new SolidBrush(Color.Black); // brush to draw rectangle
 
@@ -1402,7 +1404,7 @@ User-defined server (read server name from osm_server.txt)
             double deltaS = Math.Sqrt(xMinDist * xMinDist + yMinDist * yMinDist);
 			deltaS = deltaS * unit_cff;
 
-            string strDistance = "Distance to T2F: " + deltaS.ToString("0.0") + unit_name;
+            string strDistance = "Distance to T2F: " + deltaS.ToString("0.000") + unit_name;
             SizeF TextSize = g.MeasureString(strDistance, drawFont);
 
             // Draw a black box to show distance between current position and track2follow
@@ -1418,8 +1420,8 @@ User-defined server (read server name from osm_server.txt)
             g.DrawString(strDistance, drawFont, drawBrush, 2, ScreenY - TextBoxHeight);
 
             // restore old pen settings for further use
-            p.Width = OldPenWidth;
-            p.Color = OldPenColor;
+            //p.Width = OldPenWidth;        p is local to this function
+            //p.Color = OldPenColor;
         }
 
         private void DrawCheckPoints(Graphics g, Pen p, Form1.WayPointInfo WayPoints, Color col )
@@ -1704,7 +1706,7 @@ User-defined server (read server name from osm_server.txt)
             }
 
             // draw the main track line
-            if (PlotSize != 0)
+            if (PlotSize != 0 && hideTrack == false)
             {
                 pen.Color = line_color;
                 pen.Width = line_width;

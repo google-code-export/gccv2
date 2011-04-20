@@ -1,4 +1,5 @@
 GPS Cycle Computer GCC
+
 ********* version 4.6 *********
 new features:
 - Waypoint support for GCC and GPX files. Display Waypoints - position and name - on the map screen
@@ -6,14 +7,18 @@ new features:
   * distance trip
   * distance to start/end of track to follow or (air line distance, not real track line distance)
 - Checkpoint renamed to waypoint in the GUI
-- if the track log is stopped (or loaded from disk), and the start log button is pressed again, 
-  the user is now asked, if he want´s to continue logging into the existing log file. 
+- if the track log is stopped (or loaded from disk), and the start log button is pressed again,
+  the user is now asked, if he want´s to continue logging into the existing log file.
+- Lat Lon display and Input LatLon is now very flexible: deg [min [sec]] with or without decimal digits, signed or N/S E/W
+- display of altitude max and min (alternatively to gain, loss, slope).
+  "delta" has been removed as it is the same as "relative" in the upper field.
+- track line can be hidden ("hide track" in context menu)
   
 bugfixes:
 - if the distance between track2follow and current position is displayed, it may be overwritten by the current track line
 - if the "exclude stop time" option is selected, the stop time is not included in the track log and live logging.
-- if map folders are available for several zoom levels, but some map tiles are missing, the best map was not
-  in any case used 
+- if map folders are available for several zoom levels, but some map tiles are missing, the best map was not in any case used
+- "Clear Track" now clears all data
 
 ********* version 4.5 *********
 new features:
