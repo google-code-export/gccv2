@@ -1,6 +1,6 @@
 //#define DEBUG
 //#define BETA
-//#define SERVICEPACK
+#define SERVICEPACK
 
 using System;
 using System.Runtime.InteropServices;
@@ -2958,13 +2958,14 @@ namespace GpsCycleComputer
                                         // Bugfix: even if not moving, the first call must be logged, otherwise
                                         // the start position is logged more than once (because PlotCount=0), which leads 
                                         // to an corrupt log file.
-                                        if (checkExStopTime.Checked == false || moving == true || PlotCount == 0)
-                                        {
-                                            WriteRecord(CurrentX, CurrentY);
-                                            AddPlotData((float)CurrentLat, (float)CurrentLong, (Int16)CurrentAlt, CurrentTimeSec, (Int16)(CurrentSpeed * 10.0), (Int16)(CurrentV * 10), (Int32)Distance);
-                                            DoLapStats();
-                                            DoLiveLogging();
-                                        }
+                                        //if (checkExStopTime.Checked == false || moving == true || PlotCount == 0)     //KB: removed this feature because of incorrect average speed and trip time when track loaded back.
+                                        //{                                                                             //Also distance calculation differs slightly and incorrect speed graph.
+                                                                                                                //to make it work: first and last point with v=0 must be logged (last cached and written right before point with v!=0). No distance accumulation when v=0 (slight change in behaviour).
+                                        WriteRecord(CurrentX, CurrentY);
+                                        AddPlotData((float)CurrentLat, (float)CurrentLong, (Int16)CurrentAlt, CurrentTimeSec, (Int16)(CurrentSpeed * 10.0), (Int16)(CurrentV * 10), (Int32)Distance);
+                                        DoLapStats();
+                                        DoLiveLogging();
+                                        //}
                                     }// Logging
                                 }
                                 break;
@@ -3904,8 +3905,8 @@ namespace GpsCycleComputer
                 {
                     case 0:
                         if (str[i] == ' ' || str[i] == ';') continue;
-                        if (str[i] == 'N' || str[i] == 'E') continue;
-                        if (str[i] == 'S' || str[i] == 'W') { lat = -1.0; continue; }
+                        if ("NnEeOo".IndexOf(str[i]) != -1) continue;       //if (str[i] is one of "NnEeOo")
+                        if ("SsWw".IndexOf(str[i]) != -1) { lat = -1.0; continue; }
                         if (Char.IsDigit(str[i]) || str[i] == '-' || str[i] == '.' || str[i] == ',')
                         {
                             numberstart = i;
@@ -3916,8 +3917,8 @@ namespace GpsCycleComputer
                     case 1:
                         if (Char.IsDigit(str[i]) || str[i] == '-' || str[i] == '.' || str[i] == ',') continue;
                         lat *= Convert.ToDouble(str.Substring(numberstart, i - numberstart));     //read degree
-                        if (str[i] == '°' || str[i] == 'd' || str[i] == ' ') { state = 2; continue; }
-                        if (str[i] == ';' || str[i] == 'E' || str[i] == 'W') return true;
+                        if ("°d ".IndexOf(str[i]) != -1) { state = 2; continue; }
+                        if (";EeOoWw".IndexOf(str[i]) != -1) return true;
                         else break;
                     case 2:
                         if (str[i] == ' ') continue;
@@ -3927,15 +3928,15 @@ namespace GpsCycleComputer
                             state = 3;
                             continue;
                         }
-                        if (str[i] == ';' || str[i] == 'E' || str[i] == 'W') return true;
+                        if (";EeOoWw".IndexOf(str[i]) != -1) return true;
                         break;
                     case 3:
                         if (Char.IsDigit(str[i]) || str[i] == '.' || str[i] == ',') continue;
                         dez = Convert.ToDouble(str.Substring(numberstart, i - numberstart)) / 60;    //minutes
                         if (lat < 0) lat -= dez;
                         else lat += dez;
-                        if (str[i] == '\'' || str[i] == 'm' || str[i] == ' ') { state = 4; continue; }
-                        if (str[i] == ';' || str[i] == 'E' || str[i] == 'W') return true;
+                        if ("'m ".IndexOf(str[i]) != -1) { state = 4; continue; }
+                        if (";EeOoWw".IndexOf(str[i]) != -1) return true;
                         else break;
                     case 4:
                         if (str[i] == ' ') continue;
@@ -3945,18 +3946,18 @@ namespace GpsCycleComputer
                             state = 5;
                             continue;
                         }
-                        if (str[i] == ';' || str[i] == 'E' || str[i] == 'W') return true;
-                        break;
+                        if (";EeOoWw".IndexOf(str[i]) != -1) return true;
+                        else break;
                     case 5:
                         if (Char.IsDigit(str[i]) || str[i] == '.' || str[i] == ',') continue;
                         dez = Convert.ToDouble(str.Substring(numberstart, i - numberstart)) / (60*60);    //seconds
                         if (lat < 0) lat -= dez;
                         else lat += dez;
-                        if (str[i] == '"' || str[i] == 's' || str[i] == ' ') { state = 6; continue; }
-                        if (str[i] == ';' || str[i] == 'E' || str[i] == 'W') return true;
+                        if ("\"s ".IndexOf(str[i]) != -1) { state = 6; continue; }
+                        if (";EeOoWw".IndexOf(str[i]) != -1) return true;
                         else break;
                     case 6:
-                        if (str[i] == ';' || str[i] == 'E' || str[i] == 'W') return true;
+                        if (";EeOoWw".IndexOf(str[i]) != -1) return true;
                         else break;
                     default:
                         break;
@@ -3967,126 +3968,6 @@ namespace GpsCycleComputer
             return false;
         }
 
-
-        private void InputLatLon()
-        {
-            string LatLon =  CurrentLat.ToString() + "; " + CurrentLong.ToString();
-        retry:
-            if (Utils.InputBox("Input", "Lat; Lon (separated with semicolon)", ref LatLon) == DialogResult.OK)
-            {
-                int state = 0;
-                int numberstart = 0;
-                double Lat = 1.0, Lon = 1.0, dez;
-                int i;
-                LatLon += " ";      //add a character to make it work
-                for (i = 0; i < LatLon.Length; i++)
-                {
-                    switch (state)
-                    {
-                        case 0:
-                            if (LatLon[i] == ' ') continue;
-                            if (LatLon[i] == 'N') continue;
-                            if (LatLon[i] == 'S') { Lat = -1.0; continue; }
-                            if (Char.IsDigit(LatLon[i]) || LatLon[i] == '-' || LatLon[i] == '.' || LatLon[i] == ',')
-                            {
-                                numberstart = i;
-                                state = 1;
-                                continue;
-                            }
-                            break;
-                        case 1:
-                            if (Char.IsDigit(LatLon[i]) || LatLon[i] == '-' || LatLon[i] == '.' || LatLon[i] == ',') continue;
-                            if (LatLon[i] == '°' || LatLon[i] == 'd') state = 2;
-                            else state = 10;
-                            Lat *= Convert.ToDouble(LatLon.Substring(numberstart, i - numberstart));     //read degree
-                            continue;
-                        case 2:
-                            if (LatLon[i] == ' ') continue;
-                            if (Char.IsDigit(LatLon[i]) || LatLon[i] == '.' || LatLon[i] == ',')
-                            {
-                                numberstart = i;
-                                state = 3;
-                                continue;
-                            }
-                            break;
-                        case 3:
-                            if (Char.IsDigit(LatLon[i]) || LatLon[i] == '.' || LatLon[i] == ',') continue;
-                            dez = Convert.ToDouble(LatLon.Substring(numberstart, i - numberstart)) / 60;    //minutes
-                            if (Lat < 0) Lat -= dez;
-                            else Lat += dez;
-                            state = 10;
-                            continue;
-
-                        case 10:
-                            if (LatLon[i] == ' ') continue;
-                            if (LatLon[i] == 'E') continue;
-                            if (LatLon[i] == 'W') { Lon = -1.0; continue; }
-                            if (Char.IsDigit(LatLon[i]) || LatLon[i] == '-' || LatLon[i] == '.' || LatLon[i] == ',')
-                            {
-                                numberstart = i;
-                                state = 11;
-                                continue;
-                            }
-                            break;
-                        case 11:
-                            if (Char.IsDigit(LatLon[i]) || LatLon[i] == '-' || LatLon[i] == '.' || LatLon[i] == ',') continue;
-                            if (LatLon[i] == '°' || LatLon[i] == 'd') state = 12;
-                            else state = 20;
-                            Lon *= Convert.ToDouble(LatLon.Substring(numberstart, i - numberstart));
-                            continue;
-                        case 12:
-                            if (LatLon[i] == ' ') continue;
-                            if (Char.IsDigit(LatLon[i]) || LatLon[i] == '.' || LatLon[i] == ',')
-                            {
-                                numberstart = i;
-                                state = 13;
-                                continue;
-                            }
-                            break;
-                        case 13:
-                            if (Char.IsDigit(LatLon[i]) || LatLon[i] == '.' || LatLon[i] == ',') continue;
-                            dez = Convert.ToDouble(LatLon.Substring(numberstart, i - numberstart)) / 60;    //minutes
-                            if (Lon < 0) Lon -= dez;
-                            else Lon += dez;
-                            state = 20;
-                            continue;
-                        case 20:
-                            i = 1000;   //end for()
-                            continue;
-                        default:
-                            break;
-                    }
-                    MessageBox.Show("Format error");
-                    goto retry;
-                }
-
-                // The current Lat/Long values will only be usefull, if GPS is switched off.
-                // If GPS is on, the values are directly overwritten.
-                CurrentLat = Lat;
-                CurrentLong = Lon;
-
-                // If a track to follow consists of more than 1 point, (one point is used for this button...)
-                // ask, if the user wants to replace the loaded track to follow 
-                if (Counter2nd > 1)
-                {
-                    if (MessageBox.Show("Do you want to replace loaded track to follow with the new Lat/Long values?",
-                        "Overwrite Track2Follow", MessageBoxButtons.YesNo, MessageBoxIcon.Asterisk, MessageBoxDefaultButton.Button1)
-                        == DialogResult.No)
-                    {
-                        return;
-                    }
-                }
-                // Replace the existing track2follow with the new coordinates
-                Plot2ndLat[0] = (float)CurrentLat;
-                Plot2ndLong[0] = (float)CurrentLong;
-                Counter2nd = 1;
-                // And Jump in the Map screen directly to the track to follow start position
-                ResetMapPosition();
-                mapUtil.ShowTrackToFollowMode = MapUtil.ShowTrackToFollow.T2FStart;
-                // Jump Directly to the Map view
-                buttonMap_Click(null, null);
-            }
-        }
 
         private void RecallSettings(string filename)
         {
