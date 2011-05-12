@@ -69,6 +69,7 @@ namespace GpsUtils
         public ShowTrackToFollow ShowTrackToFollowMode = ShowTrackToFollow.T2FOff;
 
         public bool hideTrack = false;
+        public bool hideMap = false;
 
         private int ScreenX = 100;         // screen (drawing) size in pixels
         private int ScreenY = 100;
@@ -1395,7 +1396,7 @@ User-defined server (read server name from osm_server.txt)
             //float OldPenWidth = p.Width;
             //Color OldPenColor = p.Color;
             Font drawFont = new Font("Arial", 8, FontStyle.Regular);
-            SolidBrush drawBrush = new SolidBrush(Color.Black); // brush to draw rectangle
+            SolidBrush drawBrush = new SolidBrush(Back_Color); // brush to draw rectangle
 
             // Calculate the distance between track and current position
 			double xMinDist, yMinDist;
@@ -1408,20 +1409,16 @@ User-defined server (read server name from osm_server.txt)
             SizeF TextSize = g.MeasureString(strDistance, drawFont);
 
             // Draw a black box to show distance between current position and track2follow
-            p.Color = Color.Gray;
+            p.Color = Fore_Color;
             const int LineWidth = 1;
             p.Width = LineWidth;
             int TextBoxHeight = (int) (TextSize.Height + 0.5);
             g.FillRectangle(drawBrush, 0, ScreenY - TextBoxHeight - LineWidth, ScreenX, TextBoxHeight + LineWidth);
-            g.DrawLine(p, 0, ScreenY - TextBoxHeight - LineWidth, ScreenX, ScreenY - TextBoxHeight - LineWidth);
+            g.DrawLine(p, 0, ScreenY - TextBoxHeight - LineWidth, ScreenX, ScreenY - TextBoxHeight - LineWidth);    //separation line to map
 
             // Draw Distance to Track information
-            drawBrush.Color = Color.White;
+            drawBrush.Color = Fore_Color;
             g.DrawString(strDistance, drawFont, drawBrush, 2, ScreenY - TextBoxHeight);
-
-            // restore old pen settings for further use
-            //p.Width = OldPenWidth;        p is local to this function
-            //p.Color = OldPenColor;
         }
 
         private void DrawCheckPoints(Graphics g, Pen p, Form1.WayPointInfo WayPoints, Color col )
@@ -1678,21 +1675,24 @@ User-defined server (read server name from osm_server.txt)
             // need to draw the picture first into back buffer
             BackBufferGraphics.Clear(Back_Color);
 
-            // in OSM tile mode, required map array is created based on the current screen coordinates
-            if (OsmTilesMode) { FillOsmTiles(); }
-
-            // Update screen coordinates for all maps
-            for (int i = 0; i < NumMaps; i++)
+            if (!hideMap)
             {
-                Maps[i].scrX1 = ToScreenX(Maps[i].lon1);
-                Maps[i].scrX2 = ToScreenX(Maps[i].lon2);
-                Maps[i].scrY1 = ToScreenY(Maps[i].lat1);
-                Maps[i].scrY2 = ToScreenY(Maps[i].lat2);
-            }
+                // in OSM tile mode, required map array is created based on the current screen coordinates
+                if (OsmTilesMode) { FillOsmTiles(); }
 
-            // select the best map and draw it
-            SelectBestMap(MapMode);
-            DrawJpeg(BackBufferGraphics);
+                // Update screen coordinates for all maps
+                for (int i = 0; i < NumMaps; i++)
+                {
+                    Maps[i].scrX1 = ToScreenX(Maps[i].lon1);
+                    Maps[i].scrX2 = ToScreenX(Maps[i].lon2);
+                    Maps[i].scrY1 = ToScreenY(Maps[i].lat1);
+                    Maps[i].scrY2 = ToScreenY(Maps[i].lat2);
+                }
+
+                // select the best map and draw it
+                SelectBestMap(MapMode);
+                DrawJpeg(BackBufferGraphics);
+            }
 
             Pen pen = new Pen(Color.LightGray, 1);
 

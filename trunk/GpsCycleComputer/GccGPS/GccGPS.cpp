@@ -876,6 +876,26 @@ else if(com_port == 14) __hGpsPort = CreateFile(L"COM14:",GENERIC_READ|GENERIC_W
 		fclose(file);
 	}
 
+	//FILE *filex = fopen("\\debug.txt", "w");
+	//fprintf(filex, "debugfile\n");
+	HANDLE initfile = CreateFile(L"\\GccInitGps.txt", GENERIC_READ,FILE_SHARE_READ, NULL,OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if(initfile != INVALID_HANDLE_VALUE)			//file exists -> send init data to GPS device
+	{
+		char c; unsigned long r,w; BOOL a;
+		while(1)
+		{
+			if(!ReadFile(initfile, &c, 1, &r, NULL) || r==0)
+				break;
+			for(int i=0; i<1000; i++)
+			{
+				a=WriteFile(__hGpsPort, &c, 1, &w, NULL);		//w==0 if buffer full?
+				//fprintf(filex, "read=%i  char=%c  written=%i  ret=%i\n",r,c,w,a);
+				if(w == 1) break;
+			}
+		}
+		CloseHandle(initfile);
+	}
+	//fclose(filex);
     return 1;
 }
 //-----------------------------------------------------------------------------

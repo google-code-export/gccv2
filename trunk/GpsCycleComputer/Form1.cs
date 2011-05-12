@@ -1,6 +1,6 @@
 //#define DEBUG
 //#define BETA
-#define SERVICEPACK
+//#define SERVICEPACK
 
 using System;
 using System.Runtime.InteropServices;
@@ -283,6 +283,7 @@ namespace GpsCycleComputer
         bool MapsFolderSetupMode = false;
         // current directory for maps files
         string MapsFilesDirectory;
+        string LoadedSettingsName = "";
 
         // vars to select which file type to open
         const byte FileOpenMode_Gcc = 0;
@@ -419,8 +420,8 @@ namespace GpsCycleComputer
         private CheckBox checkGPSOffOnPowerOff;
         private CheckBox checkKeepBackLightOn;
         private CheckBox checkDispWaypoints;
-        private const int MenuItemSize = 6;
-        private MenuItem[] cMenuItem = new MenuItem[]{ new MenuItem(), new MenuItem(), new MenuItem(), new MenuItem(), new MenuItem(), new MenuItem()};
+        private const int MenuItemSize = 7;
+        private MenuItem[] cMenuItem = new MenuItem[]{new MenuItem(), new MenuItem(), new MenuItem(), new MenuItem(), new MenuItem(), new MenuItem(), new MenuItem()};
 
         // c-tor. Create classes used, init some components
         public Form1()
@@ -650,6 +651,9 @@ namespace GpsCycleComputer
                             if (mapUtil.hideTrack) cMenuItem[numItems].Checked = true;
                             numItems++;
                         }
+                        cMenuItem[numItems].Text = "hide map";
+                        if (mapUtil.hideMap) cMenuItem[numItems].Checked = true;
+                        numItems++;
 
                         break;
                     }
@@ -728,6 +732,7 @@ namespace GpsCycleComputer
                 // change the name, or safe the data. 
                 // Bugfix: Store the the position of the button before opening the popup menu.
                 SaveSettings(CurrentDirectory + "\\" + mPage.mBAr[(int)mPage.lastSelectedBFkt].text + ".dat");
+                LoadedSettingsName = mPage.mBAr[(int)mPage.lastSelectedBFkt].text;
             }
             else if (((MenuItem)sender).Text == "change name")
             {
@@ -775,6 +780,8 @@ namespace GpsCycleComputer
                 checkDispWaypoints.Checked = !checkDispWaypoints.Checked;
             else if (((MenuItem)sender).Text == "hide track")
                 mapUtil.hideTrack = !mapUtil.hideTrack;
+            else if (((MenuItem)sender).Text == "hide map")
+                mapUtil.hideMap = !mapUtil.hideMap;
 
             else
                 MessageBox.Show("no method for menu: " + ((MenuItem)sender).Text);
@@ -2521,6 +2528,7 @@ namespace GpsCycleComputer
                 checkDispWaypoints.Checked = 1 == wr.ReadInt32();
 				MainConfigDistance = (eConfigDistance) wr.ReadInt32();
                 MainConfigLatFormat = wr.ReadInt32();
+                LoadedSettingsName = wr.ReadString();
 				
             }
             catch (FileNotFoundException)
@@ -2660,6 +2668,7 @@ namespace GpsCycleComputer
                 wr.Write(checkDispWaypoints.Checked ? 1 : 0);
 				wr.Write((int)MainConfigDistance);
                 wr.Write(MainConfigLatFormat);
+                wr.Write(LoadedSettingsName);
 
             }
             catch (Exception e)
@@ -3473,7 +3482,7 @@ namespace GpsCycleComputer
             ResetMapPosition();
 
             Cursor.Current = Cursors.WaitCursor;
-
+            CloseGps();
             if (gps.OpenedOrSuspended)
                 mPage.mBAr[(int)MenuPage.BFkt.gps_toggle] = mPage.mBGpsOn;
             else
@@ -3752,11 +3761,11 @@ namespace GpsCycleComputer
                     break;
 
                 case MenuPage.BFkt.recall1:
-                    RecallSettings(CurrentDirectory + "\\" + mPage.mBAr[(int)MenuPage.BFkt.recall1].text + ".dat"); break;
+                    RecallSettings(mPage.mBAr[(int)MenuPage.BFkt.recall1].text); break;
                 case MenuPage.BFkt.recall2:
-                    RecallSettings(CurrentDirectory + "\\" + mPage.mBAr[(int)MenuPage.BFkt.recall2].text + ".dat"); break;
+                    RecallSettings(mPage.mBAr[(int)MenuPage.BFkt.recall2].text); break;
                 case MenuPage.BFkt.recall3:
-                    RecallSettings(CurrentDirectory + "\\" + mPage.mBAr[(int)MenuPage.BFkt.recall3].text + ".dat"); break;
+                    RecallSettings(mPage.mBAr[(int)MenuPage.BFkt.recall3].text); break;
 
                 case MenuPage.BFkt.backlight_off:
                     Utils.SwitchBacklight(); break;
@@ -3969,8 +3978,9 @@ namespace GpsCycleComputer
         }
 
 
-        private void RecallSettings(string filename)
+        private void RecallSettings(string name)
         {
+            string filename = CurrentDirectory + "\\" + name + ".dat";
             if (File.Exists(filename))
             {
                 LoadSettings(filename);
@@ -3978,7 +3988,8 @@ namespace GpsCycleComputer
                 MessageBeep(BeepType.Ok);
                 // If a changed maps or Input/Output location is displayed, it may become invalid after a recall.
                 // To avoid displaying an invalid path, overwrite the existing text.
-                labelFileName.SetText("Recall settings: " + Path.GetFileNameWithoutExtension( filename ));
+                labelFileName.SetText("Recall settings: " + name);
+                LoadedSettingsName = name;
             }
             else
                 MessageBox.Show("File does not exist:\n" + filename, "Error",
@@ -5252,6 +5263,7 @@ namespace GpsCycleComputer
             BackBufferGraphics.FillRectangle(br, ((MGridX[1] + MGridX[3]) / 2) - MHeightDelta, MGridY[5] + MGridDelta, MHeightDelta, MHeightDelta);
 
             // draw Info cell
+            DrawMainLabelOnRight(BackBufferGraphics, LoadedSettingsName, MGridX[1], MGridY[5], 8.0f);
             DrawMainLabelOnRight(BackBufferGraphics, CurrentLiveLoggingString + " ", MGridX[1], MGridY[6], 8.0f);
             DrawMainLabelOnRight(BackBufferGraphics, CurrentStatusString + " ", MGridX[1], MGridY[6] + MHeightDelta, 8.0f);
 #if DEBUG
@@ -5800,6 +5812,7 @@ namespace GpsCycleComputer
         private void buttonOptions_Click(object sender, EventArgs e)
         {
             BufferDrawMode = BufferDrawModeOptions;
+            LoadedSettingsName = "";
             tabControl.BringToFront();
             //labelFileName.SetText(""); // clear text from info label
             ShowHideViewOpt(false); // make sure the view selector is hidden
