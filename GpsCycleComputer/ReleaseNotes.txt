@@ -1,5 +1,15 @@
 GPS Cycle Computer GCC
 
+********* version 4.7 *********
+new features:
+- press stop: -> GPS is switched off
+- recall settings: -> name is displayed in Info field
+- initialization of GPS device by \GccInitGps.txt possible
+- hide map
+
+bugfixes:
+- back and fore color of "Distance to T2F"
+
 ********* version 4.6 SP1 *********
 - input Lat Lon accepts lowercase for N/S E/W and also O alternative to E (East = Ost in German)
 bugfix:
@@ -99,5 +109,6 @@ new features:
 
 known issues:
 - elevation gain (altitude gain) is showing too high value, if you move slowly or don't move
+- GPX files without "carriage returns" cannot be loaded (e.g. GPX files from crossingways.com)
 
 

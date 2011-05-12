@@ -245,7 +245,9 @@ content="text/html; charset=iso-8859-1"/>
                 are part of the setting itself, so some of the 3 buttons may change their name when
                 you recall a setting. If desired rechange the name and resave the setting you have
                 just recalled. The settings are stored in the application
-                directory in files with the name of the setting extended with .dat.&nbsp;</li>
+                directory in files with the name of the setting extended with .dat.
+                The name of the current loaded setting is displayed in Main display at the top of
+                the Info field&nbsp;</li>
             <li><strong>BKLight</strong>: by default, you
                 shall be able to switch your phone off by the
                 hardware power button, and the GPS will continue
@@ -662,8 +664,11 @@ content="text/html; charset=iso-8859-1"/>
 				If a track to follow is loaded and includes waypoints, you can select to show or hide displaying 
 				waypoints.</font></li>
             <li><font size="2" face="Arial">&quot;<strong>Hide track</strong>&quot;: here you can hide the track in order to see better the track to follow
-                or the map. This setting is not stored permanently.&nbsp;</li>
+                or the map. This setting is not stored permanently.</font></li>
+            <li><font size="2" face="Arial">&quot;<strong>Hide map</strong>&quot;: here you can hide the map in order to see better the
+                        track. This setting is not stored permanently.</font></li>
 		</ul>
+            
         <h2>
                 <span style="font-size: 12pt; font-family: Arial"></span>&nbsp;</h2>
         <a name="graph"></a>
@@ -1226,6 +1231,11 @@ content="text/html; charset=iso-8859-1"/>
         relative to ground (not relative to your car dashboard
         while you are driving off !). On Diamond, in this
         conditions, usually you will get a lock in under 30 sec.</font></p>
+            <p>
+                <font face="Arial" size="2"><strong>Initialization of GPS Receiver</strong>: If you
+                    need to initialize your GPS receiver you can place a file "\GccInitGps.txt" in the
+                    root directory of your device. If this file exists, its content is sent to the GPS
+                    receiver on every open of the GPS.</font></p>
         <h3><font size="2" face="Arial">15.2 Logging raw (NMEA) data from GPS device</font></h3>
             <p><font size="2" face="Arial">
                 By context menu on the main screen in GPS field you can enable "log raw nmea" data.
