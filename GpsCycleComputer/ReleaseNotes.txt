@@ -1,5 +1,11 @@
 GPS Cycle Computer GCC
 
+********* version 4.8 *********
+
+bugfixes
+- improved GPX file support to reaad files from http://openrouteservice.org
+  (trkpt tag can be closed inside the tag e.g. <trkpt lon=.../>).
+  
 ********* version 4.7 *********
 new features:
 - press stop: -> GPS is switched off
