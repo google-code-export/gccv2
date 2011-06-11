@@ -55,6 +55,7 @@ namespace GpsSample.FileSupport
                             if (words[i].IndexOf("lon=\"") >= 0)
                             {
                                 words[i] = words[i].Replace("></trkpt>", "");
+                                words[i] = words[i].Replace("/>", "");
                                 words[i] = words[i].Replace("lon=\"", "");
                                 words[i] = words[i].Replace("\"", "");
                                 words[i] = words[i].Replace(">", "");
@@ -63,6 +64,7 @@ namespace GpsSample.FileSupport
                             else if (words[i].IndexOf("lat=\"") >= 0)
                             {
                                 words[i] = words[i].Replace("></trkpt>", "");
+                                words[i] = words[i].Replace("/>", "");
                                 words[i] = words[i].Replace("lat=\"", "");
                                 words[i] = words[i].Replace("\"", "");
                                 words[i] = words[i].Replace(">", "");
@@ -71,7 +73,7 @@ namespace GpsSample.FileSupport
                         }
 
                         // fix if file contains coordinates only (i.e. no time info), all on one line
-                        if ((line.IndexOf("></trkpt>") >= 0) && (last_lat != 0.0) && (last_long != 0.0))
+                        if (((line.IndexOf("></trkpt>") >= 0) || (line.IndexOf("/>") >= 0)) && (last_lat != 0.0) && (last_long != 0.0))
                         {
                             // check if we need to decimate arrays
                             if (Counter >= vector_size)
