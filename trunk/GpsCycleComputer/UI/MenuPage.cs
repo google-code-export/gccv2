@@ -23,7 +23,7 @@ namespace GpsCycleComputer
             }
             public MButton(String bm, String txt)
             {
-                icon = Form1.LoadBitmap(bm);
+                icon = Form1.LoadBitmap(bm);                        //don't know how to call constructor explicitly
                 icon_p = Form1.LoadBitmap(bm.Replace(".", "_p."));
                 text = txt;
                 enabled = true;
@@ -51,7 +51,7 @@ namespace GpsCycleComputer
                                                   new MButton ("cancel.jpg", "ClearTrack"),
 
                                                   new MButton ("exit.jpg", "Exit"),
-                                                  new MButton ("continue.jpg", "Continue", false),
+                                                  new MButton ("navigate.jpg", "Navigate"),
                                                   new MButton ("lap.jpg", "Lap"),
 
                                                   new MButton ("recall.jpg", "Recall 1"),
@@ -60,7 +60,10 @@ namespace GpsCycleComputer
 
                                                   new MButton ("bklight.jpg", "BKLight"),
                                                   new MButton ("checkpoint.jpg", "Input LatLon"),
+                                                  new MButton ("continue.jpg", "Continue", false),
+                                                  
                                                   new MButton ("help.jpg", "Help"),
+                                                  new MButton ("help.jpg", "About"),
                                                   //end of menu page
 
                                                   new MButton ("start.jpg", "Start"),
@@ -105,7 +108,7 @@ namespace GpsCycleComputer
             load_2clear,
 
             exit,
-            continu,            //'continue' is reserved for c instruction 
+            navigate,
             lap,
 
             recall1,
@@ -114,8 +117,11 @@ namespace GpsCycleComputer
 
             backlight_off,
             inputLatLon,
+            continu,            //'continue' is reserved for c instruction 
+
             help,
-            endOfMenuPage = help,
+            about,
+            endOfMenuPage = about,
 
             //separate buttons on bottom
             start,

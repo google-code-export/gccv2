@@ -70,6 +70,9 @@ namespace GpsUtils
 
         public bool hideTrack = false;
         public bool hideMap = false;
+        public bool hideNav = false;
+        public bool navigate_backward = false;
+        public bool show_nav_button = true;
 
         private int ScreenX = 100;         // screen (drawing) size in pixels
         private int ScreenY = 100;
@@ -179,7 +182,7 @@ namespace GpsUtils
                 StreamReader sr = null;
                 try
                 {
-                    fs = new FileStream(file_name, FileMode.Open);
+                    fs = new FileStream(file_name, FileMode.Open, FileAccess.Read);
                     sr = new StreamReader(fs);
                     if (sr.Peek() != -1)
                     {
@@ -448,7 +451,7 @@ User-defined server (read server name from osm_server.txt)
                     {
                         double center_lat = 0.0, center_long = 0.0, center_range = 0.0;
 
-                        FileStream fs = new FileStream(kml_file, FileMode.Open);
+                        FileStream fs = new FileStream(kml_file, FileMode.Open, FileAccess.Read);
                         StreamReader sr = new StreamReader(fs);
                         string line = "";
                         while (sr.Peek() != -1)
@@ -499,7 +502,7 @@ User-defined server (read server name from osm_server.txt)
                     }
                     else if (File.Exists(txt_file)) // load text file (if KML does not exist)
                     {
-                        FileStream fs = new FileStream(txt_file, FileMode.Open);
+                        FileStream fs = new FileStream(txt_file, FileMode.Open, FileAccess.Read);
                         StreamReader sr = new StreamReader(fs);
                         Maps[NumMaps].lat1 = Convert.ToDouble(sr.ReadLine().Trim().Replace(",", "."), number_info);
                         Maps[NumMaps].lon1 = Convert.ToDouble(sr.ReadLine().Trim().Replace(",", "."), number_info);
@@ -511,7 +514,7 @@ User-defined server (read server name from osm_server.txt)
                     }
                     else // load GMI file (if KML and TXT do not exist)
                     {
-                        FileStream fs = new FileStream(gmi_file, FileMode.Open);
+                        FileStream fs = new FileStream(gmi_file, FileMode.Open, FileAccess.Read);
                         StreamReader sr = new StreamReader(fs);
 
                         // check header
@@ -1071,11 +1074,8 @@ User-defined server (read server name from osm_server.txt)
             g.FillEllipse(drawBrush, x_point - size / 2, y_point - size / 2, size, size);
         }
         //KB draw arrow   (size = radius)
-        private void DrawArrow(Graphics g, double Long, double Lat, int heading_int, int size, Color col)
+        private void DrawArrow(Graphics g, int x0, int y0, int heading_int, int size, Color col)
         {
-            int x0 = ToScreenX(Long);
-            int y0 = ToScreenY(Lat);
-            
             SolidBrush br = new SolidBrush(col);
 
             // draw heading - 4 points arrow
@@ -1091,7 +1091,6 @@ User-defined server (read server name from osm_server.txt)
             // point A - at +150 deg from current
             pa[2].X = (int)(x0 + size * Math.Cos(Math.PI / 2.0 - ((heading_int + 150) * Math.PI / 180.0)));
             pa[2].Y = (int)(y0 - size * Math.Sin(Math.PI / 2.0 - ((heading_int + 150) * Math.PI / 180.0)));
-            if (heading_int == 720) br.Color = Color.DimGray;
             g.FillPolygon(br, pa);
 
             // point B - at +210 deg from current
@@ -1254,11 +1253,10 @@ User-defined server (read server name from osm_server.txt)
 
         // KB-Version2
         // 
-        private int DrawTrackLine(Graphics g, Pen p, float[] PlotLong, float[] PlotLat, int PlotSize, bool plot_dots, float CurLong, float CurLat, bool GetMinDistance)
+        private int DrawTrackLine(Graphics g, Pen p, float[] PlotLong, float[] PlotLat, int PlotSize, bool plot_dots, float CurLong, float CurLat, bool GetMinDistance, ref bool ShowDistance2T2F)
         {
             // return value: Index of the Point with the minimum Distance between track2follow and current position.
             // But only, if one of both is outside of the current screen.
-            // -1 if index is not available
 
             // idea is to draw max 128 points (as it is slow),
             // so first select only points which are within the map
@@ -1266,7 +1264,7 @@ User-defined server (read server name from osm_server.txt)
             //int begin = Environment.TickCount;
             //String str = "";// = new String("");
 
-            int IndexMinDistance = -1;
+            int IndexMinDistance = 0;
             // Current position on the screen
             int CurrentX = 0; 
             int CurrentY = 0;
@@ -1321,12 +1319,12 @@ User-defined server (read server name from osm_server.txt)
 
                 i++;
 
-                if (d > 0)  //erster punkt auf jeden Fall
+                if (d > 0)  //first point never ignore
                 {
                     if (PointInMap && (Math.Abs(points[d].X - points[d - 1].X) < 5) && (Math.Abs(points[d].Y - points[d - 1].Y) < 5))  //only points which differ significant from previous
                     { IgnorePoint = true; }
 
-                    if (!LineStarted)   //&& !PointInMap (implizit)
+                    if (!LineStarted)   //&& !PointInMap (implicitly)
                     {
                         points[d - 1] = points[d];    //overwrite first point (outside screen)
                         IgnorePoint = true;
@@ -1373,10 +1371,12 @@ User-defined server (read server name from osm_server.txt)
                     p.Color = modifyColor(p.Color, +100);
                     // not supported by .NET CF??? p.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
                     g.DrawLine(p, CurrentX, CurrentY, MinDistanceX, MinDistanceY);
+                    ShowDistance2T2F = true;
                 }
                 else  // both points are inside of the visible screen area
                 {
-                    IndexMinDistance = -1;  // Index to min Distance not required.
+                    //IndexMinDistance = -1;  // Index to min Distance not required.
+                    ShowDistance2T2F = false;
                 }
             }
 
@@ -1472,7 +1472,6 @@ User-defined server (read server name from osm_server.txt)
             }
         }
 
-
         private void DrawTickLabel(Graphics g, Pen p, int tick_dist_screen, double tick_dist_units, string unit_name)
         {
             // draw text: Create font and brush.
@@ -1559,8 +1558,8 @@ User-defined server (read server name from osm_server.txt)
             utmUtil.setReferencePoint(PlotLat[PlotSize - 1], PlotLong[PlotSize - 1]);
 
             utmUtil.getLatLong(100.0, 100.0, out Meter2Lat, out Meter2Long);
-            Meter2Lat = Math.Abs(Meter2Lat - PlotLat[PlotSize - 1]) / 100.0;
-            Meter2Long = Math.Abs(Meter2Long - PlotLong[PlotSize - 1]) / 100.0;
+            Meter2Lat = (Meter2Lat - PlotLat[PlotSize - 1]) / 100.0;
+            Meter2Long = (Meter2Long - PlotLong[PlotSize - 1]) / 100.0;
             RatioMeterLatLong = Meter2Long / Meter2Lat;
 
             // during liveview (logging), set a fixed scale with current point in the middle
@@ -1630,6 +1629,7 @@ User-defined server (read server name from osm_server.txt)
                 return;
             }*/
             int IndexMinDistance = -1;
+            bool ShowDistanceToT2F = false;
 
             // if back buffer exists and picture is moving - draw existing picture
             if (MouseMoving && (BackBuffer != null))
@@ -1701,7 +1701,7 @@ User-defined server (read server name from osm_server.txt)
             {
                 pen.Color = line_color2;
                 pen.Width = line_width2;
-                IndexMinDistance = DrawTrackLine(BackBufferGraphics, pen, PlotLong2, PlotLat2, PlotSize2, plot_dots2, CurLong[0], CurLat[0], true );
+                IndexMinDistance = DrawTrackLine(BackBufferGraphics, pen, PlotLong2, PlotLat2, PlotSize2, plot_dots2, CurLong[0], CurLat[0], true, ref ShowDistanceToT2F );
                 DrawCurrentPoint(BackBufferGraphics, PlotLong2[PlotSize2 - 1], PlotLat2[PlotSize2 - 1], line_width2, line_color2);
             }
 
@@ -1710,7 +1710,7 @@ User-defined server (read server name from osm_server.txt)
             {
                 pen.Color = line_color;
                 pen.Width = line_width;
-                DrawTrackLine(BackBufferGraphics, pen, PlotLong, PlotLat, PlotSize, plot_dots, 0, 0, false );
+                DrawTrackLine(BackBufferGraphics, pen, PlotLong, PlotLat, PlotSize, plot_dots, 0, 0, false, ref ShowDistanceToT2F );
                 // draw last point larger by 5 points
                 DrawCurrentPoint(BackBufferGraphics, PlotLong[PlotSize - 1], PlotLat[PlotSize - 1], line_width + 5, line_color);
             }
@@ -1722,14 +1722,27 @@ User-defined server (read server name from osm_server.txt)
             }
 
             // Draw the Distance between track2follow and current position (we have to draw after the main track line, to avoid overwriting of the text string)
-            if( PlotSize2 != 0 && IndexMinDistance >= 0 && IndexMinDistance < PlotSize2 )
+            if( ShowDistanceToT2F )
             {
                 DrawDistanceToTrack2Follow(BackBufferGraphics, pen, CurLong[0], CurLat[0], PlotLong2[IndexMinDistance], PlotLat2[IndexMinDistance], unit_cff, unit_name); 
             }
 
             if (lifeview)
             {
-                DrawArrow(BackBufferGraphics, CurLong[0], CurLat[0], heading, line_width * 2 + 5, line_color);
+                int x0 = ToScreenX(CurLong[0]);
+                int y0 = ToScreenY(CurLat[0]);
+                Color col = line_color, col2 = line_color2;
+                if (heading == 720) { col = Color.DimGray; col2 = Color.DimGray; }
+                
+                if (!hideNav && PlotSize2 != 0)
+                {
+                    int angle2Dest;
+                    double MinDistance, Distance2Dest;
+                    GetNavigationData(PlotLong2, PlotLat2, PlotSize2, CurLong[0], CurLat[0], out angle2Dest, out MinDistance, out Distance2Dest);
+                    DrawArrow(BackBufferGraphics, x0, y0, angle2Dest , line_width * 3 + 7, line_color2);                    //navigation arrow pointing at t2f 100m ahead
+                    DrawArrow(BackBufferGraphics, ScreenX * 4 / 5, ScreenY / 5, angle2Dest - heading, ScreenX / 5, col2);   //big navigation arrow in direction of travel
+                }
+                DrawArrow(BackBufferGraphics, x0, y0, heading, line_width * 2 + 5, col);                            //arrow showing direction of movement
                 // draw gps led point
                 //DrawCurrentPoint(BackBufferGraphics, CurLong[0], CurLat[0], line_width, CurrentGpsLedColor);
             }
@@ -1748,6 +1761,105 @@ User-defined server (read server name from osm_server.txt)
             g.DrawImage(BackBuffer, 0, 0);
         }
 
+
+
+        public void DrawNavigate(Graphics g, Bitmap BackBuffer, Graphics BackBufferGraphics, float[] PlotLong2, float[] PlotLat2, int PlotSize2, float CurLong, float CurLat, int heading, Color col, double unit_cff, string unit_name)
+        {
+            BackBufferGraphics.Clear(Back_Color);
+            Font drawFont = new Font("Arial", 20, FontStyle.Regular);
+            SolidBrush drawBrush = new SolidBrush(col);
+            string str_nav;
+            if (PlotSize2 > 0)
+            {
+                int angle2Dest;
+                double MinDistance, Distance2Dest;
+                GetNavigationData(PlotLong2, PlotLat2, PlotSize2, CurLong, CurLat, out angle2Dest, out MinDistance, out Distance2Dest);
+
+                int size = Math.Min(BackBuffer.Width, BackBuffer.Height*4/5) / 2;
+                if (heading == 720) col = Color.DimGray;
+                DrawArrow(BackBufferGraphics, BackBuffer.Width/2, size, angle2Dest - heading, size, col);
+                
+                
+                if (MinDistance > 100.0)
+                    str_nav = (MinDistance * unit_cff).ToString("0.00") + unit_name + " to Track";
+                else
+                    str_nav = (Distance2Dest * unit_cff).ToString("0.00") + unit_name + " to Destin.";
+            }
+            else
+            {
+                str_nav = "no Track2F loaded";
+            }
+            BackBufferGraphics.DrawString(str_nav, drawFont, drawBrush, 2, BackBuffer.Height * 41 / 50);
+            g.DrawImage(BackBuffer, 0, 0); // draw back buffer on screen
+        }
+
+        private int GetNavigationData(float[] PlotLong2, float[] PlotLat2, int PlotSize2, float CurLong, float CurLat, out int angle2Dest, out double MinDistance, out double Distance2Dest)
+        {
+            double Long2Meter, Lat2Meter;
+            double x, y;                    //m
+            double dist2, MinDistance2;     //m2
+            int i, IndexMinDistance = 0;
+
+            utmUtil.setReferencePoint(CurLat, CurLong);
+            utmUtil.getLatLong(100.0, 100.0, out Lat2Meter, out Long2Meter);
+            Long2Meter = 100.0 / (Long2Meter - CurLong);
+            Lat2Meter = 100.0 / (Lat2Meter - CurLat);
+
+            int begin = 0, increment = 1;
+            if (navigate_backward)
+            { begin = PlotSize2-1; increment = -1; }
+
+            x = (PlotLong2[begin] - CurLong) * Long2Meter;
+            y = (PlotLat2[begin] - CurLat) * Lat2Meter;
+            dist2 = x * x + y * y;
+            MinDistance2 = dist2;
+            Distance2Dest = Math.Sqrt(dist2);
+            for (i = begin + increment; i < PlotSize2 && i >= 0; i += increment)
+            {
+                //calculate distance to track2follow
+                x = (PlotLong2[i] - CurLong) * Long2Meter;
+                y = (PlotLat2[i] - CurLat) * Lat2Meter;
+                dist2 = x * x + y * y;
+                //calculate distance to destination
+                x = (PlotLong2[i] - PlotLong2[i - increment]) * Long2Meter;
+                y = (PlotLat2[i] - PlotLat2[i - increment]) * Lat2Meter;
+                Distance2Dest += Math.Sqrt(x * x + y * y);
+                if (dist2 < MinDistance2)
+                {
+                    IndexMinDistance = i;
+                    MinDistance2 = dist2;
+                    Distance2Dest = Math.Sqrt(dist2);
+                }
+            }
+            //search point 100m ahead from current position (or IndexMinDistance)
+            i = IndexMinDistance;
+            while (true)
+            {
+                x = (PlotLong2[i] - CurLong) * Long2Meter;
+                y = (PlotLat2[i] - CurLat) * Lat2Meter;
+                dist2 = x * x + y * y;
+                if (dist2 >= 100.0 * 100.0) break;
+                if (navigate_backward)
+                {
+                    if (--i < 0) break;
+                }
+                else
+                {
+                    if (++i >= PlotSize2) break;
+                }
+            }
+            //angle2Dest = (int)(90.0 - 180.0 / Math.PI * Math.Atan2(y, x));
+            angle2Dest = (int)(180.0 / Math.PI * Math.Atan2(x, y));
+            MinDistance = Math.Sqrt(MinDistance2);
+            return IndexMinDistance;
+        }
+
+
+
+
+
+
+
         // make sure that the central point is stationary after zoom in / zoom out
         public void ZoomIn()
         {
@@ -1763,7 +1875,7 @@ User-defined server (read server name from osm_server.txt)
         }
 
         // DEBUG printout - called in DrawJpeg (make sure it is commented out in release).
-        private void PrintMapInfo()
+        /*private void PrintMapInfo()
         {
             try
             {
@@ -1798,6 +1910,6 @@ User-defined server (read server name from osm_server.txt)
             {
                 Utils.log.Debug("--------------------------------------------------------------------------------------------------------------------");
             }
-        }
+        }*/
     }
 }

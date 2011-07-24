@@ -28,7 +28,7 @@ namespace GpsSample.FileSupport
             {
                 try
                 {
-                    FileStream fs = new FileStream(filename, FileMode.Open);
+                    FileStream fs = new FileStream(filename, FileMode.Open, FileAccess.Read);
                     BinaryReader rd = new BinaryReader(fs);
 
                     // load header "GCC1" (1 is version)

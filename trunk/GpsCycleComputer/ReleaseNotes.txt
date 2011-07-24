@@ -1,11 +1,18 @@
 GPS Cycle Computer GCC
 
 ********* version 4.8 *********
+new features:
+- audio notes in waypoints
+- improved calculation of altitude gain (affects also old tracks)
+- improved GPX file support to read files from http://openrouteservice.org
+- compass in main can be configured to show "north" (device must be held up in direction of movement)
+- new Navigation arrow shows direction to follow T2F (100m ahead) - either in map or fullscreen in new navigation screen
+- new "About" button in menu page
 
-bugfixes
-- improved GPX file support to reaad files from http://openrouteservice.org
-  (trkpt tag can be closed inside the tag e.g. <trkpt lon=.../>).
-  
+bugfix:
+- at 00:00 UTC time and AVG > 1, a wrong point far away was logged
+
+
 ********* version 4.7 *********
 new features:
 - press stop: -> GPS is switched off

@@ -12,8 +12,10 @@ content="text/html; charset=iso-8859-1"/>
 
 <table border="0" width="450">
     <tr>
-        <td style="width: 669px"><h1><font face="Arial">GPS Cycle Computer 4.6</font></h1>
-        <h2><font size="3" face="Arial">1. General Description</font></h2>
+        <td style="width: 669px"><h1><font face="Arial">GPS Cycle Computer 4.8</font></h1>
+        <font size="2" face="Arial">Tip: You can copy this file (Readme.htm) to your Desktop
+            PC and read it there more comfortable.</font><h2>
+                <font face="Arial" size="3">1. General Description</font></h2>
         <p><font size="2" face="Arial">This is a GPS tracking
         application for Windows Mobile. You do not need any other
         GPS software to be installed, i.e. it works directly with
@@ -147,6 +149,9 @@ content="text/html; charset=iso-8859-1"/>
                 searching; Yellow - GPS valid, but first
                 samples dropped to get better precision (useful in start/stop mode); Grey - GPS
                 suspended to save battery (start/stop mode).</font></li>
+            <li>Compass - shows the direction of movement (north above). By means of context menu
+                it can be changed, so that the arrow points to north, provided that you move in
+                direction from bottom to top of your device.</li>
         </ul>
         <p><font size="2" face="Arial"><strong>Info</strong>
         display (bottom left of the main window) : </font></p>
@@ -231,13 +236,25 @@ content="text/html; charset=iso-8859-1"/>
             <li><strong>Options</strong>: (see below)</li>
             <li><strong>Altitude</strong>: show altitude graph over time (see Graph below)&nbsp;</li>
             <li><strong>Speed</strong>: show speed graph over time (see Graph below)&nbsp;</li>
-            <li><strong>Waypoint</strong>: add a named waypoint to the track log </li>
+            <li><strong>Add Waypoint</strong>: add a named waypoint to the track log.
+                <br />
+                Additonally you can record a short <strong>Audio</strong> note which is saved in the tracks directory
+                with the track name extended by a number and with .wav extension. Recording starts automatically by pressing the "Audio" button. "OK" stops recording
+                and dismisses the dialog. The waypoint in
+                the track log includes a link to the audio file.&nbsp;</li>
             <li><strong>File/Export</strong>: file operations like load GCC files and save KML or GPX files&nbsp;</li>
             <li><strong>Track2Follow</strong>: load a track as second line in map which you can follow. Valid file
                 formats are GCC, KML and GPX.</li>
             <li><strong>ClearTrack</strong> / <strong>Clear2Follow</strong>: clears the main track or 'track to follow'.</li>
             <li><strong>Exit</strong> </li>
-            <li><strong>Continue</strong>: continues a previous recorded track.&nbsp;</li>
+               <li><strong>Navigate</strong>: The navigation screen shows a big arrow which points
+                   in the direction which you must drive to follow the Track2Follow. The arrow points
+                   at a point 100m ahead on the T2F, based on your current direction of movement. At
+                   the bottom the distance to the destination is displayed or the shortest distance
+                   to the T2F if it is more than 100m. By means of context menu you can navigate backward
+                   on the Track2Follow. Also you can configure if you want to see the navigation button
+                   in the bottom menu column (note: go to menu page - Navigate to display navigation
+                   screen and reenable this feature).&nbsp;</li>
             <li><strong>Lap</strong>: (see below)&nbsp;</li>
             <li><strong>Recal 1 .. 3</strong>: with
                 these 3 buttons you can recall different option settings. Use the context menu to
@@ -258,11 +275,14 @@ content="text/html; charset=iso-8859-1"/>
                 you can reactivate your device.</li>
             <li><strong>Input LatLon</strong>: is useful to browse map on a specific place or to navigate to a specific position (e. g. Geocaching).
                 <br />
-                The input is allowed in any format (dd.dddddd or NddÂ°mm.mmmm' or NddÂ°mm'ss.ss").
-                The characters (N,S,E,W and Â° ' ") can be omitted or replaced by sign or blank respectively.
+                The input is allowed in any format (dd.dddddd or Ndd°mm.mmmm' or Ndd°mm'ss.ss").
+                The characters (N,S,E,W and ° ' ") can be omitted or replaced by sign or blank respectively.
                 Lat and Long are separated by semicolon or by the first Letter of Longitude (E,
                 W).</li>
-            <li><strong>Help</strong></li></font>
+            <li><strong>Continue</strong>: continues a previous recorded track.</li>
+            <li><strong>Help</strong>: displays "Readme.html" in your browser.</li>
+            <li><strong>About</strong>: displays "About page".</li>
+            </font>
            </ul>
         <p><font size="2" face="Arial"></font>&nbsp;</p>
             <h2>

@@ -12,7 +12,7 @@
     <ProjectTypeGuids>{4D628B5B-2FBC-4AA6-8C16-197242AEB884};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <PlatformFamilyName>PocketPC</PlatformFamilyName>
     <PlatformID>4118C335-430C-497f-BE48-11C3316B135E</PlatformID>
-    <OSVersion>5.02</OSVersion>
+    <OSVersion>5.01</OSVersion>
     <DeployDirSuffix>
     </DeployDirSuffix>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
@@ -135,6 +135,8 @@
     <EmbeddedResource Include="Graphics\lap_p.jpg" />
     <EmbeddedResource Include="Graphics\recall.jpg" />
     <EmbeddedResource Include="Graphics\recall_p.jpg" />
+    <EmbeddedResource Include="Graphics\navigate.jpg" />
+    <EmbeddedResource Include="Graphics\navigate_p.jpg" />
     <Content Include="Properties\icon2.ico" />
     <EmbeddedResource Include="Graphics\pause_mode.jpg" />
     <EmbeddedResource Include="Graphics\pause_p.jpg" />

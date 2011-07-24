@@ -29,7 +29,7 @@ namespace GpsSample.FileSupport
             Cursor.Current = Cursors.WaitCursor;
             try
             {
-                FileStream fs = new FileStream(filename, FileMode.Open);
+                FileStream fs = new FileStream(filename, FileMode.Open, FileAccess.Read);
                 StreamReader sr = new StreamReader(fs);
                 string line = "";
                 double last_lat = 0.0;
@@ -230,12 +230,24 @@ namespace GpsSample.FileSupport
                     {
                         // need to replave chars not supported by XML
                         string chk_name = CheckPoints[chk].name.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;").Replace("\"", "&quot;").Replace("'", "&apos;");
+                        string chk_link = null;
+                        int link_idx = chk_name.IndexOf('\x02');
+                        if (link_idx != -1)                     //audio file is present
+                        {
+                            chk_link = chk_name.Substring(link_idx + 1);
+                            if (link_idx == 0)
+                                chk_name = chk_name.Remove(0, 1);
+                            else
+                                chk_name = chk_name.Remove(link_idx, chk_name.Length - link_idx);
+                        }
 
                         // GPS Track Analyser expects a newline between wpt and name
                         wr.WriteLine("<wpt lat=\"" + CheckPoints[chk].lat.ToString("0.##########", IC)
                                     + "\" lon=\"" + CheckPoints[chk].lon.ToString("0.##########", IC)
                                     + "\" >");
                         wr.WriteLine("<name>" + chk_name + "</name>");
+                        if (link_idx != -1)
+                            wr.WriteLine("<link href=\"" + chk_link + "\" />");
                         wr.WriteLine("</wpt>");
                     }
                 }
