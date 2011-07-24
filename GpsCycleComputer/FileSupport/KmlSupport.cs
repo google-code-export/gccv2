@@ -27,7 +27,7 @@ namespace GpsSample.FileSupport
             Cursor.Current = Cursors.WaitCursor;
             try
             {
-                FileStream fs = new FileStream(filename, FileMode.Open);
+                FileStream fs = new FileStream(filename, FileMode.Open, FileAccess.Read);
                 StreamReader sr = new StreamReader(fs);
                 string line = "";
 

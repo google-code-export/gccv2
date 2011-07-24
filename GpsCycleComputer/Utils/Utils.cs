@@ -129,7 +129,7 @@ namespace GpsUtils
             int return_status = 3;
             try
             {
-                fs = new FileStream(fname, FileMode.Open);
+                fs = new FileStream(fname, FileMode.Open, FileAccess.Read);
                 wr = new BinaryReader(fs, Encoding.ASCII);
 
                 // check that this is correct file format
@@ -272,7 +272,7 @@ namespace GpsUtils
         }
 
         // Util to draw compass on a given graphics. Heading is in degrees, 0 is "north" == up
-        public static void DrawCompass(Graphics g, Color col, int x0, int y0, int size, int heading_int)
+        public static void DrawCompass(Graphics g, Color col, int x0, int y0, int size, int heading_int, bool north)
         {
             int rad = (size - 2) / 2;
             int tick = rad / 10;
@@ -286,6 +286,8 @@ namespace GpsUtils
                 int yt = (int)(y0 - (rad - 1 - tick / 2) * Math.Sin(i * Math.PI / 4.0));
                 g.FillEllipse(br, xt - tick / 2, yt - tick / 2, tick, tick);
             }
+            if (north && heading_int != 720)
+                heading_int = -heading_int;
 
             // draw heading - 4 points arrow
             // needle
@@ -309,10 +311,22 @@ namespace GpsUtils
             pa[2].X = (int)(x0 + (rad - 1 - tick / 2) * Math.Cos(Math.PI / 2.0 - ((heading_int + 210) * Math.PI / 180.0)));
             pa[2].Y = (int)(y0 - (rad - 1 - tick / 2) * Math.Sin(Math.PI / 2.0 - ((heading_int + 210) * Math.PI / 180.0)));
             g.FillPolygon(br, pa);
+
+            if (north)
+            {
+                Pen p = new Pen(col, size/32);
+                int d = size/10;
+                Point[] points = new Point[] { new Point(x0 - d, y0 + d), new Point(x0 - d, y0 - d), new Point(x0 + d, y0 + d), new Point(x0 + d, y0 - d) };
+                g.DrawLines(p, points);
+            }
         }
 
-
         public static DialogResult InputBox(string title, string promptText, ref string value)
+        {
+            return InputBoxRec(title, promptText, ref value, null);
+        }
+
+        public static DialogResult InputBoxRec(string title, string promptText, ref string value, string RecFile)
         {
             Form form = new Form();
             Label label = new Label();
@@ -332,8 +346,8 @@ namespace GpsUtils
             int w = form.Width, h = form.Height;
             label.Bounds = new Rectangle(w *10/480, h *40/588, w *460/480, h *36/588);      //5, 20, 230, 18);
             textBox.Bounds = new Rectangle(w *10/480, h *80/588, w *460/480, h *36/588);    //5, 40, 230, 18);
-            buttonOk.Bounds = new Rectangle(w *160/480, h *140/588, w *150/480, h *48/588);   //80, 70, 75, 24);
-            buttonCancel.Bounds = new Rectangle(w *320/480, h *140/588, w *150/480, h *48/588);    //160, 70, 75, 24);
+            buttonOk.Bounds = new Rectangle(w *165/480, h *140/588, w *150/480, h *80/588);   //80, 70, 75, 24);
+            buttonCancel.Bounds = new Rectangle(w *325/480, h *140/588, w *150/480, h *80/588);    //160, 70, 75, 24);
 
             //label.AutoSize = true;
             //textBox.Anchor = textBox.Anchor | AnchorStyles.Right;
@@ -345,6 +359,18 @@ namespace GpsUtils
             form.Controls.Add(textBox);
             form.Controls.Add(buttonOk);
             form.Controls.Add(buttonCancel);
+
+            if (RecFile != null)
+            {
+                Button buttonRec = new Button();
+                buttonRec.Text = "Audio";
+                buttonRec.Bounds = new Rectangle(w * 5/480, h * 140/588, w * 150/480, h * 80/588);
+                form.Controls.Add(buttonRec);
+                buttonRec.Click += buttonRec_Click; //buttonRec_Click;
+                if(vr == null) vr = new VoiceRecorder();
+                vr.Position(w * 5/480, h * 280/588);
+                vr.RecFile = RecFile;
+            }
             
             form.BackColor = GpsCycleComputer.Form1.bkColor;
             form.ForeColor = GpsCycleComputer.Form1.foColor;
@@ -369,8 +395,12 @@ namespace GpsUtils
             return dialogResult;
         }
 
+        static void buttonRec_Click(object sender, EventArgs e)
+        {
+            vr.ShowAndRecord();
+        }
 
-
+        static VoiceRecorder vr = null;
 
     }
 
@@ -382,6 +412,78 @@ namespace GpsUtils
 
         [System.Runtime.InteropServices.DllImport("coredll.dll", EntryPoint = "#36", SetLastError = true)]
         public static extern IntPtr LocalFree(IntPtr hMem);
+    }
+
+
+    public class VoiceRecorder
+    {
+        #region API prototypes
+        [DllImport("voicectl.dll")]
+        private static extern IntPtr VoiceRecorder_Create(ref CM_VOICE_RECORDER voicerec);
+        [DllImport("coredll.dll", EntryPoint = "SendMessage")]
+        static extern IntPtr SendMessage(IntPtr hWnd, VR_MSG Msg, IntPtr wParam, IntPtr lParam);
+        //end api delcare
+        #endregion
+
+        [StructLayout(LayoutKind.Sequential)]
+        protected struct CM_VOICE_RECORDER
+        {
+            public int cb;
+            public wndStyle dwStyle;
+            public int xPos, yPos;
+            public IntPtr hwndParent;
+            public int id;
+            public IntPtr lpszRecordFileName;
+        }
+        public enum wndStyle : uint
+        {
+            VRS_NO_OKCANCEL = 0x0001, // No OK/CANCLE displayed
+            VRS_NO_NOTIFY = 0x0002, // No parent Notifcation
+            VRS_MODAL = 0x0004, // Control is Modal    
+            VRS_NO_OK = 0x0008, // No OK displayed
+            VRS_NO_RECORD = 0x0010, // No RECORD button displayed
+            VRS_PLAY_MODE = 0x0020, // Immediately play supplied file when launched
+            VRS_NO_MOVE = 0x0040, // Grip is removed and cannot be moved around by the user
+            VRS_RECORD_MODE = 0x0080, // Immediately record when launched (don't works on WM)
+            VRS_STOP_DISMISS = 0x0100 // Dismiss control when stopped (don't works on WM)
+        }
+        public enum VR_MSG : uint
+        {
+            VRM_RECORD = 0x1900,
+            VRM_PLAY,
+            VRM_STOP,
+            VRM_CANCEL,
+            VRM_OK,
+        }
+
+        private CM_VOICE_RECORDER voicerec;
+        private IntPtr handle;
+        public string RecFile
+        {
+            get { return Marshal.PtrToStringBSTR(voicerec.lpszRecordFileName); }
+            set { voicerec.lpszRecordFileName = Marshal.StringToBSTR(value); }
+        }
+
+        public VoiceRecorder()
+        {
+            voicerec = new CM_VOICE_RECORDER();
+            handle = new IntPtr();
+            voicerec.cb = (int)Marshal.SizeOf(voicerec);  //26
+            voicerec.dwStyle = wndStyle.VRS_NO_OK | wndStyle.VRS_NO_MOVE;
+            voicerec.xPos = -1;
+            voicerec.yPos = -1;
+            voicerec.lpszRecordFileName = Marshal.StringToBSTR("\\myFile.wav");
+        }
+        public void ShowAndRecord()
+        {
+            handle = VoiceRecorder_Create(ref voicerec);            //show the voice recorder
+            SendMessage(handle, VR_MSG.VRM_RECORD, IntPtr.Zero, IntPtr.Zero);
+        }
+        public void Position(int x, int y)
+        {
+            voicerec.xPos = x;
+            voicerec.yPos = y;
+        }
     }
 
 }
