@@ -38,19 +38,11 @@
 ----
 == Installation ==
 
-Copy the CAB file into your Windows Mobile device and run to install.
-It is recommended to install into Internal Storage, 
-not main memory. (see the next paragraph why).
+Copy the CAB file into your Windows Mobile device and run to install. In most cases it's no problem to install on Storage Card. If you have problems try to install into Internal Storage or main memory.
 
-The output `*.gcc` files are created in the same folder, as the application. 
+The output `*.gcc` files are created in the "input/output files location" (default: same folder, as the application). 
 The output `*.kml/*.gpx` files also created in the same folder. The `*.kml/*.gpx` 
 file names match the input `*.gcc` name.
-
-During loging, the application creates a temporary file tmp.gcc in the root folder
-(i.e. \tmp.gcc), then copies it into the required `*.gcc` file as logging is finished.
-
-Writing into the file in the main memory seems make the application more stable,
-then writing into a "final" file, if you have application located in \Internal Storage.
 ----
 
 == Controls on the "Main" tab ==
@@ -94,7 +86,7 @@ GPS status display (top line of the window) :
 
 == Options ==
 
-Options must be selected before the log is activated, otherwise the controls are locked.
+For some Options you must stop logging and switch off and on GPS to have an effect.
 
  
 
@@ -155,7 +147,7 @@ with the Google Maps Mobile according to Google help (the one installed on Diamo
 ----
 
 == Custom button skins and custom back / fore color ==
-You can set your own background / text color and images for all buttons. All what required is
+Besides the two Day and Night Schemes, you can set your own background / text color and images for all buttons. All what is required is
 
 to edit .jpeg files which are supplied with the source code (look into GpsCycleComputerSource.zip)
 
@@ -167,17 +159,17 @@ If you want to change just a single button, just copy the files for that button,
 
  
 
-For example, if you want the change “Graph” button for bottom menu, edit files “btm_graph_normal.jpg”
+For example, if you want the change “Graph” button for bottom menu, edit files “btm_graph.jpg” (normal)
 
-and “btm_graph_pressed.jpg”  (there are two images, as button has two states). Note you must
+and “btm_graph_p.jpg” (pressed - there are two images, as button has two states). Note you must
 
 not change the image sizes!
 
  
 
-To change the background color, edit file “bk_color.jpg”. The image shall be filled with a single color. For
+To change the background color, edit file “bk_color.jpg”. The image shall be filled with a single color - at best it contains only one pixel. 
 
-the font (fore) color, edit fore_color.jpg (and place then with GpsCycleComputer.exe).
+For the font (fore) color, edit fore_color.jpg (and place them with GpsCycleComputer.exe).
 ----
 
 == Source code ==
