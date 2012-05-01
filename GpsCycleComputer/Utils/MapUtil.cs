@@ -1304,16 +1304,21 @@ User-defined server (read server name from osm_server.txt)
                 if (GetMinDistance == true)
                 {
                     // Find Point on track with minimum Distance to current position
-                    int xDist = points[d].X - CurrentX;
-                    int yDist = points[d].Y - CurrentY;
-                    int Dist = xDist * xDist + yDist * yDist;		// We do not need to use sqrt, reduce CPU load
+                    int xDist = Math.Abs( points[d].X - CurrentX );
+                    int yDist = Math.Abs( points[d].Y - CurrentY );
 
-                    if( MinDistance > Dist )
+                    // Avoid overflow on long tracks, and avoid using 64 bit multiplication
+                    if (xDist < 32768 && yDist < 32768)
                     {
-                        MinDistance = Dist;
-                        MinDistanceX = points[d].X;
-                        MinDistanceY = points[d].Y;
-						IndexMinDistance = i;
+                        int Dist = xDist * xDist + yDist * yDist;		// We do not need to use sqrt, reduce CPU load
+
+                        if (MinDistance > Dist)
+                        {
+                            MinDistance = Dist;
+                            MinDistanceX = points[d].X;
+                            MinDistanceY = points[d].Y;
+                            IndexMinDistance = i;
+                        }
                     }
                 }
 
@@ -1359,7 +1364,7 @@ User-defined server (read server name from osm_server.txt)
                 }
             }
 
-            if (GetMinDistance == true)
+            if (GetMinDistance == true && MinDistance != int.MaxValue )
             {
                 // If the Current Position is outside of the Screen or the nearest point on the track is outside
                 // of the screen, show a line between current position and track to indicate the direction to follow
