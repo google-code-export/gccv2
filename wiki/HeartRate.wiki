@@ -2,12 +2,10 @@
 
 = Introduction =
 
-Add your content here.
-
+You can connect a common (5.3kHz) heart rate belt to GCC. In order to do so you must feed the 5.3kHz pulses into the microphone input of your device.
 
 = Details =
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+The simplest way is to replace the microphone of a head set with a coil and place it close to the heart rate belt. The coil can be a small ferrite rod coil or a single wire loop with a diameter of about 30mm.  Use the signals strength indicator to find an optimal position.
+
+With a selective amplifier circuit it is possible to get over a distance of 1m.
