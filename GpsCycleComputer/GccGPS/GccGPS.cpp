@@ -529,7 +529,7 @@ bool CheckFloatWord( std::string &word)
     return true;
 }
 //-----------------------------------------------------------------------------
-int ___max_snr = 0; int ___num_sat = 0; 
+int ___max_snr = 0; int ___num_sat = 0;
 
 // var used in this function only, the next expected GPSSV rec number
 int ___expected_rec_number = 1; 
@@ -925,6 +925,8 @@ extern "C" __declspec(dllexport) int GccIsGpsOpened()
 #define READ_HAS_GPGGA 0x08
 #define READ_HAS_GPRMC 0x10
 
+int gpgsv_trust_count = 0;
+
 extern "C" __declspec(dllexport) int GccReadGps(int &hour, int &min, int &sec,                  // from GPGGA
                                                 double &latitude, double &longitude,
                                                 int &num_sat, double &hdop, double &altitude,
@@ -1074,9 +1076,7 @@ extern "C" __declspec(dllexport) int GccReadGps(int &hour, int &min, int &sec,  
             {
                 ParseGPGSV(words);
 
-                return_status |= READ_HAS_GPGSV;
-
-                max_snr = ___max_snr; num_sat  = ___num_sat;
+				gpgsv_trust_count = 10;
             }
             else if(words[0] == "$GPGGA")
             {
@@ -1102,6 +1102,12 @@ extern "C" __declspec(dllexport) int GccReadGps(int &hour, int &min, int &sec,  
 		else if (logRawNmea)
 		{	fprintf(file, "^invalid line\n"); }
     }
+	if(gpgsv_trust_count > 0)
+	{
+		max_snr = ___max_snr; num_sat  = ___num_sat;	//use last values of SNR and NUM to avoid blinking (for 10s)
+		return_status |= READ_HAS_GPGSV;				//(some receivers deliver $GPGSV only every 2s or 5s)
+		gpgsv_trust_count--;
+	}
 
 	if (logRawNmea)
 		fclose(file);

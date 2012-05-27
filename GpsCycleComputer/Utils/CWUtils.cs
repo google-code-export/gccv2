@@ -208,6 +208,12 @@ namespace LiveTracker
             return result;
         }
 
+
+        // global variables for async UpdatePositionOnCrossingwaysViaHTTP
+        static GpsCycleComputer.Form1 f1;
+        static bool UpdateBusy = false;
+        static string payload = "";
+
         /// <summary>
         /// Updates a single Position on Crossingways via an HTTP Get request
         /// </summary>
@@ -219,11 +225,19 @@ namespace LiveTracker
         /// <param name="heading">Heading</param>
         /// <param name="messagetext">A Message can be sent along (max. length 160)</param>
         /// <returns>status as a string</returns>
-        public static string UpdatePositionOnCrossingwaysViaHTTP(string server, string username, string passwordhash, double lat, double lon, double ele, double heading, string messagetext)
+        public static void UpdatePositionOnCrossingwaysViaHTTP(string server, string username, string passwordhash, double lat, double lon, double ele, int heading, string messagetext, GpsCycleComputer.Form1 form1)
         {
+            f1 = form1;
+            if (UpdateBusy)
+            {
+                UpdateEnd(1);
+                return;
+            }
+            UpdateBusy = true;
+            f1.CurrentLiveLoggingString = "livelog in progress";
+
             string url = server + "/services/livetracking.asmx/CurrentPosition"; 
-            string payload= "";
-            payload += "username=" + UrlEncode(username) + "&";
+            payload = "username=" + UrlEncode(username) + "&";
             payload += "password=" + passwordhash + "&";
             payload += "lat=" + lat.ToString(CultureInfo.InvariantCulture) + "&";
             payload += "lon=" + lon.ToString(CultureInfo.InvariantCulture) + "&";
@@ -233,27 +247,84 @@ namespace LiveTracker
             payload += "trackid=" + 0 + "&";
             payload += "tracktypeid=" + 0 + "&";
             payload += "message=" + UrlEncode(messagetext) ;
-
-            string result = "";
+            doPostAsync(url);
+            return;
+        }
+        private static void doPostAsync(String url)
+        {
             try
             {
-                WebResponse resp = doPost(url, payload);
-                Encoding encode = System.Text.Encoding.GetEncoding("utf-8");
-                StreamReader readStream = new StreamReader(resp.GetResponseStream(), encode);
-                result = readStream.ReadToEnd();
-                result = result.Replace("<?xml version=\"1.0\" encoding=\"utf-8\"?>", "");
-                result = result.Replace("\r\n", "");
-                result = result.Replace("<string xmlns=\"" + server + "/\">", "");
-                result = result.Replace("</string>", "");
+                HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
+                req.Method = "POST";
+                req.ContentType = "application/x-www-form-urlencoded; charset=utf-8 ";
+                System.Net.ServicePointManager.Expect100Continue = false;
+                req.AllowWriteStreamBuffering = true;
+                req.BeginGetRequestStream(GetRequestStreamCallback, req);
             }
-            catch (Exception /*e*/)
+            catch (Exception)
             {
-                result = "Failed. Will try again!";
+                UpdateEnd(2);
             }
-            return result;
+            return;
+        }
+        private static void GetRequestStreamCallback(IAsyncResult asynchronousResult)
+        {
+            try
+            {
+                HttpWebRequest request = (HttpWebRequest)asynchronousResult.AsyncState;
+                Stream requestStream = request.EndGetRequestStream(asynchronousResult);     // End the operation
+                byte[] encodedBytes = Encoding.UTF8.GetBytes(payload);                      // Encode the data
+                request.ContentLength = encodedBytes.Length;
+                requestStream.Write(encodedBytes, 0, encodedBytes.Length);
+                requestStream.Flush();
+                requestStream.Close();
+                request.BeginGetResponse(GetResponseCallback, request);
+            }
+            catch (Exception)
+            {
+                UpdateEnd(3);
+            }
+        }
+        private static void GetResponseCallback(IAsyncResult asynchronousResult)
+        {
+            try
+            {
+                HttpWebRequest request = (HttpWebRequest)asynchronousResult.AsyncState;
+
+                // End the operation
+                HttpWebResponse response = (HttpWebResponse)request.EndGetResponse(asynchronousResult);
+                //Stream streamResponse = response.GetResponseStream();
+                //StreamReader streamRead = new StreamReader(streamResponse, Encoding.UTF8);
+                //string result = streamRead.ReadToEnd();
+                if (response.StatusCode == HttpStatusCode.OK)
+                    UpdateEnd(0);
+                else
+                    UpdateEnd(5);
+                //streamRead.Close();
+                //streamResponse.Close();
+                response.Close();
+            }
+            catch (Exception)
+            {
+                UpdateEnd(4);
+            }
+        }
+        static void UpdateEnd(int error)
+        {
+            string livelogStr = "livelog ";
+            switch (error)
+            {
+                case 0: livelogStr += "ok "; break;
+                case 1: livelogStr += "busy! "; break;
+                default: livelogStr += "error" + error + " "; break;
+            }
+            livelogStr += DateTime.Now.ToString("t");
+            f1.CurrentLiveLoggingString = livelogStr;
+            UpdateBusy = false;
         }
 
-        public static WebResponse doPost(String url, String payload)
+
+        private static WebResponse doPost(String url, String payload)
         {
             HttpWebRequest req = (HttpWebRequest) WebRequest.Create(url);
             req.Method = "POST";
@@ -273,12 +344,10 @@ namespace LiveTracker
 
             WebResponse result = req.GetResponse();
             return result;
-
         }
         /// <summary>
         /// Replacement for HttpUtility.UrlEncode
         /// </summary>
-
         public static string UrlEncode(string instring)
         {
             StringReader strRdr = new StringReader(instring);
@@ -297,7 +366,6 @@ namespace LiveTracker
 
                 charValue = strRdr.Read();
             }
-
             return strWtr.ToString();
         }
 

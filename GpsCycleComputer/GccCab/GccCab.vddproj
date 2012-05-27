@@ -14,73 +14,91 @@
     {
         "Entry"
         {
-        "MsmKey" = "8:_03DAA066E67D6BEC84EB94EF0A1FD2D1"
-        "OwnerKey" = "8:_C39E361BF92CBCE24B36AD62304A3C91"
+        "MsmKey" = "8:_08DE58043620497FBDA1CCC442610CC3"
+        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_03DAA066E67D6BEC84EB94EF0A1FD2D1"
+        "MsmKey" = "8:_096B231DBCEF4893B8D4081798F8AC4F"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_0C40213CD4AEA7228BCFE5CF63DE26DF"
         "OwnerKey" = "8:_5A23394E9E8C42468666EFEFA9F0B926"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_03DAA066E67D6BEC84EB94EF0A1FD2D1"
-        "OwnerKey" = "8:_FFD1F73F45FFD3AF20BCE71066544FAC"
+        "MsmKey" = "8:_11655F36D9884509BFF4610FD33A122E"
+        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_209AC30D2AC5F0B530D08DCBA8086286"
+        "MsmKey" = "8:_2CAC20C7338913D7B15F139F1F4655BE"
+        "OwnerKey" = "8:_A1EE15CED6D1DD4275EBAD27DF673081"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_2CAC20C7338913D7B15F139F1F4655BE"
         "OwnerKey" = "8:_5A23394E9E8C42468666EFEFA9F0B926"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_225619B66DF91979917B4128DC244D98"
-        "OwnerKey" = "8:_C39E361BF92CBCE24B36AD62304A3C91"
+        "MsmKey" = "8:_2CAC20C7338913D7B15F139F1F4655BE"
+        "OwnerKey" = "8:_399DA9F909D9C4D076AE3B0D722060B4"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_225619B66DF91979917B4128DC244D98"
-        "OwnerKey" = "8:_47390170D1B33F7E542AD43AF7D4C4FD"
+        "MsmKey" = "8:_2D2126B114BC46A0B0FDF1CE6755E15D"
+        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_225619B66DF91979917B4128DC244D98"
+        "MsmKey" = "8:_37F74611853F46049829CE86DE2854AF"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_37FA44F04F9C4643AC6A458B33F2BCFC"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_399DA9F909D9C4D076AE3B0D722060B4"
+        "OwnerKey" = "8:_A1EE15CED6D1DD4275EBAD27DF673081"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_399DA9F909D9C4D076AE3B0D722060B4"
         "OwnerKey" = "8:_5A23394E9E8C42468666EFEFA9F0B926"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_225619B66DF91979917B4128DC244D98"
-        "OwnerKey" = "8:_A17E171C0F4EF981E891FB4B7CBA55D3"
+        "MsmKey" = "8:_3C68ABC7882945D788DC661C1B358AB6"
+        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_225619B66DF91979917B4128DC244D98"
-        "OwnerKey" = "8:_209AC30D2AC5F0B530D08DCBA8086286"
+        "MsmKey" = "8:_486C51512A914094A15056BFAEE5AB1E"
+        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_225619B66DF91979917B4128DC244D98"
-        "OwnerKey" = "8:_FFD1F73F45FFD3AF20BCE71066544FAC"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_47390170D1B33F7E542AD43AF7D4C4FD"
-        "OwnerKey" = "8:_5A23394E9E8C42468666EFEFA9F0B926"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_4A2E6B7D27924D0AB73033BEC586760D"
+        "MsmKey" = "8:_4CFB73FA2A3E4C9A913D185B807A1C4A"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -104,26 +122,104 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_6100C4FF345D499E8EE775A07B331FD8"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_630B0DFA643447BD8D40FD26837C5BC7"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_6D5A67DEF68442B28670C75936958251"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_70028366BFC54F2DB34EBADF9641AE69"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_72D7A09B6C3109B5DE2858669B824CE3"
+        "OwnerKey" = "8:_5A23394E9E8C42468666EFEFA9F0B926"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_74E6E8B975A94ADBB7A2403357E4D308"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_75F2E36B0AEC43EA9685C9AAC6099EE7"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_77BDAC52BF5B4FF1A79F660C32DE2308"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_881DB0E20BC44ABBB37CD4A4BA7217FB"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_8A49924875B0496FB13E72E3C2324A39"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_A17E171C0F4EF981E891FB4B7CBA55D3"
-        "OwnerKey" = "8:_209AC30D2AC5F0B530D08DCBA8086286"
+        "MsmKey" = "8:_8A610D5C9FD14BDDB3A0D75FA8D5F924"
+        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_A17E171C0F4EF981E891FB4B7CBA55D3"
+        "MsmKey" = "8:_9AC6F5707D094190A860700EE27DC470"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_9D4791FFE55945FE85D2849170450FA4"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_9E069B5F6F664C849FFD5470CDE8B8BF"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_A1EE15CED6D1DD4275EBAD27DF673081"
         "OwnerKey" = "8:_5A23394E9E8C42468666EFEFA9F0B926"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_A17E171C0F4EF981E891FB4B7CBA55D3"
-        "OwnerKey" = "8:_47390170D1B33F7E542AD43AF7D4C4FD"
+        "MsmKey" = "8:_A3FAC672EAF642DB93321453EE7BF492"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_AE6CB0FC1FCB44289B261F906B305DBC"
+        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -134,56 +230,158 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_C32E5EB928D8467EA075E9228DE04169"
-        "OwnerKey" = "8:_C39E361BF92CBCE24B36AD62304A3C91"
+        "MsmKey" = "8:_BE71861841DF4C57214D514EB899890E"
+        "OwnerKey" = "8:_A1EE15CED6D1DD4275EBAD27DF673081"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_C32E5EB928D8467EA075E9228DE04169"
-        "OwnerKey" = "8:_47390170D1B33F7E542AD43AF7D4C4FD"
+        "MsmKey" = "8:_BE71861841DF4C57214D514EB899890E"
+        "OwnerKey" = "8:_72D7A09B6C3109B5DE2858669B824CE3"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_C32E5EB928D8467EA075E9228DE04169"
-        "OwnerKey" = "8:_A17E171C0F4EF981E891FB4B7CBA55D3"
+        "MsmKey" = "8:_BE71861841DF4C57214D514EB899890E"
+        "OwnerKey" = "8:_E1AB81977493F6430CAAB9EC62D9E7CC"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_C32E5EB928D8467EA075E9228DE04169"
-        "OwnerKey" = "8:_209AC30D2AC5F0B530D08DCBA8086286"
+        "MsmKey" = "8:_BE71861841DF4C57214D514EB899890E"
+        "OwnerKey" = "8:_0C40213CD4AEA7228BCFE5CF63DE26DF"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_C32E5EB928D8467EA075E9228DE04169"
+        "MsmKey" = "8:_BE71861841DF4C57214D514EB899890E"
         "OwnerKey" = "8:_5A23394E9E8C42468666EFEFA9F0B926"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_C32E5EB928D8467EA075E9228DE04169"
-        "OwnerKey" = "8:_FFD1F73F45FFD3AF20BCE71066544FAC"
+        "MsmKey" = "8:_BE71861841DF4C57214D514EB899890E"
+        "OwnerKey" = "8:_399DA9F909D9C4D076AE3B0D722060B4"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_C32E5EB928D8467EA075E9228DE04169"
-        "OwnerKey" = "8:_03DAA066E67D6BEC84EB94EF0A1FD2D1"
+        "MsmKey" = "8:_BE71861841DF4C57214D514EB899890E"
+        "OwnerKey" = "8:_2CAC20C7338913D7B15F139F1F4655BE"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_C32E5EB928D8467EA075E9228DE04169"
-        "OwnerKey" = "8:_225619B66DF91979917B4128DC244D98"
+        "MsmKey" = "8:_BE71861841DF4C57214D514EB899890E"
+        "OwnerKey" = "8:_C89D2E65399CED62A12DEDA7A6DA15A9"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_C39E361BF92CBCE24B36AD62304A3C91"
+        "MsmKey" = "8:_BF2BD99A27484E50B4C8C81FD986A48F"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_C0181ADBF84C48DDB866C175B6D7C647"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_C79E8C758C5C48BBB2F8E8F873463414"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_C89D2E65399CED62A12DEDA7A6DA15A9"
+        "OwnerKey" = "8:_A1EE15CED6D1DD4275EBAD27DF673081"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_C89D2E65399CED62A12DEDA7A6DA15A9"
+        "OwnerKey" = "8:_72D7A09B6C3109B5DE2858669B824CE3"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_C89D2E65399CED62A12DEDA7A6DA15A9"
         "OwnerKey" = "8:_5A23394E9E8C42468666EFEFA9F0B926"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_C89D2E65399CED62A12DEDA7A6DA15A9"
+        "OwnerKey" = "8:_E1AB81977493F6430CAAB9EC62D9E7CC"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_C89D2E65399CED62A12DEDA7A6DA15A9"
+        "OwnerKey" = "8:_0C40213CD4AEA7228BCFE5CF63DE26DF"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_C89D2E65399CED62A12DEDA7A6DA15A9"
+        "OwnerKey" = "8:_399DA9F909D9C4D076AE3B0D722060B4"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_CA4B77C6E8F34E66A4141866F19DCF93"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_CBA29FB71D924026A356D2B5815DEE73"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_D21BDC9888B74513958CEFA91DC2AE85"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_D39ACAA10F304649BDCD732F6FFBDFD9"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_D66A178960AD4C75867A54A2D9263A40"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_E1AB81977493F6430CAAB9EC62D9E7CC"
+        "OwnerKey" = "8:_0C40213CD4AEA7228BCFE5CF63DE26DF"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_E1AB81977493F6430CAAB9EC62D9E7CC"
+        "OwnerKey" = "8:_5A23394E9E8C42468666EFEFA9F0B926"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_E1AB81977493F6430CAAB9EC62D9E7CC"
+        "OwnerKey" = "8:_72D7A09B6C3109B5DE2858669B824CE3"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_E1B89FECE0AC4ABFAB1E3888F1EF4B65"
+        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -194,14 +392,26 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_FFD1F73F45FFD3AF20BCE71066544FAC"
-        "OwnerKey" = "8:_C39E361BF92CBCE24B36AD62304A3C91"
+        "MsmKey" = "8:_EA93DDB7599840279B796879D3A79642"
+        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_FFD1F73F45FFD3AF20BCE71066544FAC"
-        "OwnerKey" = "8:_5A23394E9E8C42468666EFEFA9F0B926"
+        "MsmKey" = "8:_F00B3E97EB9D49F7AC5943E9657FF4D1"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_F33910CD2E784AEC9569BE59EDE7EF24"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_FB7B3B8DCFDC4D10A49DA99F587F593E"
+        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -236,22 +446,12 @@
     {
         "File"
         {
-            "{E4F2F62A-3940-4BF5-A031-F7FA98CAAFFA}:_03DAA066E67D6BEC84EB94EF0A1FD2D1"
+            "{BA458234-9B71-4F46-8107-E91156377184}:_08DE58043620497FBDA1CCC442610CC3"
             {
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=969db8053d3322ac"
-                "ScatterAssemblies"
-                {
-                    "_03DAA066E67D6BEC84EB94EF0A1FD2D1"
-                    {
-                    "Name" = "8:System.Drawing.dll"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:System.Drawing.dll"
-            "TargetName" = "8:"
+            "SourcePath" = "8:..\\local\\eng\\North.wav"
+            "TargetName" = "8:North.wav"
             "Tag" = "8:"
-            "Folder" = "8:_A279FA883AA84AE392BA265B237C07ED"
+            "Folder" = "8:_1B99BCB9ECF347FAA1A9E11716EB71AC"
             "Condition" = "8:"
             "Vital" = "11:TRUE"
             "ReadOnly" = "11:FALSE"
@@ -260,17 +460,35 @@
             "Permanent" = "11:FALSE"
             "SharedLegacy" = "11:FALSE"
             "Register" = "3:0"
-            "Exclude" = "11:TRUE"
-            "IsDependency" = "11:TRUE"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{E4F2F62A-3940-4BF5-A031-F7FA98CAAFFA}:_209AC30D2AC5F0B530D08DCBA8086286"
+            "{BA458234-9B71-4F46-8107-E91156377184}:_096B231DBCEF4893B8D4081798F8AC4F"
+            {
+            "SourcePath" = "8:..\\local\\eng\\Seq_toRoute.txt"
+            "TargetName" = "8:Seq_toRoute.txt"
+            "Tag" = "8:"
+            "Folder" = "8:_1B99BCB9ECF347FAA1A9E11716EB71AC"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{E4F2F62A-3940-4BF5-A031-F7FA98CAAFFA}:_0C40213CD4AEA7228BCFE5CF63DE26DF"
             {
             "AssemblyIsInGAC" = "11:FALSE"
             "AssemblyAsmDisplayName" = "8:System.Data, Version=2.0.0.0, Culture=neutral, PublicKeyToken=969db8053d3322ac"
                 "ScatterAssemblies"
                 {
-                    "_209AC30D2AC5F0B530D08DCBA8086286"
+                    "_0C40213CD4AEA7228BCFE5CF63DE26DF"
                     {
                     "Name" = "8:System.Data.dll"
                     "Attributes" = "3:512"
@@ -292,19 +510,37 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{E4F2F62A-3940-4BF5-A031-F7FA98CAAFFA}:_225619B66DF91979917B4128DC244D98"
+            "{BA458234-9B71-4F46-8107-E91156377184}:_11655F36D9884509BFF4610FD33A122E"
+            {
+            "SourcePath" = "8:..\\local\\eng\\DriveToRoute.wav"
+            "TargetName" = "8:DriveToRoute.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_1B99BCB9ECF347FAA1A9E11716EB71AC"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{E4F2F62A-3940-4BF5-A031-F7FA98CAAFFA}:_2CAC20C7338913D7B15F139F1F4655BE"
             {
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=969db8053d3322ac"
+            "AssemblyAsmDisplayName" = "8:System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=969db8053d3322ac"
                 "ScatterAssemblies"
                 {
-                    "_225619B66DF91979917B4128DC244D98"
+                    "_2CAC20C7338913D7B15F139F1F4655BE"
                     {
-                    "Name" = "8:System.dll"
+                    "Name" = "8:System.Drawing.dll"
                     "Attributes" = "3:512"
                     }
                 }
-            "SourcePath" = "8:System.dll"
+            "SourcePath" = "8:System.Drawing.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_A279FA883AA84AE392BA265B237C07ED"
@@ -320,19 +556,73 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{E4F2F62A-3940-4BF5-A031-F7FA98CAAFFA}:_47390170D1B33F7E542AD43AF7D4C4FD"
+            "{BA458234-9B71-4F46-8107-E91156377184}:_2D2126B114BC46A0B0FDF1CE6755E15D"
+            {
+            "SourcePath" = "8:..\\local\\eng\\Onehundred.wav"
+            "TargetName" = "8:Onehundred.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_1B99BCB9ECF347FAA1A9E11716EB71AC"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_37F74611853F46049829CE86DE2854AF"
+            {
+            "SourcePath" = "8:..\\local\\eng\\Twelve.wav"
+            "TargetName" = "8:Twelve.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_1B99BCB9ECF347FAA1A9E11716EB71AC"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_37FA44F04F9C4643AC6A458B33F2BCFC"
+            {
+            "SourcePath" = "8:..\\local\\eng\\Seq_test.txt"
+            "TargetName" = "8:Seq_test.txt"
+            "Tag" = "8:"
+            "Folder" = "8:_1B99BCB9ECF347FAA1A9E11716EB71AC"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{E4F2F62A-3940-4BF5-A031-F7FA98CAAFFA}:_399DA9F909D9C4D076AE3B0D722060B4"
             {
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:System.Web.Services, Version=2.0.0.0, Culture=neutral, PublicKeyToken=969db8053d3322ac"
+            "AssemblyAsmDisplayName" = "8:System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=969db8053d3322ac"
                 "ScatterAssemblies"
                 {
-                    "_47390170D1B33F7E542AD43AF7D4C4FD"
+                    "_399DA9F909D9C4D076AE3B0D722060B4"
                     {
-                    "Name" = "8:System.Web.Services.dll"
+                    "Name" = "8:System.Windows.Forms.dll"
                     "Attributes" = "3:512"
                     }
                 }
-            "SourcePath" = "8:System.Web.Services.dll"
+            "SourcePath" = "8:System.Windows.Forms.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_A279FA883AA84AE392BA265B237C07ED"
@@ -344,16 +634,52 @@
             "Permanent" = "11:FALSE"
             "SharedLegacy" = "11:FALSE"
             "Register" = "3:0"
-            "Exclude" = "11:FALSE"
+            "Exclude" = "11:TRUE"
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{BA458234-9B71-4F46-8107-E91156377184}:_4A2E6B7D27924D0AB73033BEC586760D"
+            "{BA458234-9B71-4F46-8107-E91156377184}:_3C68ABC7882945D788DC661C1B358AB6"
             {
-            "SourcePath" = "8:..\\osm_server.txt"
-            "TargetName" = "8:osm_server.txt"
+            "SourcePath" = "8:..\\local\\eng\\East.wav"
+            "TargetName" = "8:East.wav"
             "Tag" = "8:"
-            "Folder" = "8:_A279FA883AA84AE392BA265B237C07ED"
+            "Folder" = "8:_1B99BCB9ECF347FAA1A9E11716EB71AC"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_486C51512A914094A15056BFAEE5AB1E"
+            {
+            "SourcePath" = "8:..\\local\\eng\\InDirection.wav"
+            "TargetName" = "8:InDirection.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_1B99BCB9ECF347FAA1A9E11716EB71AC"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_4CFB73FA2A3E4C9A913D185B807A1C4A"
+            {
+            "SourcePath" = "8:..\\local\\eng\\Kilometer.wav"
+            "TargetName" = "8:Kilometer.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_1B99BCB9ECF347FAA1A9E11716EB71AC"
             "Condition" = "8:"
             "Vital" = "11:TRUE"
             "ReadOnly" = "11:FALSE"
@@ -402,6 +728,178 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_6100C4FF345D499E8EE775A07B331FD8"
+            {
+            "SourcePath" = "8:..\\local\\eng\\Sharp.wav"
+            "TargetName" = "8:Sharp.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_1B99BCB9ECF347FAA1A9E11716EB71AC"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_630B0DFA643447BD8D40FD26837C5BC7"
+            {
+            "SourcePath" = "8:..\\local\\eng\\Ten.wav"
+            "TargetName" = "8:Ten.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_1B99BCB9ECF347FAA1A9E11716EB71AC"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_6D5A67DEF68442B28670C75936958251"
+            {
+            "SourcePath" = "8:..\\local\\eng\\Right.wav"
+            "TargetName" = "8:Right.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_1B99BCB9ECF347FAA1A9E11716EB71AC"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_70028366BFC54F2DB34EBADF9641AE69"
+            {
+            "SourcePath" = "8:..\\local\\eng\\Twohundred.wav"
+            "TargetName" = "8:Twohundred.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_1B99BCB9ECF347FAA1A9E11716EB71AC"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{E4F2F62A-3940-4BF5-A031-F7FA98CAAFFA}:_72D7A09B6C3109B5DE2858669B824CE3"
+            {
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:System.Web.Services, Version=2.0.0.0, Culture=neutral, PublicKeyToken=969db8053d3322ac"
+                "ScatterAssemblies"
+                {
+                    "_72D7A09B6C3109B5DE2858669B824CE3"
+                    {
+                    "Name" = "8:System.Web.Services.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:System.Web.Services.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_A279FA883AA84AE392BA265B237C07ED"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_74E6E8B975A94ADBB7A2403357E4D308"
+            {
+            "SourcePath" = "8:..\\local\\eng\\YouHaveReachedYourDestination.wav"
+            "TargetName" = "8:YouHaveReachedYourDestination.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_1B99BCB9ECF347FAA1A9E11716EB71AC"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_75F2E36B0AEC43EA9685C9AAC6099EE7"
+            {
+            "SourcePath" = "8:..\\local\\eng\\Half.wav"
+            "TargetName" = "8:Half.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_1B99BCB9ECF347FAA1A9E11716EB71AC"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_77BDAC52BF5B4FF1A79F660C32DE2308"
+            {
+            "SourcePath" = "8:..\\local\\eng\\Kilometers.wav"
+            "TargetName" = "8:Kilometers.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_1B99BCB9ECF347FAA1A9E11716EB71AC"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_881DB0E20BC44ABBB37CD4A4BA7217FB"
+            {
+            "SourcePath" = "8:..\\local\\eng\\Seq_destination.txt"
+            "TargetName" = "8:Seq_destination.txt"
+            "Tag" = "8:"
+            "Folder" = "8:_1B99BCB9ECF347FAA1A9E11716EB71AC"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{BA458234-9B71-4F46-8107-E91156377184}:_8A49924875B0496FB13E72E3C2324A39"
             {
             "SourcePath" = "8:..\\GccGPS\\Pocket PC 2003 (ARMV4)\\Release\\GccGPS.dll"
@@ -420,40 +918,12 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{E4F2F62A-3940-4BF5-A031-F7FA98CAAFFA}:_A17E171C0F4EF981E891FB4B7CBA55D3"
+            "{BA458234-9B71-4F46-8107-E91156377184}:_8A610D5C9FD14BDDB3A0D75FA8D5F924"
             {
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:System.Xml, Version=2.0.0.0, Culture=neutral, PublicKeyToken=969db8053d3322ac"
-                "ScatterAssemblies"
-                {
-                    "_A17E171C0F4EF981E891FB4B7CBA55D3"
-                    {
-                    "Name" = "8:System.Xml.dll"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:System.Xml.dll"
-            "TargetName" = "8:"
+            "SourcePath" = "8:..\\local\\eng\\Eight.wav"
+            "TargetName" = "8:Eight.wav"
             "Tag" = "8:"
-            "Folder" = "8:_A279FA883AA84AE392BA265B237C07ED"
-            "Condition" = "8:"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "Register" = "3:0"
-            "Exclude" = "11:TRUE"
-            "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
-            "{BA458234-9B71-4F46-8107-E91156377184}:_BA97D13CFB8E4A669DC179017970E5FE"
-            {
-            "SourcePath" = "8:..\\GpsCycleComputer.xml"
-            "TargetName" = "8:GpsCycleComputer.xml"
-            "Tag" = "8:"
-            "Folder" = "8:_610BE3EDD48941C9B4C6F6C78BF1A60C"
+            "Folder" = "8:_1B99BCB9ECF347FAA1A9E11716EB71AC"
             "Condition" = "8:"
             "Vital" = "11:TRUE"
             "ReadOnly" = "11:FALSE"
@@ -466,22 +936,12 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{E4F2F62A-3940-4BF5-A031-F7FA98CAAFFA}:_C32E5EB928D8467EA075E9228DE04169"
+            "{BA458234-9B71-4F46-8107-E91156377184}:_9AC6F5707D094190A860700EE27DC470"
             {
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=969db8053d3322ac"
-                "ScatterAssemblies"
-                {
-                    "_C32E5EB928D8467EA075E9228DE04169"
-                    {
-                    "Name" = "8:mscorlib.dll"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:mscorlib.dll"
-            "TargetName" = "8:"
+            "SourcePath" = "8:..\\local\\eng\\Pause.wav"
+            "TargetName" = "8:Pause.wav"
             "Tag" = "8:"
-            "Folder" = "8:_A279FA883AA84AE392BA265B237C07ED"
+            "Folder" = "8:_1B99BCB9ECF347FAA1A9E11716EB71AC"
             "Condition" = "8:"
             "Vital" = "11:TRUE"
             "ReadOnly" = "11:FALSE"
@@ -490,17 +950,53 @@
             "Permanent" = "11:FALSE"
             "SharedLegacy" = "11:FALSE"
             "Register" = "3:0"
-            "Exclude" = "11:TRUE"
-            "IsDependency" = "11:TRUE"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{E4F2F62A-3940-4BF5-A031-F7FA98CAAFFA}:_C39E361BF92CBCE24B36AD62304A3C91"
+            "{BA458234-9B71-4F46-8107-E91156377184}:_9D4791FFE55945FE85D2849170450FA4"
+            {
+            "SourcePath" = "8:..\\local\\eng\\In.wav"
+            "TargetName" = "8:In.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_1B99BCB9ECF347FAA1A9E11716EB71AC"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_9E069B5F6F664C849FFD5470CDE8B8BF"
+            {
+            "SourcePath" = "8:..\\local\\eng\\Fivehundred.wav"
+            "TargetName" = "8:Fivehundred.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_1B99BCB9ECF347FAA1A9E11716EB71AC"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{E4F2F62A-3940-4BF5-A031-F7FA98CAAFFA}:_A1EE15CED6D1DD4275EBAD27DF673081"
             {
             "AssemblyIsInGAC" = "11:FALSE"
             "AssemblyAsmDisplayName" = "8:Microsoft.WindowsCE.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=969db8053d3322ac"
                 "ScatterAssemblies"
                 {
-                    "_C39E361BF92CBCE24B36AD62304A3C91"
+                    "_A1EE15CED6D1DD4275EBAD27DF673081"
                     {
                     "Name" = "8:Microsoft.WindowsCE.Forms.dll"
                     "Attributes" = "3:512"
@@ -522,6 +1018,306 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_A3FAC672EAF642DB93321453EE7BF492"
+            {
+            "SourcePath" = "8:..\\local\\eng\\Now.wav"
+            "TargetName" = "8:Now.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_1B99BCB9ECF347FAA1A9E11716EB71AC"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_AE6CB0FC1FCB44289B261F906B305DBC"
+            {
+            "SourcePath" = "8:..\\local\\eng\\Turn.wav"
+            "TargetName" = "8:Turn.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_1B99BCB9ECF347FAA1A9E11716EB71AC"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_BA97D13CFB8E4A669DC179017970E5FE"
+            {
+            "SourcePath" = "8:..\\GpsCycleComputer.xml"
+            "TargetName" = "8:GpsCycleComputer.xml"
+            "Tag" = "8:"
+            "Folder" = "8:_610BE3EDD48941C9B4C6F6C78BF1A60C"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{E4F2F62A-3940-4BF5-A031-F7FA98CAAFFA}:_BE71861841DF4C57214D514EB899890E"
+            {
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=969db8053d3322ac"
+                "ScatterAssemblies"
+                {
+                    "_BE71861841DF4C57214D514EB899890E"
+                    {
+                    "Name" = "8:mscorlib.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:mscorlib.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_A279FA883AA84AE392BA265B237C07ED"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:TRUE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_BF2BD99A27484E50B4C8C81FD986A48F"
+            {
+            "SourcePath" = "8:..\\local\\eng\\West.wav"
+            "TargetName" = "8:West.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_1B99BCB9ECF347FAA1A9E11716EB71AC"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_C0181ADBF84C48DDB866C175B6D7C647"
+            {
+            "SourcePath" = "8:..\\local\\eng\\South.wav"
+            "TargetName" = "8:South.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_1B99BCB9ECF347FAA1A9E11716EB71AC"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_C79E8C758C5C48BBB2F8E8F873463414"
+            {
+            "SourcePath" = "8:..\\local\\eng\\Meters.wav"
+            "TargetName" = "8:Meters.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_1B99BCB9ECF347FAA1A9E11716EB71AC"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{E4F2F62A-3940-4BF5-A031-F7FA98CAAFFA}:_C89D2E65399CED62A12DEDA7A6DA15A9"
+            {
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=969db8053d3322ac"
+                "ScatterAssemblies"
+                {
+                    "_C89D2E65399CED62A12DEDA7A6DA15A9"
+                    {
+                    "Name" = "8:System.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:System.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_A279FA883AA84AE392BA265B237C07ED"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:TRUE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_CA4B77C6E8F34E66A4141866F19DCF93"
+            {
+            "SourcePath" = "8:..\\local\\eng\\Left.wav"
+            "TargetName" = "8:Left.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_1B99BCB9ECF347FAA1A9E11716EB71AC"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_CBA29FB71D924026A356D2B5815DEE73"
+            {
+            "SourcePath" = "8:..\\local\\eng\\Six.wav"
+            "TargetName" = "8:Six.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_1B99BCB9ECF347FAA1A9E11716EB71AC"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_D21BDC9888B74513958CEFA91DC2AE85"
+            {
+            "SourcePath" = "8:..\\tracks_folder.txt"
+            "TargetName" = "8:tracks_folder.txt"
+            "Tag" = "8:"
+            "Folder" = "8:_639C8E7F986A4CC7B046EEE1B6518FDC"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_D39ACAA10F304649BDCD732F6FFBDFD9"
+            {
+            "SourcePath" = "8:..\\local\\Readme.txt"
+            "TargetName" = "8:Readme.txt"
+            "Tag" = "8:"
+            "Folder" = "8:_292CBA5D57DA4CBB9464E9DDF3FA55BF"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_D66A178960AD4C75867A54A2D9263A40"
+            {
+            "SourcePath" = "8:..\\local\\eng\\Seq_turn.txt"
+            "TargetName" = "8:Seq_turn.txt"
+            "Tag" = "8:"
+            "Folder" = "8:_1B99BCB9ECF347FAA1A9E11716EB71AC"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{E4F2F62A-3940-4BF5-A031-F7FA98CAAFFA}:_E1AB81977493F6430CAAB9EC62D9E7CC"
+            {
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:System.Xml, Version=2.0.0.0, Culture=neutral, PublicKeyToken=969db8053d3322ac"
+                "ScatterAssemblies"
+                {
+                    "_E1AB81977493F6430CAAB9EC62D9E7CC"
+                    {
+                    "Name" = "8:System.Xml.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:System.Xml.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_A279FA883AA84AE392BA265B237C07ED"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:TRUE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_E1B89FECE0AC4ABFAB1E3888F1EF4B65"
+            {
+            "SourcePath" = "8:..\\local\\eng\\One.wav"
+            "TargetName" = "8:One.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_1B99BCB9ECF347FAA1A9E11716EB71AC"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{BA458234-9B71-4F46-8107-E91156377184}:_E63E63F06B9C41DD85E2BD4E9F7E1640"
             {
             "SourcePath" = "8:..\\Readme.htm"
@@ -540,22 +1336,12 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{E4F2F62A-3940-4BF5-A031-F7FA98CAAFFA}:_FFD1F73F45FFD3AF20BCE71066544FAC"
+            "{BA458234-9B71-4F46-8107-E91156377184}:_EA93DDB7599840279B796879D3A79642"
             {
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=969db8053d3322ac"
-                "ScatterAssemblies"
-                {
-                    "_FFD1F73F45FFD3AF20BCE71066544FAC"
-                    {
-                    "Name" = "8:System.Windows.Forms.dll"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:System.Windows.Forms.dll"
-            "TargetName" = "8:"
+            "SourcePath" = "8:..\\local\\eng\\Four.wav"
+            "TargetName" = "8:Four.wav"
             "Tag" = "8:"
-            "Folder" = "8:_A279FA883AA84AE392BA265B237C07ED"
+            "Folder" = "8:_1B99BCB9ECF347FAA1A9E11716EB71AC"
             "Condition" = "8:"
             "Vital" = "11:TRUE"
             "ReadOnly" = "11:FALSE"
@@ -564,8 +1350,62 @@
             "Permanent" = "11:FALSE"
             "SharedLegacy" = "11:FALSE"
             "Register" = "3:0"
-            "Exclude" = "11:TRUE"
-            "IsDependency" = "11:TRUE"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_F00B3E97EB9D49F7AC5943E9657FF4D1"
+            {
+            "SourcePath" = "8:..\\local\\eng\\Many.wav"
+            "TargetName" = "8:Many.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_1B99BCB9ECF347FAA1A9E11716EB71AC"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_F33910CD2E784AEC9569BE59EDE7EF24"
+            {
+            "SourcePath" = "8:..\\local\\eng\\OClock.wav"
+            "TargetName" = "8:OClock.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_1B99BCB9ECF347FAA1A9E11716EB71AC"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_FB7B3B8DCFDC4D10A49DA99F587F593E"
+            {
+            "SourcePath" = "8:..\\local\\eng\\Two.wav"
+            "TargetName" = "8:Two.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_1B99BCB9ECF347FAA1A9E11716EB71AC"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
         }
@@ -597,6 +1437,42 @@
             "Property" = "8:%InstallDir%"
                 "Folders"
                 {
+                    "{5943FCFD-5B64-4EE4-96C9-4618EC95352A}:_292CBA5D57DA4CBB9464E9DDF3FA55BF"
+                    {
+                    "Name" = "8:local"
+                    "Condition" = "8:"
+                    "Property" = "8:_C0CC6AB7F9164FE387A3DB370CAF3B09"
+                        "Folders"
+                        {
+                            "{5943FCFD-5B64-4EE4-96C9-4618EC95352A}:_1B99BCB9ECF347FAA1A9E11716EB71AC"
+                            {
+                            "Name" = "8:eng"
+                            "Condition" = "8:"
+                            "Property" = "8:_E31AB7B34A2C48749D7E1C870BF6A6BB"
+                                "Folders"
+                                {
+                                }
+                            }
+                            "{5943FCFD-5B64-4EE4-96C9-4618EC95352A}:_FABD894C012949C6AA6E3DAA983A65CB"
+                            {
+                            "Name" = "8:ger"
+                            "Condition" = "8:"
+                            "Property" = "8:_0CE2E8142B4B4533806D60E0A18D1B8E"
+                                "Folders"
+                                {
+                                }
+                            }
+                        }
+                    }
+                    "{5943FCFD-5B64-4EE4-96C9-4618EC95352A}:_639C8E7F986A4CC7B046EEE1B6518FDC"
+                    {
+                    "Name" = "8:tracks"
+                    "Condition" = "8:"
+                    "Property" = "8:_D751CA35E9684019B5DD446500AC7348"
+                        "Folders"
+                        {
+                        }
+                    }
                     "{5943FCFD-5B64-4EE4-96C9-4618EC95352A}:_CAEC5726354749F1AEAFE54D9D4296F0"
                     {
                     "Name" = "8:maps"
@@ -633,7 +1509,7 @@
         "ProductName" = "8:GpsCycleComputer"
         "Manufacturer" = "8:AndyZap"
         "OSVersionMin" = "8:4.0"
-        "OSVersionMax" = "8:5.99"
+        "OSVersionMax" = "8:6.99"
         "NoUninstall" = "11:FALSE"
         "Compress" = "11:FALSE"
         "CESetupDLL" = "8:"

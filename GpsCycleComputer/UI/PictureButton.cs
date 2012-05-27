@@ -43,6 +43,9 @@ namespace GpsCycleComputer
             base.OnMouseUp(e);
         }
 
+        protected override void OnPaintBackground(PaintEventArgs e)
+        {}      //to avoid flicker (textonly button is alway drawn over a clear background)
+
         // Override the OnPaint method to draw the background image and the text.
         protected override void OnPaint(PaintEventArgs e)
         {

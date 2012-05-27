@@ -48,7 +48,7 @@ namespace GpsCycleComputer
 
                                                   new MButton ("edit.jpg", "File/Export"),
                                                   new MButton ("edit.jpg", "Track2Follow"),
-                                                  new MButton ("cancel.jpg", "ClearTrack"),
+                                                  new MButton ("restore.jpg", "Restore"),
 
                                                   new MButton ("exit.jpg", "Exit"),
                                                   new MButton ("navigate.jpg", "Navigate"),
@@ -58,10 +58,11 @@ namespace GpsCycleComputer
                                                   new MButton ("recall.jpg", "Recall 2"),
                                                   new MButton ("recall.jpg", "Recall 3"),
 
-                                                  new MButton ("bklight.jpg", "BKLight"),
+                                                  new MButton ("cancel.jpg", "ClearTrack"),
                                                   new MButton ("checkpoint.jpg", "Input LatLon"),
                                                   new MButton ("continue.jpg", "Continue", false),
                                                   
+                                                  new MButton ("bklight.jpg", "BKLight"),
                                                   new MButton ("help.jpg", "Help"),
                                                   new MButton ("help.jpg", "About"),
                                                   //end of menu page
@@ -89,6 +90,9 @@ namespace GpsCycleComputer
                                                   new MButton ("menu.jpg", "Menu"),
                                                   new MButton ("up.jpg", ""),
                                                   new MButton ("down.jpg", ""),
+
+                                                  new MButton ("graph.jpg", "Heart Rate"),
+
                                                   new MButton ("blank.jpg", "")
                                                                        
                                               };
@@ -105,7 +109,7 @@ namespace GpsCycleComputer
 
             load_gcc,
             load_2follow,
-            load_2clear,
+            restore,
 
             exit,
             navigate,
@@ -115,12 +119,14 @@ namespace GpsCycleComputer
             recall2,
             recall3,
 
-            backlight_off,
+            clearTrack,
             inputLatLon,
             continu,            //'continue' is reserved for c instruction 
 
+            backlight_off,
             help,
             about,
+
             endOfMenuPage = about,
 
             //separate buttons on bottom
@@ -147,6 +153,8 @@ namespace GpsCycleComputer
             mPageUp,
             mPageDown,
 
+            graph_heartRate,
+
             nothing
         }
 
@@ -168,7 +176,7 @@ namespace GpsCycleComputer
 
         public bool DownPossible
         {
-            get { return so <= (int)BFkt.endOfMenuPage - 9; }
+            get { return so <= (int)BFkt.endOfMenuPage - (Size.Height / GridHeigh) * 3; }
         }
         public bool UpPossible
         {
@@ -241,7 +249,7 @@ namespace GpsCycleComputer
                     mouseDownY += GridHeigh;
                     mouseDrag -= GridHeigh;
                 }
-                if (!UpPossible)
+                if (!UpPossible && mouseDrag > 0)
                     mouseDrag = 0;
             }
             if (e.Y < mouseDownY)
@@ -253,7 +261,7 @@ namespace GpsCycleComputer
                     mouseDownY -= GridHeigh;
                     mouseDrag += GridHeigh;
                 }
-                if (!DownPossible)
+                if (!DownPossible && mouseDrag < 0)
                     mouseDrag = 0;
             }
             if (Math.Abs(e.Y - mouseDownY) > GridHeigh/8)
@@ -262,37 +270,41 @@ namespace GpsCycleComputer
             base.OnMouseMove(e);
         }
 
+        protected override void OnPaintBackground(PaintEventArgs e)
+        {}
         protected override void OnPaint(PaintEventArgs e)
         {
             bWidth = this.Width / 3;
             bHeigh = bWidth / 2;
             GridHeigh = bHeigh * 3 / 2;
 
-            e.Graphics.Clear(this.BackColor);
+            mBAr[(int)BFkt.gps_toggle] = Form1.gps.OpenedOrSuspended ? mBGpsOn : mBGpsOff;
+            mBAr[(int)BFkt.clearTrack].text = (form1ref.Plot2ndCount == 0) ? "Clear Track" : "Clear2Follow";
+            SolidBrush br = new SolidBrush(this.ForeColor);
+            Bitmap temp = new Bitmap(this.Width, this.Height);
+            Graphics graphics = Graphics.FromImage(temp);
+            graphics.Clear(this.BackColor);
             if (!Form1.isLandscape)
             {
                 Rectangle cliprec = e.ClipRectangle;
-                cliprec.Height = cliprec.Height * 31 / 32;      //create a black separator between mPage buttons and standard buttons on bottom
-                e.Graphics.Clip = new System.Drawing.Region(cliprec);
+                cliprec.Height = cliprec.Height * 63 / 64;      //create a black separator between mPage buttons and standard buttons on bottom
+                graphics.Clip = new System.Drawing.Region(cliprec);
             }
-
-            if (Form1.gps.OpenedOrSuspended)
-                mBAr[(int)BFkt.gps_toggle] = mBGpsOn;
-            else
-                mBAr[(int)BFkt.gps_toggle] = mBGpsOff;
-            SolidBrush br = new SolidBrush(this.ForeColor);
             for (int i = so; i <= (int)BFkt.endOfMenuPage; i++)
             {
                 int ix = (i - so) % 3; int iy = (i - so) / 3;
-                if ((2 * iy + 1) * GridHeigh > 2 * Size.Height)            //show minimum half
-                    break;                              // not enough room for a complete button
+                if ((2 * iy + 1) * GridHeigh > 2 * (Size.Height - mouseDrag))       //show minimum half
+                    break;                                                          //not enough room for a complete button
                 Rectangle dest_rect = new Rectangle(bWidth * ix, GridHeigh * iy + mouseDrag, bWidth, bHeigh);
                 Bitmap bm = (i == i_p) ? mBAr[i].icon_p : mBAr[i].icon;
-                e.Graphics.DrawImage(bm, dest_rect, new Rectangle(0, 0, mBAr[i].icon.Width, mBAr[i].icon.Height), GraphicsUnit.Pixel);
-                SizeF Tsize = e.Graphics.MeasureString(mBAr[i].text, this.Font);
-                e.Graphics.DrawString(mBAr[i].text, this.Font, br, bWidth * ix + (bWidth - Tsize.Width) / 2, GridHeigh * iy + bHeigh + mouseDrag);
+                graphics.DrawImage(bm, dest_rect, new Rectangle(0, 0, mBAr[i].icon.Width, mBAr[i].icon.Height), GraphicsUnit.Pixel);
+                SizeF Tsize = graphics.MeasureString(mBAr[i].text, this.Font);
+                graphics.DrawString(mBAr[i].text, this.Font, br, bWidth * ix + (bWidth - Tsize.Width) / 2, GridHeigh * iy + bHeigh + mouseDrag);
                 lastDisplayed = i;
             }
+
+            e.Graphics.DrawImage(temp, 0, 0);
+            temp.Dispose();
             base.OnPaint(e);
         }
     }

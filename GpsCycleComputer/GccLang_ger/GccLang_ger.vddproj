@@ -1,0 +1,955 @@
+"DeployProject"
+{
+"VSVersion" = "3:701"
+"ProjectType" = "8:{AB322303-2255-48EF-A496-5904EB18DA55}"
+"IsWebType" = "8:FALSE"
+"ProjectName" = "8:GccLang_ger"
+"LanguageId" = "3:1033"
+"CodePage" = "3:1252"
+"SccProjectName" = "8:Svn"
+"SccLocalPath" = "8:Svn"
+"SccAuxPath" = "8:Svn"
+"SccProvider" = "8:SubversionScc"
+    "Hierarchy"
+    {
+        "Entry"
+        {
+        "MsmKey" = "8:_00C4CB31D91A412F98038756CFFB340D"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_057AAC9C715F4929B23CA9095936BF8B"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_09173217C11242649431130696D0101F"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_0D2C4867139042BF8332B5FDD495BF8C"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_0F016145DA804D839FD07571725F0BF1"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_1C7A4F8F9E7C48C5B50FDA684DF15105"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_1E5DDE06D2FF4706A6F83ACA25249248"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_298AA9F534DA49CEAFF6EB3E5A48D6BA"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_3ED8F0DE0D7B4C2E97E6C2C8DB3D5695"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_3FACEF9743AF4044827D54741B5356B7"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_4532A9608832409087526170AEB31CEC"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_45B6E8E03ACF468097CD3EFF4A8FF716"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_47E7E43F24C340189E46ADB653CA724F"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_4E0EAD563DF74115B0A375AB63852621"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_50CB65EE3A974BEC866180F65DB29F2C"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_51990ED9F6DD4562847D9C4C59F02EDD"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_52E232B835F4469195E9F561EFD2221D"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_72A6985495D34CFE9CEEFEBAD7C9C915"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_7F47E4593778424DBE4C7E20B08B9A98"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_8AEE4FA5B9664A8D8A914F88AACF35CD"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_95599BDF85A04DD383102D2F0F9C577F"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_9BC20E31C17849F690327749E331EF2F"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_B503532BDA374B15AA9BBFB830E5566D"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_B83E8138516F499C81ECAA08D26A47C7"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_B98CCAE381464A86BDA9E3879E55CB59"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_C04B711D25874ABE8DF043A13012AB07"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_C177A0B481D84873BDD84AEC40EFB957"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_C8C4C0B4C7054D5CAFDAE03FB0B6EC8B"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_CB3CB01763494ED2855CD5BA03E259ED"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_CE41B4BADD204499B23FBC82E612FC88"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_D406FCD6CBBE43FDAF9EE3D9D8C4B1EE"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_D7094E78C17147C49E6EF0A06AE1E766"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_DD9945A568A04DFCB88EBCFC94B98668"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_F27752CA28034A28BA16DF57E5D573E5"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+    }
+    "Configurations"
+    {
+        "Debug"
+        {
+        "DisplayName" = "8:Debug"
+        "IsDebugOnly" = "11:TRUE"
+        "IsReleaseOnly" = "11:FALSE"
+        "OutputFilename" = "8:Debug\\GccLang_ger.cab"
+        "PackageFileSize" = "3:-2147483648"
+        "CabType" = "3:1"
+        "SignOutput" = "11:FALSE"
+        "CertificateHash" = "8:"
+        "TimeStampServer" = "8:"
+        }
+        "Release"
+        {
+        "DisplayName" = "8:Release"
+        "IsDebugOnly" = "11:FALSE"
+        "IsReleaseOnly" = "11:TRUE"
+        "OutputFilename" = "8:Release\\GccLang_ger.cab"
+        "PackageFileSize" = "3:-2147483648"
+        "CabType" = "3:1"
+        "SignOutput" = "11:FALSE"
+        "CertificateHash" = "8:"
+        "TimeStampServer" = "8:"
+        }
+    }
+    "Deployable"
+    {
+        "File"
+        {
+            "{BA458234-9B71-4F46-8107-E91156377184}:_00C4CB31D91A412F98038756CFFB340D"
+            {
+            "SourcePath" = "8:..\\local\\ger\\Eight.wav"
+            "TargetName" = "8:Eight.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_384AE00896AA4E2E8DD115E77E35F952"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_057AAC9C715F4929B23CA9095936BF8B"
+            {
+            "SourcePath" = "8:..\\local\\ger\\Twelve.wav"
+            "TargetName" = "8:Twelve.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_384AE00896AA4E2E8DD115E77E35F952"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_09173217C11242649431130696D0101F"
+            {
+            "SourcePath" = "8:..\\local\\ger\\Meters.wav"
+            "TargetName" = "8:Meters.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_384AE00896AA4E2E8DD115E77E35F952"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_0D2C4867139042BF8332B5FDD495BF8C"
+            {
+            "SourcePath" = "8:..\\local\\ger\\Turn.wav"
+            "TargetName" = "8:Turn.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_384AE00896AA4E2E8DD115E77E35F952"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_0F016145DA804D839FD07571725F0BF1"
+            {
+            "SourcePath" = "8:..\\local\\ger\\Fivehundred.wav"
+            "TargetName" = "8:Fivehundred.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_384AE00896AA4E2E8DD115E77E35F952"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_1C7A4F8F9E7C48C5B50FDA684DF15105"
+            {
+            "SourcePath" = "8:..\\local\\ger\\Six.wav"
+            "TargetName" = "8:Six.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_384AE00896AA4E2E8DD115E77E35F952"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_1E5DDE06D2FF4706A6F83ACA25249248"
+            {
+            "SourcePath" = "8:..\\local\\ger\\Half.wav"
+            "TargetName" = "8:Half.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_384AE00896AA4E2E8DD115E77E35F952"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_298AA9F534DA49CEAFF6EB3E5A48D6BA"
+            {
+            "SourcePath" = "8:..\\local\\ger\\Right.wav"
+            "TargetName" = "8:Right.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_384AE00896AA4E2E8DD115E77E35F952"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_3ED8F0DE0D7B4C2E97E6C2C8DB3D5695"
+            {
+            "SourcePath" = "8:..\\local\\ger\\Kilometer.wav"
+            "TargetName" = "8:Kilometer.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_384AE00896AA4E2E8DD115E77E35F952"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_3FACEF9743AF4044827D54741B5356B7"
+            {
+            "SourcePath" = "8:..\\local\\ger\\One.wav"
+            "TargetName" = "8:One.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_384AE00896AA4E2E8DD115E77E35F952"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_4532A9608832409087526170AEB31CEC"
+            {
+            "SourcePath" = "8:..\\local\\ger\\In.wav"
+            "TargetName" = "8:In.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_384AE00896AA4E2E8DD115E77E35F952"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_45B6E8E03ACF468097CD3EFF4A8FF716"
+            {
+            "SourcePath" = "8:..\\local\\ger\\Two.wav"
+            "TargetName" = "8:Two.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_384AE00896AA4E2E8DD115E77E35F952"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_47E7E43F24C340189E46ADB653CA724F"
+            {
+            "SourcePath" = "8:..\\local\\ger\\Left.wav"
+            "TargetName" = "8:Left.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_384AE00896AA4E2E8DD115E77E35F952"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_4E0EAD563DF74115B0A375AB63852621"
+            {
+            "SourcePath" = "8:..\\local\\ger\\East.wav"
+            "TargetName" = "8:East.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_384AE00896AA4E2E8DD115E77E35F952"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_50CB65EE3A974BEC866180F65DB29F2C"
+            {
+            "SourcePath" = "8:..\\local\\ger\\South.wav"
+            "TargetName" = "8:South.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_384AE00896AA4E2E8DD115E77E35F952"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_51990ED9F6DD4562847D9C4C59F02EDD"
+            {
+            "SourcePath" = "8:..\\local\\ger\\Twohundred.wav"
+            "TargetName" = "8:Twohundred.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_384AE00896AA4E2E8DD115E77E35F952"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_52E232B835F4469195E9F561EFD2221D"
+            {
+            "SourcePath" = "8:..\\local\\ger\\Seq_destination.txt"
+            "TargetName" = "8:Seq_destination.txt"
+            "Tag" = "8:"
+            "Folder" = "8:_384AE00896AA4E2E8DD115E77E35F952"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_72A6985495D34CFE9CEEFEBAD7C9C915"
+            {
+            "SourcePath" = "8:..\\local\\ger\\Kilometers.wav"
+            "TargetName" = "8:Kilometers.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_384AE00896AA4E2E8DD115E77E35F952"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_7F47E4593778424DBE4C7E20B08B9A98"
+            {
+            "SourcePath" = "8:..\\local\\ger\\Now.wav"
+            "TargetName" = "8:Now.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_384AE00896AA4E2E8DD115E77E35F952"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_8AEE4FA5B9664A8D8A914F88AACF35CD"
+            {
+            "SourcePath" = "8:..\\local\\ger\\Four.wav"
+            "TargetName" = "8:Four.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_384AE00896AA4E2E8DD115E77E35F952"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_95599BDF85A04DD383102D2F0F9C577F"
+            {
+            "SourcePath" = "8:..\\local\\ger\\InDirection.wav"
+            "TargetName" = "8:InDirection.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_384AE00896AA4E2E8DD115E77E35F952"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_9BC20E31C17849F690327749E331EF2F"
+            {
+            "SourcePath" = "8:..\\local\\ger\\Sharp.wav"
+            "TargetName" = "8:Sharp.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_384AE00896AA4E2E8DD115E77E35F952"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_B503532BDA374B15AA9BBFB830E5566D"
+            {
+            "SourcePath" = "8:..\\local\\ger\\YouHaveReachedYourDestination.wav"
+            "TargetName" = "8:YouHaveReachedYourDestination.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_384AE00896AA4E2E8DD115E77E35F952"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_B83E8138516F499C81ECAA08D26A47C7"
+            {
+            "SourcePath" = "8:..\\local\\ger\\North.wav"
+            "TargetName" = "8:North.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_384AE00896AA4E2E8DD115E77E35F952"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_B98CCAE381464A86BDA9E3879E55CB59"
+            {
+            "SourcePath" = "8:..\\local\\ger\\Seq_turn.txt"
+            "TargetName" = "8:Seq_turn.txt"
+            "Tag" = "8:"
+            "Folder" = "8:_384AE00896AA4E2E8DD115E77E35F952"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_C04B711D25874ABE8DF043A13012AB07"
+            {
+            "SourcePath" = "8:..\\local\\ger\\Onehundred.wav"
+            "TargetName" = "8:Onehundred.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_384AE00896AA4E2E8DD115E77E35F952"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_C177A0B481D84873BDD84AEC40EFB957"
+            {
+            "SourcePath" = "8:..\\local\\ger\\Seq_test.txt"
+            "TargetName" = "8:Seq_test.txt"
+            "Tag" = "8:"
+            "Folder" = "8:_384AE00896AA4E2E8DD115E77E35F952"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_C8C4C0B4C7054D5CAFDAE03FB0B6EC8B"
+            {
+            "SourcePath" = "8:..\\local\\ger\\West.wav"
+            "TargetName" = "8:West.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_384AE00896AA4E2E8DD115E77E35F952"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_CB3CB01763494ED2855CD5BA03E259ED"
+            {
+            "SourcePath" = "8:..\\local\\ger\\Many.wav"
+            "TargetName" = "8:Many.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_384AE00896AA4E2E8DD115E77E35F952"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_CE41B4BADD204499B23FBC82E612FC88"
+            {
+            "SourcePath" = "8:..\\local\\ger\\DriveToRoute.wav"
+            "TargetName" = "8:DriveToRoute.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_384AE00896AA4E2E8DD115E77E35F952"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_D406FCD6CBBE43FDAF9EE3D9D8C4B1EE"
+            {
+            "SourcePath" = "8:..\\local\\ger\\Seq_toRoute.txt"
+            "TargetName" = "8:Seq_toRoute.txt"
+            "Tag" = "8:"
+            "Folder" = "8:_384AE00896AA4E2E8DD115E77E35F952"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_D7094E78C17147C49E6EF0A06AE1E766"
+            {
+            "SourcePath" = "8:..\\local\\ger\\OClock.wav"
+            "TargetName" = "8:OClock.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_384AE00896AA4E2E8DD115E77E35F952"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_DD9945A568A04DFCB88EBCFC94B98668"
+            {
+            "SourcePath" = "8:..\\local\\ger\\Pause.wav"
+            "TargetName" = "8:Pause.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_384AE00896AA4E2E8DD115E77E35F952"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_F27752CA28034A28BA16DF57E5D573E5"
+            {
+            "SourcePath" = "8:..\\local\\ger\\Ten.wav"
+            "TargetName" = "8:Ten.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_384AE00896AA4E2E8DD115E77E35F952"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+        }
+        "Folder"
+        {
+            "{D5B00AC1-E6C3-4CC5-90FF-8E0F53D9E5E0}:_2D0349E3BC5D4EE8B2463321FF47EF56"
+            {
+            "DefaultLocation" = "8:%InstallDir%"
+            "Name" = "8:#1920"
+            "Condition" = "8:"
+            "Property" = "8:%InstallDir%"
+                "Folders"
+                {
+                    "{5943FCFD-5B64-4EE4-96C9-4618EC95352A}:_F188C91EE0154A97BA85B5DF8CECFC57"
+                    {
+                    "Name" = "8:local"
+                    "Condition" = "8:"
+                    "Property" = "8:_333B08BE075443FF82545587D4317DD2"
+                        "Folders"
+                        {
+                            "{5943FCFD-5B64-4EE4-96C9-4618EC95352A}:_384AE00896AA4E2E8DD115E77E35F952"
+                            {
+                            "Name" = "8:ger"
+                            "Condition" = "8:"
+                            "Property" = "8:_1B238DA5EB68476EB2984A40BA3A5355"
+                                "Folders"
+                                {
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            "{F6DFDB62-1DD1-498B-89B7-27BAC542EE5A}:_320F312203D441CD8C093365976ECFD3"
+            {
+            "Name" = "8:#1911"
+            "Condition" = "8:"
+            "Property" = "8:%CE1%"
+                "Folders"
+                {
+                }
+            }
+        }
+        "Product"
+        {
+        "Name" = "8:Microsoft Visual Studio"
+        "ProductName" = "8:GpsCycleComputer"
+        "Manufacturer" = "8:b"
+        "OSVersionMin" = "8:4.0"
+        "OSVersionMax" = "8:6.99"
+        "NoUninstall" = "11:FALSE"
+        "Compress" = "11:FALSE"
+        "CESetupDLL" = "8:"
+        }
+        "ProjectOutput"
+        {
+        }
+        "Registry"
+        {
+            "HKLM"
+            {
+                "Keys"
+                {
+                }
+            }
+            "HKCU"
+            {
+                "Keys"
+                {
+                }
+            }
+            "HKCR"
+            {
+                "Keys"
+                {
+                }
+            }
+            "HKU"
+            {
+                "Keys"
+                {
+                }
+            }
+            "HKPU"
+            {
+                "Keys"
+                {
+                }
+            }
+        }
+        "Shortcut"
+        {
+        }
+    }
+}

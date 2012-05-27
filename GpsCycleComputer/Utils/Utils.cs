@@ -7,6 +7,8 @@ using System.Windows.Forms;
 using System.Text;
 using System.IO;
 using System.Drawing;
+using System.Net;
+using System.Xml;
 
 using Log;
 #endregion
@@ -116,7 +118,7 @@ namespace GpsUtils
 
 
         /* Functions to get JPEG image size
-         * return 0 - if all OK, 1 - file not exists, 2 - not JPEG, 3 - width/height not found, 4 - other errors
+         * return 0 - if all OK, 1 - file not exists, 2 - not JPEG, 3 - width/height not found, 4 - other errors (EOF)
          */
         public static int GetJpegSize(string fname, out int w, out int h)
         {
@@ -134,17 +136,21 @@ namespace GpsUtils
 
                 // check that this is correct file format
                 Byte b1 = 0, b2 = 0;
-                if (wr.PeekChar() != -1) { b1 = wr.ReadByte(); }
-                if (wr.PeekChar() != -1) { b2 = wr.ReadByte(); }
-                if ((b1 != 0xFF) || (b2 != 0xD8)) { return 2; } // 0xD8 SOI: Start Of Image (beginning of datastream)
+                b1 = wr.ReadByte();
+                b2 = wr.ReadByte();
+                if ((b1 != 0xFF) || (b2 != 0xD8))    // 0xD8 SOI: Start Of Image (beginning of datastream)
+                {
+                    return_status = 2;
+                    throw new Exception("not jpeg");
+                }
 
-                while (wr.PeekChar() != -1)
+                while (true)
                 {
                     // scroll to the next marker
                     Byte next_marker = 0;
                     // Find 0xFF byte; count and skip any non-FFs
                     next_marker = wr.ReadByte();
-                    while ((next_marker != 0xFF) && (wr.PeekChar() != -1))
+                    while (next_marker != 0xFF)
                     {
                         next_marker = 0;
                         next_marker = wr.ReadByte();
@@ -156,7 +162,7 @@ namespace GpsUtils
                         next_marker = 0;
                         next_marker = wr.ReadByte();
                     }
-                    while ((next_marker == 0xFF) && (wr.PeekChar() != -1));
+                    while (next_marker == 0xFF);
 
 
                     if ((next_marker == 0xDA)    // M_SOS - Start Of Scan (begins compressed data)
@@ -201,7 +207,7 @@ namespace GpsUtils
                         h = (int)hgt;
                         return_status = 0;
 
-                        // image dimention found, break the loop
+                        // image dimension found, break the loop
                         break;
                     }
 
@@ -221,12 +227,15 @@ namespace GpsUtils
                         length--;
                     }
                 }
-
+            }
+            catch (EndOfStreamException e)
+            {
+                return_status = 4;
+                log.Error(" GetJpegSize ", e);
             }
             catch (Exception e)
             {
                 log.Error(" GetJpegSize ", e);
-                return 4;
             }
             finally
             {
@@ -272,7 +281,7 @@ namespace GpsUtils
         }
 
         // Util to draw compass on a given graphics. Heading is in degrees, 0 is "north" == up
-        public static void DrawCompass(Graphics g, Color col, int x0, int y0, int size, int heading_int, bool north)
+        public static void DrawCompass(Graphics g, Color col, int x0, int y0, int size, int heading_int, bool compass_north)
         {
             int rad = (size - 2) / 2;
             int tick = rad / 10;
@@ -286,7 +295,7 @@ namespace GpsUtils
                 int yt = (int)(y0 - (rad - 1 - tick / 2) * Math.Sin(i * Math.PI / 4.0));
                 g.FillEllipse(br, xt - tick / 2, yt - tick / 2, tick, tick);
             }
-            if (north && heading_int != 720)
+            if (compass_north && heading_int != 720)
                 heading_int = -heading_int;
 
             // draw heading - 4 points arrow
@@ -312,14 +321,112 @@ namespace GpsUtils
             pa[2].Y = (int)(y0 - (rad - 1 - tick / 2) * Math.Sin(Math.PI / 2.0 - ((heading_int + 210) * Math.PI / 180.0)));
             g.FillPolygon(br, pa);
 
-            if (north)
+            if (compass_north)
             {
-                Pen p = new Pen(col, size/32);
-                int d = size/10;
+                Pen p = new Pen(col, size / 32);
+                int d = size / 10;
                 Point[] points = new Point[] { new Point(x0 - d, y0 + d), new Point(x0 - d, y0 - d), new Point(x0 + d, y0 + d), new Point(x0 + d, y0 - d) };
                 g.DrawLines(p, points);
             }
         }
+
+
+        public static void update(string Revision)
+        {
+            Cursor.Current = Cursors.WaitCursor;
+            try
+            {
+                WebRequest request = WebRequest.Create("http://gccv2.googlecode.com/files/GpsCycleComputer.xml");
+                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+                if (response != null && "OK" == response.StatusDescription)
+                {
+                    Stream DataStream = response.GetResponseStream();
+                    StreamReader Sreader = new StreamReader(DataStream);
+                    string responseFromServer = Sreader.ReadToEnd();
+                    if (responseFromServer.IndexOf("403", StringComparison.CurrentCulture) < 3)
+                    {
+                        XmlDocument doc = new XmlDocument();
+                        doc.LoadXml(responseFromServer);
+                        XmlNode element = doc.SelectSingleNode("/application");
+                        XmlNodeList cnode = element.ChildNodes;
+                        int up2date = 0;
+                        string link = "", webVersion;
+                        foreach (XmlNode child in cnode)
+                        {
+                            switch (child.Name)
+                            {
+                                case "version":
+                                    webVersion = child.InnerText.ToString();
+                                    if (Revision2Number(webVersion) > Revision2Number(Revision))
+                                        up2date = 1;
+                                    else
+                                        up2date = -1;
+                                    break;
+                                case "caburl":
+                                    link = child.InnerText.ToString();
+                                    break;
+                            }
+                        }
+                        if (up2date == 1)
+                            MessageBox.Show("The current version is up to date", "Update");
+                        else if (up2date == -1)
+                            System.Diagnostics.Process.Start(link, null);
+                        else
+                            MessageBox.Show("Error: No version found", "Update");
+                    }
+                    Sreader.Close();
+                    DataStream.Close();
+                }
+                response.Close();
+            }
+            catch (Exception e)
+            {
+                Utils.log.Error(" Update ", e);
+                MessageBox.Show(e.Message, "Update");
+            }
+            Cursor.Current = Cursors.Default;
+        }
+        private static int Revision2Number(string revision)
+        {
+            int number = 0;
+            string str;
+            int idx;
+            str = RemoveNonDigit(revision);
+            number = 1000000 * Convert.ToInt32(str);
+            if ((idx = revision.IndexOf('.')) > -1)
+            {
+                str = revision.Remove(0, idx + 1);
+                str = RemoveNonDigit(str);
+                number += 10000 * Convert.ToInt32(str);
+            }
+            if ((idx = revision.ToUpper().IndexOf("SP")) > -1)
+            {
+                str = revision.Remove(0, idx + 2);
+                str = RemoveNonDigit(str);
+                number += 100 * Convert.ToInt32(str);
+            }
+            if ((idx = revision.ToUpper().IndexOf("BETA")) > -1)
+            {
+                str = revision.Remove(0, idx + 4);
+                str = RemoveNonDigit(str);
+                number += Convert.ToInt32(str);
+            }
+            else
+                number += 99;       //non-beta is highest 'beta'
+            return number;
+        }
+        private static string RemoveNonDigit(string str)
+        {
+            for (int i = 0; i < str.Length; i++)
+            {
+                if (Char.IsDigit(str[i]))
+                    continue;
+                else
+                    return str.Remove(i, str.Length - i);
+            }
+            return str;
+        }
+
 
         public static DialogResult InputBox(string title, string promptText, ref string value)
         {
