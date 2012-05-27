@@ -11,6 +11,7 @@ using System.Globalization;
 using System.Net;
 using System.Text;
 using System.Runtime.InteropServices;
+using System.Threading;
 using GpsCycleComputer;
 
 #endregion
@@ -20,8 +21,10 @@ namespace GpsUtils
     // Utilities to work with JPEG maps and plot a track
     public class MapUtil
     {
+        public Form1 parent;
         public Color Back_Color = Color.White;
         public Color Fore_Color = Color.Black;
+        private Bitmap hourglass;
 
         public MapUtil() 
         {
@@ -30,6 +33,9 @@ namespace GpsUtils
                 Maps[i].bmp = null;
                 Maps[i].fname = "";
             }
+            corner.Type = 0;
+            corner.processedIndex = -1;
+            hourglass = new Bitmap(Assembly.GetExecutingAssembly().GetManifestResourceStream("GpsSample.Graphics.hourglass.png"));
         }
 
         public struct MapInfo
@@ -56,7 +62,7 @@ namespace GpsUtils
         public int NumMaps = 0;
         private int NumBitmaps = 0;        // max num bitmaps to plot and store (depending on the algorithm)
         public MapInfo[] Maps = new MapInfo[MaxNumMaps];
-        private string MapsFilesDirectory;
+        public string MapsFilesDirectory;
 
         public enum ShowTrackToFollow
         {
@@ -73,6 +79,8 @@ namespace GpsUtils
         public bool hideNav = false;
         public bool navigate_backward = false;
         public bool show_nav_button = true;
+        public bool playVoiceCommand = true;
+        public bool reDownloadMaps = false;
 
         private int ScreenX = 100;         // screen (drawing) size in pixels
         private int ScreenY = 100;
@@ -91,13 +99,10 @@ namespace GpsUtils
         public int ScreenShiftSaveY = 0;
 
         // vars to work with OpenStreetMap tiles
-        public int OsmTilesWebDownload = 0;  // 0 - web download "off", or the server index from a predefined server list
         private bool OsmTilesMode = false;
         private const int OsmNumZoomLevels = 19;    //19  is too high - most servers do not respond on zoom level 18
         private bool[] OsmZoomAvailable = new bool[OsmNumZoomLevels]; // if a directories for this zoom level found (true/false)
-        private const int OsmTmpReadArraySize = 4096;
-        private byte[] OsmTmpReadArray = new byte[OsmTmpReadArraySize];
-        private string OsmCustomServer = "http://";
+        public string OsmServer = "http://";
         private string OsmFileExtension = "";
 
         // map error codes
@@ -105,8 +110,32 @@ namespace GpsUtils
         private const int __MapErrorReading = 1;
         private const int __MapErrorDownload = 2;
         private const int __MapErrorOutOfMemory = 3;
+        private const int __MapErrorNotFound = 4;
 
         private int MapErrors = __MapNoError;
+
+        public struct CornerInfo
+        {
+            public int Type;        //0=straight(invalid)  1=half turn   2=turn   3=sharp turn
+            public float Long;      //Long of corner
+            public float Lat;       //Lat of corner
+            public int processedIndex;   //last processed index (always valid (if!=0))
+            public int dir1;        //direction before corner
+            public int dir2;        //direction after corner
+            public int angle;       //angle of corner (-180..180 degree; 90=right)
+            public int direction;   //direction (-180..180 degree) from CurrentPos
+            public int distance;    //distance in m from CurrentPos
+            public bool voicePlayed;    //flag voice played
+        } public  CornerInfo corner;
+
+        public struct NavInfo
+        {
+            public int IndexMinDistance;
+            public double MinDistance;      //CurPos to Track
+            public double Distance2Dest;    //without MinDistance
+            public int Angle100mAhead;      //-180 .. 180 degree
+            public bool voicePlayed;
+        } public NavInfo nav;
 
 
         // return true if only sub-directories with names "0".."18" exist in this folder
@@ -117,7 +146,16 @@ namespace GpsUtils
             string[] zoom_dirs = Directory.GetDirectories(MapsFilesDirectory);
 
             // nothing found
-            if (zoom_dirs.Length == 0) { return false; }
+            if (zoom_dirs.Length == 0)
+            {
+                if (File.Exists(MapsFilesDirectory + "\\server.txt"))
+                {
+                    OsmFileExtension = ".png";
+                    return true;
+                }
+                else
+                    return false;
+            }
 
             for (int i = 0; i < zoom_dirs.Length; i++)
             {
@@ -174,67 +212,193 @@ namespace GpsUtils
             double lat_rad = lat_deg * Math.PI / 180.0;
             return (int)((1.0 - Math.Log(Math.Tan(lat_rad) + (1 / Math.Cos(lat_rad))) / Math.PI) / 2.0 * n);
         }
-        public void LoadCustomOsmServer(string file_name)
+        private void LoadOsmServer()
         {
-            if (File.Exists(file_name))
+            if (File.Exists(MapsFilesDirectory + "\\server.txt"))
             {
                 FileStream fs = null;
                 StreamReader sr = null;
                 try
                 {
-                    fs = new FileStream(file_name, FileMode.Open, FileAccess.Read);
+                    fs = new FileStream(MapsFilesDirectory + "\\server.txt", FileMode.Open, FileAccess.Read);
                     sr = new StreamReader(fs);
-                    if (sr.Peek() != -1)
+                    string s = sr.ReadLine();
+                    if (s == "1") parent.checkDownloadOsm.Checked = true;
+                    else parent.checkDownloadOsm.Checked = false;
+                    s = sr.ReadLine();
+                    if (s != null)
+                        OsmServer = s;
+                    else
                     {
-                        OsmCustomServer = sr.ReadLine().Trim();
+                        parent.checkDownloadOsm.Checked = false;
+                        OsmServer = "";
                     }
                 }
                 catch (Exception e)
                 {
-                    Utils.log.Error(" LoadCustomOsmServer ", e);
+                    Utils.log.Error(" Load server.txt ", e);
+                    parent.checkDownloadOsm.Checked = false;
+                    OsmServer = "";
                 }
                 finally
                 {
-                    if(sr != null) sr.Close();
-                    if(fs != null) fs.Close();
+                    if (sr != null) sr.Close();
+                    if (fs != null) fs.Close();
                 }
             }
+            else
+                parent.checkDownloadOsm.Checked = false;
         }
-        public void DownloadOsmTile(string tile_name)
+        public void SaveOsmServer(string server)
         {
-            /* hard-coded server names: 
-Osmarender                     http://tah.openstreetmap.org/Tiles/tile/
-Mapnik                         http://tile.openstreetmap.org/mapnik/
-Cyclemap (CloudMade)           http://c.andy.sandbox.cloudmade.com/tiles/cycle/
-OpenPisteMap                   http://openpistemap.org/tiles/contours/     new:     http://tiles.openpistemap.org/contours/
-CloudMade Web style            http://tile.cloudmade.com/8bafab36916b5ce6b4395ede3cb9ddea/1/256/
-CloudMade Mobile style         http://tile.cloudmade.com/8bafab36916b5ce6b4395ede3cb9ddea/2/256/
-CloudMade NoNames style        http://tile.cloudmade.com/8bafab36916b5ce6b4395ede3cb9ddea/3/256/
-User-defined server (read server name from osm_server.txt)             
-             */
-
-            string server_name = "http://tah.openstreetmap.org/Tiles/tile/";
-            if      (OsmTilesWebDownload == 1) { server_name = "http://tah.openstreetmap.org/Tiles/tile/"; }
-            else if (OsmTilesWebDownload == 2) { server_name = "http://tile.openstreetmap.org/mapnik/"; }
-            else if (OsmTilesWebDownload == 3) { server_name = "http://c.andy.sandbox.cloudmade.com/tiles/cycle/"; }
-            else if (OsmTilesWebDownload == 4) { server_name = "http://tiles.openpistemap.org/contours/"; }
-            else if (OsmTilesWebDownload == 5) { server_name = "http://tile.cloudmade.com/8bafab36916b5ce6b4395ede3cb9ddea/1/256/"; }
-            else if (OsmTilesWebDownload == 6) { server_name = "http://tile.cloudmade.com/8bafab36916b5ce6b4395ede3cb9ddea/2/256/"; }
-            else if (OsmTilesWebDownload == 7) { server_name = "http://tile.cloudmade.com/8bafab36916b5ce6b4395ede3cb9ddea/3/256/"; }
-            else if (OsmTilesWebDownload == 8) { server_name = OsmCustomServer; }
-
+            OsmServer = server;
+            if (!OsmTilesMode && parent.checkDownloadOsm.Checked)
+                LoadMaps(MapsFilesDirectory);            //set OsmTilesMode and initialize it
+            FileStream fs = null;
+            StreamWriter sw = null;
             try
             {
-                String forecastAdress = tile_name.Replace(MapsFilesDirectory + "\\", server_name);
+                fs = new FileStream(MapsFilesDirectory + "\\server.txt", FileMode.Create, FileAccess.Write);
+                sw = new StreamWriter(fs);
+                sw.WriteLine(parent.checkDownloadOsm.Checked ? "1" : "0");
+                sw.WriteLine(server);
+            }
+            catch (Exception e)
+            {
+                Utils.log.Error(" Save server.txt ", e);
+            }
+            finally
+            {
+                if (sw != null) sw.Close();
+                if (fs != null) fs.Close();
+            }
+        }
+
+        class DownloadData
+        {
+            public string DLFilename;
+            public HttpWebRequest httpRequest;
+            public HttpWebResponse response;
+            public const int BUFFER_SIZE = 4096;
+            public byte[] readBuffer = new byte[BUFFER_SIZE];
+            public Stream streamResponse;
+            public FileStream fs;
+            public BinaryWriter wr;
+
+            public void Cleanup()
+            {
+                if (wr != null) wr.Close();
+                if (fs != null) fs.Close();
+                if (streamResponse != null) streamResponse.Close();
+                if (response != null) response.Close();
+            }
+        }
+        ArrayList DlList = new ArrayList();          //list of currently downloading tiles (DownloadState)
+        private bool DlListContains(string filename)    //could not get to work DlList.Contains() with object subelement
+        {
+            for (int i = 0; i < DlList.Count; i++)
+            {
+                if (((DownloadData)DlList[i]).DLFilename == filename)
+                    return true;
+            }
+            return false;
+        }
+        private bool DownloadOsmTile(string tile_name)
+        {
+            if (DlList.Count > 2)       //only 2 download threads allowed on osm
+                return false;
+            DownloadData dld = new DownloadData();
+            try
+            {
+                String forecastAdress = tile_name.Replace(MapsFilesDirectory + "\\", OsmServer);
                 forecastAdress = forecastAdress.Replace("\\", "/");
 
-                HttpWebRequest httpRequest = (HttpWebRequest)WebRequest.Create(forecastAdress);
-                httpRequest.Credentials = CredentialCache.DefaultCredentials;
-                httpRequest.Timeout = 10000;          // 10 sec timeouts
-                httpRequest.ReadWriteTimeout = 10000;
+                dld.DLFilename = tile_name;
+                dld.httpRequest = (HttpWebRequest)WebRequest.Create(forecastAdress);
 
-                HttpWebResponse httpResponse = (HttpWebResponse)httpRequest.GetResponse();
+                dld.httpRequest.Credentials = CredentialCache.DefaultCredentials;
+                dld.httpRequest.Timeout = 30000;          // 10 sec timeouts
+                dld.httpRequest.ReadWriteTimeout = 30000;
+                dld.httpRequest.UserAgent = "GpsCycleComputer";
 
+                dld.httpRequest.BeginGetResponse(GetResponseCallback, dld);
+                DlList.Add(dld);
+                return true;
+            }
+            catch(Exception e)
+            {
+                DownloadEnd(e, dld);
+            }
+            return false;
+        }
+        private void GetResponseCallback(IAsyncResult asynchronousResult)
+        {
+            DownloadData dld = (DownloadData)asynchronousResult.AsyncState;
+            try
+            {
+                // End the operation
+                dld.response = (HttpWebResponse)dld.httpRequest.EndGetResponse(asynchronousResult);
+                if (dld.response.StatusCode != HttpStatusCode.OK)
+                {
+                    Utils.log.Debug ("Map download error - " + dld.httpRequest.RequestUri + " HTTPResponse = " + dld.response.StatusCode + " - " + dld.response.StatusDescription);
+                    MapErrors = __MapErrorDownload;
+                    DownloadEnd(new Exception(dld.response.StatusCode.ToString()), dld);
+                    return;
+                }
+                dld.streamResponse = dld.response.GetResponseStream();
+                Directory.CreateDirectory(Path.GetDirectoryName(dld.DLFilename));
+                dld.fs = new FileStream(dld.DLFilename, FileMode.Create);
+                dld.wr = new BinaryWriter(dld.fs, Encoding.UTF8);
+                //streamResponse.ReadTimeout = 200;
+                dld.streamResponse.BeginRead(dld.readBuffer, 0, DownloadData.BUFFER_SIZE, BeginReadCallback, dld);
+                return;
+            }
+            catch (Exception e)
+            {
+                DownloadEnd(e, dld);
+            }
+        }
+        private void BeginReadCallback(IAsyncResult asyncResult)
+        {
+            DownloadData dld = (DownloadData)asyncResult.AsyncState;
+            try
+            {
+                int n = dld.streamResponse.EndRead(asyncResult);
+                if (n > 0)
+                {
+                    dld.wr.Write(dld.readBuffer, 0, n);
+                    //dld.streamResponse.BeginRead(dld.readBuffer, 0, DownloadData.BUFFER_SIZE, new AsyncCallback(BeginReadCallback), dld);
+                    dld.streamResponse.BeginRead(dld.readBuffer, 0, DownloadData.BUFFER_SIZE, BeginReadCallback, dld);
+                }
+                else
+                {   //all data are read
+                    dld.Cleanup();          //normal end of download
+                    DlList.Remove(dld);
+                }
+            }
+            catch (Exception e)
+            {
+                DownloadEnd(e, dld);
+            }
+        }
+
+        void DownloadEnd(Exception e, DownloadData dld)
+        {
+            Utils.log.Error (" DownloadOsmTile ", e);
+            if (e.Message.IndexOf("404") != -1)
+                MapErrors = __MapErrorNotFound;
+            else
+                MapErrors = __MapErrorDownload;
+            try { File.Delete(dld.DLFilename); }
+            catch { }
+            DlList.Remove(dld);
+            dld.Cleanup();
+        }
+
+
+
+
+/*
                 if (httpResponse.StatusCode != HttpStatusCode.OK) 
                 {
                     Utils.log.Debug ("Map download error - " + forecastAdress + " HTTPResponse = " + httpResponse.StatusCode + " - " + httpResponse.StatusDescription);
@@ -268,6 +432,7 @@ User-defined server (read server name from osm_server.txt)
                 MapErrors = __MapErrorDownload;
             }
         }
+ * */
         public void FillOsmTiles()
         {
             if (NumMaps != 0)
@@ -299,7 +464,7 @@ User-defined server (read server name from osm_server.txt)
 
             for (int iz = 0; iz < OsmNumZoomLevels; iz++) // start filling map array from the lowest zoom level
             {
-                if ((OsmTilesWebDownload == 0) && (OsmZoomAvailable[iz] == false)) { continue; }
+                if (!parent.checkDownloadOsm.Checked && !OsmZoomAvailable[iz]) { continue; }
 
                 double n = (double)(1 << iz); // num tiles in this zoom level
 
@@ -313,7 +478,7 @@ User-defined server (read server name from osm_server.txt)
                 if (num_tiles_in_this_zoom > 32) { break; }
 
                 // do a quick check if a central tile exist when we have lots of times, - skip if not exists
-                if ((num_tiles_in_this_zoom > 9) && (OsmTilesWebDownload == 0))
+                if ((num_tiles_in_this_zoom > 9) && !parent.checkDownloadOsm.Checked)
                 {
                     int center_x = (xtile_min + xtile_max) / 2;
                     int center_y = (ytile_min + ytile_max) / 2;
@@ -376,8 +541,15 @@ User-defined server (read server name from osm_server.txt)
             }
 
             OsmTilesMode = DetectOsmTiles();
-            if (OsmTilesWebDownload != 0) { OsmTilesMode = true; } // if want to download - force OsmTilesMode
-
+            if (!OsmTilesMode && parent.checkDownloadOsm.Checked)
+            {                            // if want to download - force OsmTilesMode and enable all zoom levels
+                for (int allowed_i = 0; allowed_i < OsmNumZoomLevels; allowed_i++)
+                {
+                    OsmZoomAvailable[allowed_i] = true;
+                }
+                OsmFileExtension = ".png";
+                OsmTilesMode = true;
+            }
             if (OsmTilesMode)
             {
                 // all OSM tiles are 256x256
@@ -386,6 +558,7 @@ User-defined server (read server name from osm_server.txt)
                     Maps[i].sizeX = 256;
                     Maps[i].sizeY = 256;
                 }
+                LoadOsmServer();
                 return;
             }
 
@@ -454,9 +627,9 @@ User-defined server (read server name from osm_server.txt)
                         FileStream fs = new FileStream(kml_file, FileMode.Open, FileAccess.Read);
                         StreamReader sr = new StreamReader(fs);
                         string line = "";
-                        while (sr.Peek() != -1)
+                        while ((line = sr.ReadLine()) != null)
                         {
-                            line = sr.ReadLine().Trim();
+                            line = line.Trim();
                             if (line == "</kml>") { break; }
 
                             // replace all "," with "." to read correctly
@@ -544,9 +717,9 @@ User-defined server (read server name from osm_server.txt)
                             string line = "";
                             try
                             {
-                                while (sr.Peek() != -1)
+                                while ((line = sr.ReadLine()) != null)
                                 {
-                                    line = sr.ReadLine().Trim();
+                                    line = line.Trim();
                                     string[] words = line.Split(';');
                                     if (words.Length != 4) { continue; }
 
@@ -629,7 +802,8 @@ User-defined server (read server name from osm_server.txt)
             {
                 if (Maps[i].bmp != null)
                 {
-                    Maps[i].bmp.Dispose();
+                    if (Maps[i].bmp != hourglass)       //don't dispose hourglass
+                        Maps[i].bmp.Dispose();
                     Maps[i].bmp = null;
                 }
             }
@@ -902,7 +1076,7 @@ User-defined server (read server name from osm_server.txt)
         {
             // use this in OsmTilesMode only (as in this case we do not know if tile exist or not) 
             // and if we are NOT downloading from web (as we cannot get it from web)
-            if ((OsmTilesMode == true) && (OsmTilesWebDownload == 0))
+            if ((OsmTilesMode == true) && (!parent.checkDownloadOsm.Checked))
             {
                 bool not_exist = false;
                 for (int i = 0; i < NumBitmaps; i++)
@@ -921,6 +1095,7 @@ User-defined server (read server name from osm_server.txt)
             // otherwise return false (i.e. all exist or can be downloaded
             return false;
         }
+        int delayCount = 0;
         public void DrawJpeg(Graphics g)
         {
             RemoveBitmaps(NumBitmaps); // removes unused bitmaps
@@ -928,20 +1103,37 @@ User-defined server (read server name from osm_server.txt)
             // DEBUG - save into file map info after they are sorted
             // PrintMapInfo();
 
-            MapErrors = __MapNoError;
+            if (MapErrors == __MapErrorNotFound)
+            {
+                if (delayCount == 0)
+                {
+                    MapErrors = __MapNoError;
+                    delayCount = 60;                 //try again in 60s
+                }
+                else
+                    delayCount--;
+            }
+            else
+                MapErrors = __MapNoError;
             for(int i = (NumBitmaps-1); i >= 0; i--)
             {
                 if (Maps[i].overlap == 0.0) { continue; }
                 if (Maps[i].was_removed) { continue; }
 
                 // load the map, if it is null
-                if ((Maps[i].bmp == null))
+                if ((Maps[i].bmp == null) || Maps[i].bmp == hourglass || reDownloadMaps)
                 {
-                    Cursor.Current = Cursors.WaitCursor;
+                    if (DlListContains(Maps[i].fname))     // hold a variable (list) of currently downloading maps
+                        goto displayTile;
                     // download map from web, if no problems with download
-                    if ((OsmTilesWebDownload != 0) && !File.Exists(Maps[i].fname) && (MapErrors == __MapNoError))
+                    if (parent.checkDownloadOsm.Checked && !File.Exists(Maps[i].fname) 
+                        && (MapErrors == __MapNoError) || reDownloadMaps)               //reDownload always
                     {
-                        DownloadOsmTile(Maps[i].fname);
+                        if (DownloadOsmTile(Maps[i].fname))
+                            Maps[i].bmp = hourglass;
+                        else
+                            Maps[i].bmp = null;
+                        goto displayTile;
                     }
                     if (File.Exists(Maps[i].fname))
                     {
@@ -955,15 +1147,22 @@ User-defined server (read server name from osm_server.txt)
                             Maps[i].bmp = null;
                             MapErrors = __MapErrorOutOfMemory;
                         }
+                        //catch (System.IO.IOException)
+                        //{ }
                         catch (Exception e)
                         {
                             Utils.log.Error(" DrawJpeg - new Bitmap", e);
                             Maps[i].bmp = null;
                             MapErrors = __MapErrorReading;
+                            if (parent.checkDownloadOsm.Checked)
+                            {
+                                try { File.Delete(Maps[i].fname); }     //delet file with Read Error to initiate redownload
+                                catch { }
+                            }
                         }
                     }
-                    Cursor.Current = Cursors.Default;
                 }
+            displayTile:
                 // check that it was loaded OK
                 if (Maps[i].bmp == null) { continue; }
 
@@ -992,6 +1191,7 @@ User-defined server (read server name from osm_server.txt)
                     g.DrawImage(Maps[i].bmp, dest_rec, src_rec, GraphicsUnit.Pixel);
                 }
             }
+            reDownloadMaps = false;
         }
         public void DrawMovingImage(Graphics g, Bitmap BackBuffer, int dx, int dy)
         {
@@ -1049,19 +1249,19 @@ User-defined server (read server name from osm_server.txt)
             }
         }
 
-        private int ToScreenX(double x)
+        public int ToScreenX(double x)
         {
             return (ScreenShiftX + (int)((x - DataLongMin) * Data2Screen * ZoomValue));
         }
-        private double ToDataX(int scr_x)
+        public double ToDataX(int scr_x)
         {
             return (DataLongMin + (double)(scr_x - ScreenShiftX) / (Data2Screen * ZoomValue));
         }
-        private int ToScreenY(double y)
+        public int ToScreenY(double y)
         {
             return (ScreenShiftY - (int)((y - DataLatMax) * RatioMeterLatLong * Data2Screen * ZoomValue));
         }
-        private double ToDataY(int scr_y)
+        public double ToDataY(int scr_y)
         {
             return (DataLatMax + (double)(ScreenShiftY - scr_y) / (RatioMeterLatLong * Data2Screen * ZoomValue));
         }
@@ -1505,6 +1705,7 @@ User-defined server (read server name from osm_server.txt)
 
             g.DrawString(text, drawFont, drawBrush, x_point1 + 2, 0);
         }
+
         public string GetBestMapName()
         {
             string str_map = "no map";
@@ -1524,23 +1725,26 @@ User-defined server (read server name from osm_server.txt)
                 }
             }
 
-            if      (MapErrors == __MapErrorReading)  
+            if (MapErrors == __MapErrorReading)
             {
                 str_map += "\nRead Error";
-                Utils.log.Debug ("Map ERROR " + str_map);
+                Utils.log.Debug("Map ERROR " + str_map);
             }
             else if (MapErrors == __MapErrorOutOfMemory)
             {
                 str_map += "\nOut of Memory Error\n(Filesize too large)";
             }
-            else if (MapErrors == __MapErrorDownload) 
-            { 
+            else if (MapErrors == __MapErrorDownload)
+            {
                 str_map += "\nDownload Error";
-                Utils.log.Debug ("Map ERROR " + str_map);
+                Utils.log.Debug("Map ERROR " + str_map);
             }
+            else if (MapErrors == __MapErrorNotFound)
+                str_map += "\n404 Not Found";
 
             return str_map;
         }
+
         private double TickMark(double x, int nx)
         {
             double num, mult, mant;
@@ -1557,6 +1761,7 @@ User-defined server (read server name from osm_server.txt)
             else mant = 1.0;
             return (mant * mult);
         }
+
         private void SetAutoScale(float[] PlotLong, float[] PlotLat, int PlotSize, bool lifeview)
         {
             // compute difference in Lat/Long scale
@@ -1568,7 +1773,7 @@ User-defined server (read server name from osm_server.txt)
             RatioMeterLatLong = Meter2Long / Meter2Lat;
 
             // during liveview (logging), set a fixed scale with current point in the middle
-            if (lifeview || (PlotSize <= 1))
+            if (lifeview || (PlotSize == 1))
             {
                 double last_x = PlotLong[PlotSize - 1];
                 double last_y = PlotLat[PlotSize - 1];
@@ -1588,6 +1793,14 @@ User-defined server (read server name from osm_server.txt)
                     if (PlotLat[i] < DataLatMin) { DataLatMin = PlotLat[i]; }
                     if (PlotLat[i] > DataLatMax) { DataLatMax = PlotLat[i]; }
                 }
+                double dx = (DataLongMax - DataLongMin);       //make ca. 10% larger
+                double dy = (DataLatMax - DataLatMin);
+                if (dy > dx) dx = dy;
+                dx /= 20;
+                DataLongMin -= dx;
+                DataLongMax += dx;
+                DataLatMin -= dx;
+                DataLatMax += dx;
             }
 
             // set plot scale, must be equal for both axis to plot map
@@ -1605,6 +1818,7 @@ User-defined server (read server name from osm_server.txt)
             double yscale = (double)ScreenY / (ysize * RatioMeterLatLong);
             Data2Screen = (yscale > xscale ? xscale : yscale);
         }
+
 
         // draw map and 2 lines (main and "to follow"). Shift is the x/y shift of the second line origin.
         public void DrawMaps(Graphics g, Bitmap BackBuffer, Graphics BackBufferGraphics, 
@@ -1645,36 +1859,39 @@ User-defined server (read server name from osm_server.txt)
 
             // store current drawing screen size and set scale from "main" or the "track-to-follow" (if main not exist)
             ScreenX = BackBuffer.Width; ScreenY = BackBuffer.Height;
-            if (ShowTrackToFollowMode == ShowTrackToFollow.T2FStart && PlotSize2 != 0) 
-            { 
+            if (ShowTrackToFollowMode == ShowTrackToFollow.T2FStart && PlotSize2 != 0)
+            {
                 // Show start position of track to follow
-                SetAutoScale(PlotLong2, PlotLat2, 1, false); }
+                SetAutoScale(PlotLong2, PlotLat2, 1, false);
+            }
             else if (ShowTrackToFollowMode == ShowTrackToFollow.T2FEnd && PlotSize2 != 0)
             {
                 // Show end position of track to follow
                 float[] Long = { PlotLong2[PlotSize2 - 1] };
                 float[] Lat = { PlotLat2[PlotSize2 - 1] };
-                SetAutoScale( Long, Lat, 1, false);
+                SetAutoScale(Long, Lat, 1, false);
             }
-            else if (lifeview) 
-            { 
+            else if (parent.trackEditMode != Form1.TrackEditMode.Off)
+            { }                                                     // in trackEditMode prevent autoscale
+            else if (lifeview)
+            {
                 // Show current GPS position (last position)
-                SetAutoScale(CurLong, CurLat, 1, lifeview); 
+                SetAutoScale(CurLong, CurLat, 1, lifeview);
             }
-            else if (PlotSize != 0) 
-            { 
+            else if (PlotSize != 0)
+            {
                 // Show all points of loaded track
-                SetAutoScale(PlotLong, PlotLat, PlotSize, lifeview); 
+                SetAutoScale(PlotLong, PlotLat, PlotSize, lifeview);
             }
-            else if (PlotSize2 != 0) 
-            { 
+            else if (PlotSize2 != 0)
+            {
                 // Show all points of track to follow
-                SetAutoScale(PlotLong2, PlotLat2, PlotSize2, false); 
+                SetAutoScale(PlotLong2, PlotLat2, PlotSize2, false);
             }
-            else 
-            { 
+            else
+            {
                 // Show last position
-                SetAutoScale(CurLong, CurLat, 1, false); 
+                SetAutoScale(CurLong, CurLat, 1, false);
             }
 
             // need to draw the picture first into back buffer
@@ -1738,14 +1955,43 @@ User-defined server (read server name from osm_server.txt)
                 int y0 = ToScreenY(CurLat[0]);
                 Color col = line_color, col2 = line_color2;
                 if (heading == 720) { col = Color.DimGray; col2 = Color.DimGray; }
-                
-                if (!hideNav && PlotSize2 != 0)
+
+                if (PlotSize2 != 0 && (!hideNav || playVoiceCommand))
                 {
-                    int angle2Dest;
-                    double MinDistance, Distance2Dest;
-                    GetNavigationData(PlotLong2, PlotLat2, PlotSize2, CurLong[0], CurLat[0], out angle2Dest, out MinDistance, out Distance2Dest);
-                    DrawArrow(BackBufferGraphics, x0, y0, angle2Dest , line_width * 3 + 7, line_color2);                    //navigation arrow pointing at t2f 100m ahead
-                    DrawArrow(BackBufferGraphics, ScreenX * 4 / 5, ScreenY / 5, angle2Dest - heading, ScreenX / 5, col2);   //big navigation arrow in direction of travel
+                    //debugG = BackBufferGraphics;    //debug
+                    GetNavigationData(PlotLong2, PlotLat2, PlotSize2, CurLong[0], CurLat[0]);
+                    DoVoiceCommand();
+                    if (!hideNav)
+                    {
+                        DrawArrow(BackBufferGraphics, x0, y0, nav.Angle100mAhead, line_width2 * 3 + 7, line_color2);                    //navigation arrow pointing at t2f 100m ahead
+                        DrawArrow(BackBufferGraphics, ScreenX * 4 / 5, ScreenY / 5, nav.Angle100mAhead - heading, ScreenX / 5, col2);   //big navigation arrow in direction of travel
+                        string str;
+                        if (corner.Type != 0)        //navigation command
+                        {
+                            switch (corner.Type)
+                            {
+                                case 1: str = "H"; break;
+                                case 2: str = ""; break;
+                                case 3: str = "S"; break;
+                                default: str = ""; break;
+                            }
+                            if (corner.angle < 0)
+                                str += "L ";
+                            else
+                                str += "R ";
+                            //str = corner.angle.ToString() + str;
+                            str += corner.distance.ToString() + "m";
+                            Font drawFont = new Font("Arial", 14, FontStyle.Bold);
+                            SolidBrush drawBrush = new SolidBrush(col2);
+                            BackBufferGraphics.DrawString(str, drawFont, drawBrush, ScreenX * 4 / 10, 0);
+                            DrawCurrentPoint(BackBufferGraphics, corner.Long, corner.Lat, line_width2, Color.Yellow);
+                            /*DrawCurrentPoint(BackBufferGraphics, PlotLong2[corner.IndexT2F], PlotLat2[corner.IndexT2F], 6, Color.Yellow);
+                            DrawCurrentPoint(BackBufferGraphics, PlotLong2[corner.IndexT2F - 2], PlotLat2[corner.IndexT2F - 2], 4, Color.Yellow);
+                            DrawCurrentPoint(BackBufferGraphics, PlotLong2[corner.IndexT2F - 1], PlotLat2[corner.IndexT2F - 1], 4, Color.Yellow);
+                            DrawCurrentPoint(BackBufferGraphics, PlotLong2[corner.IndexT2F + 1], PlotLat2[corner.IndexT2F + 1], 4, Color.Yellow);
+                            DrawCurrentPoint(BackBufferGraphics, PlotLong2[corner.IndexT2F + 2], PlotLat2[corner.IndexT2F + 2], 4, Color.Yellow);*/
+                        }
+                    }
                 }
                 DrawArrow(BackBufferGraphics, x0, y0, heading, line_width * 2 + 5, col);                            //arrow showing direction of movement
                 // draw gps led point
@@ -1776,19 +2022,18 @@ User-defined server (read server name from osm_server.txt)
             string str_nav;
             if (PlotSize2 > 0)
             {
-                int angle2Dest;
-                double MinDistance, Distance2Dest;
-                GetNavigationData(PlotLong2, PlotLat2, PlotSize2, CurLong, CurLat, out angle2Dest, out MinDistance, out Distance2Dest);
+                GetNavigationData(PlotLong2, PlotLat2, PlotSize2, CurLong, CurLat);
+                DoVoiceCommand();
 
                 int size = Math.Min(BackBuffer.Width, BackBuffer.Height*4/5) / 2;
                 if (heading == 720) col = Color.DimGray;
-                DrawArrow(BackBufferGraphics, BackBuffer.Width/2, size, angle2Dest - heading, size, col);
+                DrawArrow(BackBufferGraphics, BackBuffer.Width/2, size, nav.Angle100mAhead - heading, size, col);
                 
                 
-                if (MinDistance > 100.0)
-                    str_nav = (MinDistance * unit_cff).ToString("0.00") + unit_name + " to Track";
+                if (nav.MinDistance > 100.0)
+                    str_nav = (nav.MinDistance * unit_cff).ToString("0.00") + unit_name + " to Track";
                 else
-                    str_nav = (Distance2Dest * unit_cff).ToString("0.00") + unit_name + " to Destin.";
+                    str_nav = (nav.Distance2Dest * unit_cff).ToString("0.00") + unit_name + " to Destin.";
             }
             else
             {
@@ -1798,71 +2043,546 @@ User-defined server (read server name from osm_server.txt)
             g.DrawImage(BackBuffer, 0, 0); // draw back buffer on screen
         }
 
-        private int GetNavigationData(float[] PlotLong2, float[] PlotLat2, int PlotSize2, float CurLong, float CurLat, out int angle2Dest, out double MinDistance, out double Distance2Dest)
-        {
-            double Long2Meter, Lat2Meter;
+        //Graphics debugG;    //debug
+        public void GetNavigationData(float[] PlotLong2, float[] PlotLat2, int PlotSize2, float CurLong, float CurLat)
+        {                                                                               //return: IndexMinDistance
+            double Long2Meter = 1.0 / Meter2Long;
+            double Lat2Meter = 1.0 / Meter2Lat;
             double x, y;                    //m
             double dist2, MinDistance2;     //m2
-            int i, IndexMinDistance = 0;
+            int i, Index100mDistance, j = 0, k = 0, kc = -1000;
+            const int ArSize = 14;
+            int[] indexAr = new int[ArSize];
+            double[] xAr = new double[ArSize];
+            double[] yAr = new double[ArSize];
 
-            utmUtil.setReferencePoint(CurLat, CurLong);
-            utmUtil.getLatLong(100.0, 100.0, out Lat2Meter, out Long2Meter);
-            Long2Meter = 100.0 / (Long2Meter - CurLong);
-            Lat2Meter = 100.0 / (Lat2Meter - CurLat);
+            //utmUtil.setReferencePoint(CurLat, CurLong);
+            //utmUtil.getLatLong(100.0, 100.0, out Lat2Meter, out Long2Meter);
+            //Long2Meter = 100.0 / (Long2Meter - CurLong);
+            //Lat2Meter = 100.0 / (Lat2Meter - CurLat);
 
             int begin = 0, increment = 1;
             if (navigate_backward)
-            { begin = PlotSize2-1; increment = -1; }
-
+            { 
+                begin = PlotSize2-1;
+                increment = -1;
+            }
+            
             x = (PlotLong2[begin] - CurLong) * Long2Meter;
             y = (PlotLat2[begin] - CurLat) * Lat2Meter;
             dist2 = x * x + y * y;
+            nav.IndexMinDistance = begin;
             MinDistance2 = dist2;
-            Distance2Dest = Math.Sqrt(dist2);
+            nav.Distance2Dest = 0;
+            Index100mDistance = begin;
+            indexAr[0] = begin; xAr[0] = x; yAr[0] = y; j = 1;
+            
+            //search MinDistance to t2f
             for (i = begin + increment; i < PlotSize2 && i >= 0; i += increment)
             {
+                double xOld = x;
+                double yOld = y;
+                double Distance2DestOld = nav.Distance2Dest;
                 //calculate distance to track2follow
                 x = (PlotLong2[i] - CurLong) * Long2Meter;
                 y = (PlotLat2[i] - CurLat) * Lat2Meter;
                 dist2 = x * x + y * y;
-                //calculate distance to destination
-                x = (PlotLong2[i] - PlotLong2[i - increment]) * Long2Meter;
-                y = (PlotLat2[i] - PlotLat2[i - increment]) * Lat2Meter;
-                Distance2Dest += Math.Sqrt(x * x + y * y);
+                //accumulate distance to destination
+                double xa = (PlotLong2[i] - PlotLong2[i - increment]) * Long2Meter;
+                double ya = (PlotLat2[i] - PlotLat2[i - increment]) * Lat2Meter;
+                nav.Distance2Dest += Math.Sqrt(xa * xa + ya * ya);
                 if (dist2 < MinDistance2)
                 {
-                    IndexMinDistance = i;
+                    nav.IndexMinDistance = i;
                     MinDistance2 = dist2;
-                    Distance2Dest = Math.Sqrt(dist2);
+                    nav.Distance2Dest = 0;
+                    Index100mDistance = i;      //preset to MinDistance (if > 100m)
+                    indexAr[0] = i; xAr[0] = x; yAr[0] = y; j = 1;
                 }
-            }
-            //search point 100m ahead from current position (or IndexMinDistance)
-            i = IndexMinDistance;
-            while (true)
-            {
-                x = (PlotLong2[i] - CurLong) * Long2Meter;
-                y = (PlotLat2[i] - CurLat) * Lat2Meter;
-                dist2 = x * x + y * y;
-                if (dist2 >= 100.0 * 100.0) break;
-                if (navigate_backward)
+                while (j < ArSize && nav.Distance2Dest > j * 20)
                 {
-                    if (--i < 0) break;
+                    double quot = (j * 20 - Distance2DestOld) / (nav.Distance2Dest - Distance2DestOld);
+                    indexAr[j] = i;                           //fill array every 20m for corner search [0, 20, 40,.. 260]
+                    xAr[j] = xOld + quot * (x - xOld);
+                    yAr[j] = yOld + quot * (y - yOld);
+                    j++;
+                }
+                if (nav.Distance2Dest <= 100.0)
+                    Index100mDistance = i;      //point 100m ahead from current position (or IndexMinDistance)
+            }
+
+            /*//debug
+            if (debugG != null)
+            {
+                for (int n = 0; n < j; n++)
+                {
+                    DrawCurrentPoint(debugG, (xAr[n] * Meter2Long + CurLong), (yAr[n] * Meter2Lat + CurLat), 4, Color.White);
+                }
+            }*/
+
+            nav.Angle100mAhead = (int)(180.0 / Math.PI * Math.Atan2((PlotLong2[Index100mDistance] - CurLong) * Long2Meter, (PlotLat2[Index100mDistance] - CurLat) * Lat2Meter));
+            nav.MinDistance = Math.Sqrt(MinDistance2);
+
+            if (corner.Type == 0)      //search corner
+            {
+                int dir1 = 0, dir2 = 0, angle = 0, angleAbs, angleAbsMax = 0;
+                bool cornerfound = false;
+                if (corner.processedIndex == -1)
+                    corner.processedIndex = begin;
+                for (k = 2; k < j - 2; k++)
+                {
+                    if ((corner.processedIndex - indexAr[k]) * increment > 2)       //little overlap (reprocess)
+                        continue;                                                   //already processed
+                    dir1 = (int)(180 / Math.PI * Math.Atan2(xAr[k - 1] - xAr[k - 2], yAr[k - 1] - yAr[k - 2]));
+                    dir2 = (int)(180 / Math.PI * Math.Atan2(xAr[k + 2] - xAr[k + 1], yAr[k + 2] - yAr[k + 1]));
+                    angle = dir2 - dir1;
+                    if (angle > 180) angle -= 360;
+                    if (angle <= -180) angle += 360;
+                    angleAbs = Math.Abs(angle);
+                    corner.processedIndex = indexAr[k];
+                    if (angleAbs > angleAbsMax)
+                    {
+                        angleAbsMax = angleAbs;
+                        //corner.IndexT2F = indexAr[k];
+                        corner.dir1 = dir1;
+                        corner.dir2 = dir2;
+                        corner.angle = angle;
+                        kc = k;
+                    }
+                    if (angleAbsMax >= 35 && angleAbs < angleAbsMax - 10)   //run over corner (angle gets smaller)
+                    {
+                        cornerfound = true;
+                        break;
+                    }
+                }
+                if (angleAbsMax >= 35 && j < ArSize && kc == j - 3)     //corner at end of T2F
+                    cornerfound = true;
+                if (cornerfound)
+                {
+                    if (angleAbsMax < 65)
+                        corner.Type = 1;     //half turn
+                    else if (angleAbsMax < 115)
+                        corner.Type = 2;     //turn
+                    else
+                        corner.Type = 3;     //sharp turn
+                    corner.distance = int.MaxValue;    //to overcome invalidate algorithm
+
+                    corner.Long = (float)(xAr[kc] * Meter2Long + CurLong);
+                    corner.Lat = (float)(yAr[kc] * Meter2Lat + CurLat);
+
+                    /*//debug
+                    if (debugG != null)
+                    {
+                        DrawCurrentPoint(debugG, PlotLong2[indexAr[kc - 2]], PlotLat2[indexAr[kc - 2]], 4, Color.LightBlue);
+                        DrawCurrentPoint(debugG, PlotLong2[indexAr[kc - 1]], PlotLat2[indexAr[kc - 1]], 4, Color.LightBlue);
+                        DrawCurrentPoint(debugG, PlotLong2[indexAr[kc - 0]], PlotLat2[indexAr[kc - 0]], 6, Color.LightBlue);
+                        DrawCurrentPoint(debugG, PlotLong2[indexAr[kc + 1]], PlotLat2[indexAr[kc + 1]], 4, Color.LightBlue);
+                        DrawCurrentPoint(debugG, PlotLong2[indexAr[kc + 2]], PlotLat2[indexAr[kc + 2]], 4, Color.LightBlue);
+                    }*/
+                }
+                else
+                    corner.Type = 0;     //straight
+            }
+            if (corner.Type != 0)      //update corner details
+            {
+                x = (corner.Long - CurLong) * Long2Meter;
+                y = (corner.Lat - CurLat) * Lat2Meter;
+                int cornerdistance = (int)Math.Sqrt(x * x + y * y) / 10 * 10;       //rounded to 10m
+                if (cornerdistance > corner.distance || cornerdistance > 300)
+                {
+                    corner.Type = 0;                        //invalidate corner
+                    corner.processedIndex = -1;
                 }
                 else
                 {
-                    if (++i >= PlotSize2) break;
+                    corner.distance = cornerdistance;
+                    corner.direction = (int)(180.0 / Math.PI * Math.Atan2(x, y));
                 }
             }
-            //angle2Dest = (int)(90.0 - 180.0 / Math.PI * Math.Atan2(y, x));
-            angle2Dest = (int)(180.0 / Math.PI * Math.Atan2(x, y));
-            MinDistance = Math.Sqrt(MinDistance2);
-            return IndexMinDistance;
+ 
+
+
+
+            /*
+            //search corner
+            double cornerQuotMin2 = 1.0;
+            cornerDist = 1000;
+            int kc = -1;    //index of corner (0..23)
+            double vectorprod = 0.0;
+            int step = 2;       //corner test -20m 0m 20m
+            if (j < 6)          //too few points
+                step = 1;       //corner test -10m 0m 10m   or at points available
+            for (k = step; k < j - step; k++)
+            {
+                //getCornerQuot(k - step, k, k + step);
+                int km = k-step, kp = k+step;
+                double d12 = (xAr[k] - xAr[km]) * (xAr[k] - xAr[km]) + (yAr[k] - yAr[km]) * (yAr[k] - yAr[km]);       //distance1 squared
+                double d22 = (xAr[kp] - xAr[k]) * (xAr[kp] - xAr[k]) + (yAr[kp] - yAr[k]) * (yAr[kp] - yAr[k]);       //distance2 squared
+                double dd2 = (xAr[kp] - xAr[km]) * (xAr[kp] - xAr[km]) + (yAr[kp] - yAr[km]) * (yAr[kp] - yAr[km]);      //direct distance squared
+                //double cornerQuot = Math.Sqrt(dd2) / (Math.Sqrt(d12) + Math.Sqrt(d22));
+                //double cornerQuotSquared = cornerQuot * cornerQuot; //test
+                double cornerQuot2 = dd2 / (d12 + 2 * Math.Sqrt(d12 * d22) + d22);  // straight = 1    right angle = 0.5   
+
+                if (cornerQuot2 < cornerQuotMin2)
+                {
+                    cornerQuotMin2 = cornerQuot2;
+                    kc = k;
+                }
+                if (cornerQuotMin2 < 0.8 && cornerQuot2 > 0.9)
+                    break;                                  //break after first corner found
+            }
+            if (kc != -1)
+            {
+                cornerDist = (int)Math.Sqrt(xAr[kc] * xAr[kc] + yAr[kc] * yAr[kc])/10*10;
+                vectorprod = (xAr[kc] - xAr[kc - step]) * (yAr[kc + step] - yAr[kc]) - (yAr[kc] - yAr[kc - step]) * (xAr[kc + step] - xAr[kc]);  //vector product to determine right or left turn
+            }
+            System.Diagnostics.Debug.WriteLine(cornerQuotMin2.ToString() + "   dist=" + cornerDist.ToString() + "    vp="+vectorprod.ToString());
+
+            if (cornerQuotMin2 > 0.8)
+                cornerType = 0;     //straight
+            else if (cornerQuotMin2 > 0.7)
+                cornerType = 1;     //half turn
+            else if (cornerQuotMin2 > 0.5)
+                cornerType = 2;     //turn
+            else
+                cornerType = 3;     //sharp turn
+            if (vectorprod < 0)
+                cornerType = -cornerType;       //neg = right turn
+             */
+
+            return;
         }
 
+        int msTicks = Int16.MinValue;
+        public void DoVoiceCommand()
+        {
+            if (!playVoiceCommand)
+                return;
+            if (nav.MinDistance > 50)
+            {
+                if (Environment.TickCount - msTicks > 15000)
+                {
+                    try
+                    {
+                        if (threadRunning == true)
+                        {
+                            thr.Abort();
+                            threadRunning = false;
+                        }
+                        FileStream fs = new FileStream(parent.LanguageDirectory + "\\seq_toRoute.txt", FileMode.Open, FileAccess.Read);
+                        StreamReader sr = new StreamReader(fs);
+                        string word;
+                        VoiceStrAr.Clear();
+                        while (true)
+                        {
+                            try { word = sr.ReadLine(); }
+                            catch (EndOfStreamException) { break; }
+                            if (word == null) break;
+                            switch (word)
+                            {
+                                case "%Distance":
+                                    if (nav.MinDistance > 13000)
+                                        VoiceStrAr.Add("Many.wav");
+                                    else if (nav.MinDistance > 11000)
+                                        VoiceStrAr.Add("Twelve.wav");
+                                    else if (nav.MinDistance > 9000)
+                                        VoiceStrAr.Add("Ten.wav");
+                                    else if (nav.MinDistance > 7000)
+                                        VoiceStrAr.Add("Eight.wav");
+                                    else if (nav.MinDistance > 5000)
+                                        VoiceStrAr.Add("Six.wav");
+                                    else if (nav.MinDistance > 3000)
+                                        VoiceStrAr.Add("Four.wav");
+                                    else if (nav.MinDistance > 1500)
+                                        VoiceStrAr.Add("Two.wav");
+                                    else if (nav.MinDistance > 750)
+                                        VoiceStrAr.Add("One.wav");
+                                    else if (nav.MinDistance > 300)
+                                        VoiceStrAr.Add("Fivehundred.wav");
+                                    else if (nav.MinDistance > 150)
+                                        VoiceStrAr.Add("Twohundred.wav");
+                                    else if (nav.MinDistance > 50)
+                                        VoiceStrAr.Add("Onehundred.wav");
+                                    break;
+                                case "%Unit":
+                                    if (nav.MinDistance > 1500)
+                                        VoiceStrAr.Add("Kilometers.wav");
+                                    else if (nav.MinDistance > 750)
+                                        VoiceStrAr.Add("Kilometer.wav");
+                                    else
+                                        VoiceStrAr.Add("Meters.wav");
+                                    break;
+                                case "%Direction":
+                                    if (parent.Heading != 720)
+                                    {
+                                        int clock = nav.Angle100mAhead - parent.Heading;
+                                        while (clock < 0) clock += 360;
+                                        if (clock < 30)
+                                            VoiceStrAr.Add("Twelve.wav");
+                                        else if (clock < 90)
+                                            VoiceStrAr.Add("Two.wav");
+                                        else if (clock < 150)
+                                            VoiceStrAr.Add("Four.wav");
+                                        else if (clock < 210)
+                                            VoiceStrAr.Add("Six.wav");
+                                        else if (clock < 270)
+                                            VoiceStrAr.Add("Eight.wav");
+                                        else if (clock < 330)
+                                            VoiceStrAr.Add("Ten.wav");
+                                        else
+                                            VoiceStrAr.Add("Twelve.wav");
+                                    }
+                                    else
+                                    {
+                                        int dir = nav.Angle100mAhead;
+                                        if (dir < -135)
+                                            VoiceStrAr.Add("South.wav");
+                                        else if (dir < -45)
+                                            VoiceStrAr.Add("West.wav");
+                                        else if (dir < 45)
+                                            VoiceStrAr.Add("North.wav");
+                                        else if (dir < 135)
+                                            VoiceStrAr.Add("East.wav");
+                                        else
+                                            VoiceStrAr.Add("South.wav");
+                                    }
+                                    break;
+                                case "%OClock":
+                                    if (parent.Heading != 720)
+                                        VoiceStrAr.Add("OClock.wav");
+                                    break;
+                                default:
+                                    if (word.Length > 0)
+                                        VoiceStrAr.Add(word);
+                                    break;
+                            }
+                        }
+                        sr.Close();
+                        fs.Close();
+                        thr = new Thread(new ThreadStart(VoiceThreadProc));
+                        thr.Start();
+                    }
+                    catch (Exception e)
+                    {
+                        Utils.log.Error(" seq_toRoute ", e);
+                    }
+                    msTicks = Environment.TickCount;
+                }
+            }
+            else
+            {
+                if (corner.Type > 0)
+                {
+                    string s_dist = null;
+                    switch (corner.distance)
+                    {
+                        case 210:
+                        case 200:
+                        case 190: s_dist = "Twohundred.wav"; break;
+                        case 110:
+                        case 100:
+                        case 90: s_dist = "Onehundred.wav"; break;
+                        case 20:
+                        case 10: s_dist = "Now.wav"; break;
+                        default: corner.voicePlayed = false; break;
+                    }
+                    if (s_dist != null && !corner.voicePlayed)
+                    {
+                        try
+                        {
+                            if (threadRunning == true)
+                            {
+                                thr.Abort();
+                                threadRunning = false;
+                            }
+                            FileStream fs = new FileStream(parent.LanguageDirectory + "\\seq_turn.txt", FileMode.Open, FileAccess.Read);
+                            StreamReader sr = new StreamReader(fs);
+                            string word;
+                            VoiceStrAr.Clear();
+                            while (true)
+                            {
+                                try { word = sr.ReadLine(); }
+                                catch (EndOfStreamException) { break; }
+                                if (word == null) break;
+                                switch (word)
+                                {
+                                    case "%In":
+                                        if (corner.distance > 50)
+                                            VoiceStrAr.Add("In.wav");
+                                        break;
+                                    case "%Distance":
+                                        VoiceStrAr.Add(s_dist);
+                                        break;
+                                    case "%Unit":
+                                        if (corner.distance > 50)
+                                            VoiceStrAr.Add("Meters.wav");
+                                        break;
+                                    case "%Half":
+                                        if (corner.Type == 1)
+                                            VoiceStrAr.Add("Half.wav");
+                                        else if (corner.Type == 3)
+                                            VoiceStrAr.Add("Sharp.wav");
+                                        break;
+                                    case "%Left":
+                                        if (corner.angle < 0)
+                                            VoiceStrAr.Add("Left.wav");
+                                        else
+                                            VoiceStrAr.Add("Right.wav");
+                                        break;
+                                    default:
+                                        if (word.Length > 0)
+                                            VoiceStrAr.Add(word);
+                                        break;
+                                }
+                            }
+                            sr.Close();
+                            fs.Close();
+                            thr = new Thread(new ThreadStart(VoiceThreadProc));
+                            thr.Start();
+                            corner.voicePlayed = true;
+                        }
+                        catch (Exception e)
+                        {
+                            Utils.log.Error(" seq_turn ", e);
+                        }
+                    }
+                }
+                else
+                {
+                    corner.voicePlayed = false;
 
+                    if (nav.Distance2Dest <= 200)
+                    {
+                        string s_dist = null;
+                        int dist = (int)(nav.Distance2Dest + 5) / 10 * 10;
+                        switch (dist)
+                        {
+                            case 210:
+                            case 200:
+                            case 190: s_dist = "Twohundred.wav"; break;
+                            case 110:
+                            case 100:
+                            case 90: s_dist = "Onehundred.wav"; break;
+                            case 20:
+                            case 10: s_dist = "Now.wav"; break;
+                            default: nav.voicePlayed = false; break;
+                        }
+                        if (s_dist != null && !nav.voicePlayed)
+                        {
+                            try
+                            {
+                                if (threadRunning == true)
+                                {
+                                    thr.Abort();
+                                    threadRunning = false;
+                                }
+                                FileStream fs = new FileStream(parent.LanguageDirectory + "\\seq_destination.txt", FileMode.Open, FileAccess.Read);
+                                StreamReader sr = new StreamReader(fs);
+                                string word;
+                                VoiceStrAr.Clear();
+                                while (true)
+                                {
+                                    try { word = sr.ReadLine(); }
+                                    catch (EndOfStreamException) { break; }
+                                    if (word == null) break;
+                                    switch (word)
+                                    {
+                                        case "%In":
+                                            if (dist > 50)
+                                                VoiceStrAr.Add("In.wav");
+                                            break;
+                                        case "%Distance":
+                                            VoiceStrAr.Add(s_dist);
+                                            break;
+                                        case "%Unit":
+                                            if (dist > 50)
+                                                VoiceStrAr.Add("Meters.wav");
+                                            break;
+                                        default:
+                                            if (word.Length > 0)
+                                                VoiceStrAr.Add(word);
+                                            break;
+                                    }
+                                }
+                                sr.Close();
+                                fs.Close();
+                                thr = new Thread(new ThreadStart(VoiceThreadProc));
+                                thr.Start();
+                                nav.voicePlayed = true;
+                            }
+                            catch (Exception e)
+                            {
+                                Utils.log.Error(" seq_destination ", e);
+                            }
+                        }
+                    }
+                    else nav.voicePlayed = false;
+                }
+            }
+        }
 
+        public void playVoiceTest()
+        {
+            try
+            {
+                if (threadRunning == true)
+                {
+                    thr.Abort();
+                    threadRunning = false;
+                }
+                FileStream fs = new FileStream(parent.LanguageDirectory + "\\seq_test.txt", FileMode.Open, FileAccess.Read);
+                StreamReader sr = new StreamReader(fs);
+                string word;
+                VoiceStrAr.Clear();
+                while (true)
+                {
+                    try { word = sr.ReadLine(); }
+                    catch (EndOfStreamException) { break; }
+                    if (word == null) break;
+                    switch (word)
+                    {
+                        default:
+                            if (word.Length > 0)
+                                VoiceStrAr.Add(word);
+                            break;
+                    }
+                }
+                sr.Close();
+                fs.Close();
+                thr = new Thread(new ThreadStart(VoiceThreadProc));
+                thr.Start();
+            }
+            catch (Exception e)
+            {
+                Utils.log.Error(" seq_test ", e);
+            }
+        }
 
+        [DllImport("coredll.dll")]
+        public static extern bool sndPlaySound(string fname, int flag);
 
+        // these are the SoundFlags we are using here, check mmsystem.h for more
+        const int SND_SYNC = 0x00000000;   // play synchronously (default)
+        const int SND_ASYNC = 0x0001; // play asynchronously
+        const int SND_FILENAME = 0x00020000; // use file name
+        const int SND_PURGE = 0x0040; // purge non-static events
+        const int SND_NOSTOP = 0x00000010;   // don't stop any currently playing sound
+        const int SND_NOWAIT = 0x00002000;   // don't wait if the driver is busy
+
+        
+        ArrayList VoiceStrAr = new ArrayList();
+        Thread thr;
+        bool threadRunning = false;
+        public void VoiceThreadProc()                 //use own thread and SYNC to chain several voice files
+        {
+            threadRunning = true;
+            sndPlaySound(null, 0);              //first stop any running voice
+            foreach (string str in VoiceStrAr)
+            {
+                sndPlaySound(parent.LanguageDirectory + "\\" + str, SND_SYNC | SND_FILENAME | SND_NOSTOP);
+            }
+            threadRunning = false;
+        }
 
 
         // make sure that the central point is stationary after zoom in / zoom out

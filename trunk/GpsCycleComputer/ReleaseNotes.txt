@@ -1,5 +1,32 @@
 GPS Cycle Computer GCC
 
+********* version 4.9 *********
+- speed up reading files for "Track2Follow"
+- speed up reading GPX files and make it compatible to XML syntax (now compatible to GPX files from crossingways)
+- in GPX export the track can be separated in segments when logging has gaps (Pause) of more than 10s (enable in Kml/Gpx options)
+- when automatic OSM map download is enabled, the visible map tiles can be forced to reload by context menue
+- compass in main screen can be configured in different styles (arrow, digital, letter)
+- additional log intervals: logging every 5m or 10m (but always every 30s) - settings index has changed, so check your setting if you use "run every x sec"
+- reduced flicker on menu page when scrolling (thanks to dokkis)
+- update button in About page (thanks to kilblg)
+- Navigation commands as text in map screen
+- Navigation commands as spoken voice in different languages and voices
+- Tracks are no longer restricted to 18 hours
+- Restore last session (active tracks). Done automatically after abnormal termination.
+- Odometer. You can set your initial ODO in gccState.txt (first line [m]). Don't change anything else!
+- Sattelite and Snr is no more blinking if $GPGSV is not sent every second (trusts for 10s)
+- foreground and background color can be set in options - main
+- file names of current track and t2f are now displayed in options (first page)
+- a warning is displayed if you try to continue a track which is more than 1km distant.
+- live logging with crossingways and automatic map download is now asynchron (doesn't block application)
+- all osm servers are defined in "osm_servers.txt" ("osm_server.txt" is no longer used)
+- osm download server are stored for each map separately in corresponding map directory in server.txt
+- edit T2F: add points click by click in map screen. Also remove and undo function.
+- support for heart rate belt. You need a hardware to feed the heart pulses into the microphone input.
+- time in GPX export is now UTC time, as required by GPX specification
+- new Format for csv-export in log1.csv
+
+
 ********* version 4.8 *********
 new features:
 - audio notes in waypoints
@@ -120,8 +147,6 @@ new features:
 - minor improvements and bug fixes
 
 
-known issues:
-- elevation gain (altitude gain) is showing too high value, if you move slowly or don't move
-- GPX files without "carriage returns" cannot be loaded (e.g. GPX files from crossingways.com)
+
 
 

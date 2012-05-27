@@ -1,0 +1,11 @@
+In.wav
+Twohundred.wav
+Meters.wav
+Turn.wav
+Half.wav
+Left.wav
+Pause.wav
+In.wav
+Two.wav
+Kilometers.wav
+YouHaveReachedYourDestination.wav

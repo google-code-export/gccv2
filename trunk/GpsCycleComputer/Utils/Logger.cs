@@ -11,6 +11,7 @@ namespace Log
         private FileStream fs;
         private StreamWriter wr;
         private bool logFileLocked = false;
+        public string closingMessage = null;
 
         public Logger (String path)
         {
@@ -53,13 +54,11 @@ namespace Log
         {
             checkFileLengh();
             while (logFileLocked) { }
-
             logFileLocked = true;
             wr.WriteLine(now() + " ERROR " + message);
             wr.WriteLine(e.ToString());
             wr.Flush();
             logFileLocked = false;
-
         }
         private  String now()
         {
@@ -72,23 +71,20 @@ namespace Log
         {
             while (logFileLocked) { }
             logFileLocked = true;
-            DateTime now = System.DateTime.Now;
             try
             {
-
-                FileInfo fi = new FileInfo(filePath);
-                if (fi.Length > 500000) // file size is in bytes (=500KB)
+                if (fs.Length > 500000) // file size is in bytes (=500KB)
                 {
-
                     fs.Close();
                     wr.Close();
-                    File.Move(filePath, filePath + now.Year + now.Month + now.Day + "_" +
-                                now.Hour + now.Minute + now.Second + now.Millisecond + ".log");
+                    DateTime now = System.DateTime.Now;
+                    string fileArch = filePath + now.Year + now.Month + now.Day + "_" +
+                                now.Hour + now.Minute + now.Second + now.Millisecond + ".log";
+                    File.Move(filePath, fileArch);
+                    closingMessage = "There is a remarkable number of error messages in " + fileArch;
                     fs = new FileStream(filePath, FileMode.Create);
                     wr = new StreamWriter(fs);
-
                 }
-                fi = null;
             }
             catch (Exception /*e*/)
             {

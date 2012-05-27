@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 using System.Windows.Forms;
-
+/* no more used
 namespace GpsCycleComputer
 {
     public class PictureSelectorButton : Control
@@ -38,4 +38,4 @@ namespace GpsCycleComputer
             base.OnPaint(e);
         }
     }
-}
+}*/

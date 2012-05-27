@@ -5,6 +5,7 @@ using System.IO;
 using System.Windows.Forms;
 using GpsCycleComputer;
 using GpsUtils;
+using System.Xml;
 
 namespace GpsSample.FileSupport
 {
@@ -12,6 +13,7 @@ namespace GpsSample.FileSupport
     {
         CultureInfo IC = CultureInfo.InvariantCulture;
 
+#if false
         public bool Load(string filename, ref Form1.WayPointInfo WayPoints,
             int vector_size, ref float[] dataLat, ref float[] dataLong, ref int[] dataT, out int data_size)
         {
@@ -34,12 +36,13 @@ namespace GpsSample.FileSupport
                 bool data_load_activated = false;
                 bool coordinates_found = false;
 
-                while (sr.Peek() != -1)
+                while (true)
                 {
                     // read a single word (if we detected the required section), or a whole line
                     if (data_load_activated)
                     {
                         line = LoadWord(ref sr);
+                        if (line == null) break;        //EndOfStream
 
                         // skip blank lines. Look for "<coordinates>" to trigger load values.
                         if (line == "") { continue; }
@@ -79,8 +82,10 @@ namespace GpsSample.FileSupport
                     }
                     else
                     {
-                        line = sr.ReadLine().Trim();
+                        line = sr.ReadLine();
+                        if (line == null) break;        //EndOfStream
 
+                        line = line.Trim();
                         if (line == "</kml>") { break; }
                         else if ((line.StartsWith("<LineString>")) || (line.StartsWith("<Point>")))
                         {
@@ -105,19 +110,147 @@ namespace GpsSample.FileSupport
             Cursor.Current = Cursors.Default;
             return Status;
         }
+#else
+
+        public bool Load(string filename, ref Form1.WayPointInfo WayPoints,
+                    int vector_size, ref float[] dataLat, ref float[] dataLong, ref int[] dataT, out int data_size)
+        {
+            bool Status = false;
+            data_size = 0;
+            WayPoints.WayPointCount = 0;
+
+            Cursor.Current = Cursors.WaitCursor;
+            try
+            {
+                XmlReaderSettings settings = new XmlReaderSettings();
+                settings.IgnoreWhitespace = true;
+                StreamReader sr = new StreamReader(filename, System.Text.Encoding.UTF8);        //use StreamReader to overwrite encoding ISO-8859-1, which is not supported by .NETCF (no speed drawback)
+                XmlReader reader = XmlReader.Create(sr, settings);
+                //reader.MoveToContent();
+                
+                //reader.Read();
+                while (reader.ReadToFollowing("Placemark"))
+                {
+                    string tmpname = null;
+                    string tmpdescription = null;
+
+                    reader.Read();
+                    while (reader.NodeType == XmlNodeType.Element)
+                    {
+                        if (reader.Name == "name")
+                        {
+                            tmpname = reader.ReadElementString();       //prepared for later use
+                        }
+                        else if (reader.Name == "description")
+                        {
+                            tmpdescription = reader.ReadElementString();       //prepared for later use
+                        }
+                        else if (reader.Name == "LineString")
+                        {
+                            reader.Read();
+                            while (reader.NodeType == XmlNodeType.Element)
+                            {
+                                if (reader.Name == "coordinates")
+                                {
+                                    reader.ReadStartElement();
+                                    while (true)
+                                    {
+                                        string line = "";
+                                        char[] buf = new char[1];
+                                        int count = 1;
+                                        for (int i = 0; i < 100; i++)       //read one line
+                                        {
+                                            count = reader.ReadValueChunk(buf, 0, 1);
+                                            if (buf[0] == '\n' || buf[0] == ' ' || buf[0] == '\r' || buf[0] == '\t' || count == 0)
+                                                break;
+                                            line += buf[0];
+                                        }
+                                        if (data_size >= vector_size)     // check if we need to decimate arrays
+                                        {
+                                            for (int i = 0; i < vector_size / 2; i++)
+                                            {
+                                                dataLat[i] = dataLat[i * 2];
+                                                dataLong[i] = dataLong[i * 2];
+                                                dataT[i] = dataT[i * 2];
+                                            }
+                                            data_size = vector_size / 2;
+                                        }
+                                        
+                                        string[] numbers = line.Split(',');
+                                        if (numbers.Length >= 2)            //read data
+                                        {
+                                            dataLong[data_size] = (float)Convert.ToDouble(numbers[0], IC);
+                                            dataLat[data_size] = (float)Convert.ToDouble(numbers[1], IC);
+                                            dataT[data_size] = 0;           //clear data in case there is no <time> field
+                                            data_size++;
+                                        }
+                                        if (count == 0)
+                                            break;
+                                    }
+                                    reader.Skip();      //advances reader to the next (End) Element
+                                }
+                                else
+                                    reader.Skip();
+                            }
+                            reader.ReadEndElement();
+                        }
+                        else if (reader.Name == "Point")
+                        {
+                            WayPoints.name[WayPoints.WayPointCount] = tmpname;
+                            reader.Read();
+                            while (reader.NodeType == XmlNodeType.Element)
+                            {
+                                if (reader.Name == "coordinates")
+                                {
+                                    string line = reader.ReadString();
+                                    string[] numbers = line.Split(',');
+                                    if (numbers.Length >= 2)
+                                    {
+                                        WayPoints.lon[WayPoints.WayPointCount] = (float)Convert.ToDouble(numbers[0], IC);
+                                        WayPoints.lat[WayPoints.WayPointCount] = (float)Convert.ToDouble(numbers[1], IC);
+                                        WayPoints.WayPointCount++;
+                                    }
+                                }
+                                else
+                                    reader.Skip();
+                            }
+                            reader.ReadEndElement();
+                        }
+                        else
+                            reader.Skip();
+                    }
+                    reader.ReadEndElement();    // /LineString or ..
+                    //reader.ReadEndElement();    // /Placemark   do not read here, because ReadToFollowing would not find consecutive Placemark if it is also on it
+                }
+
+                reader.Close();
+                Status = true;
+            }
+            catch (Exception e)
+            {
+                Utils.log.Error(" LoadKml ", e);
+            }
+            Cursor.Current = Cursors.Default;
+            return Status;
+        }
+
+#endif
 
         // read one word
         public string LoadWord(ref StreamReader sr)
         {
             string word = "";
-            char[] buf = new char[1];
+            int character;
             try
             {
-                while (sr.Peek() != -1)
+                while (true)
                 {
-                    sr.Read(buf, 0, 1);
-                    if ((buf[0] != ' ') && (buf[0] != '\t') && (buf[0] != '\r') && (buf[0] != '\n'))
-                    { word += buf[0]; }
+                    character = sr.Read();
+                    if (character == -1) return null;
+
+                    char c = (char)character;
+                    if ((c != ' ') && (c != '\t') && (c != '\r') && (c != '\n'))
+                    { word += c; }
                     else
                     {
                         // break if any chars has been loaded, otherwise simply skip the blanks

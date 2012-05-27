@@ -34,11 +34,7 @@ namespace GpsCycleComputer
                     this.Text = s;
                 }
 
-                e.Graphics.DrawString(this.Text,
-                                      this.Font,
-                                      new SolidBrush(this.ForeColor),
-                                      (this.ClientSize.Width - size.Width) / 2, 
-                                      (this.ClientSize.Height - size.Height) / 2);
+                e.Graphics.DrawString(this.Text, this.Font, new SolidBrush(this.ForeColor), 0, 0);
             }
 
             base.OnPaint(e);

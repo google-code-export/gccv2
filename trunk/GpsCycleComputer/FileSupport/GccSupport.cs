@@ -8,7 +8,7 @@ using GpsCycleComputer;
 namespace GpsSample.FileSupport
 {
     class GccSupport : IFileSupport
-    {
+    {                                                                   //load as T2F (WayPoints)
         public bool Load(string filename, ref Form1.WayPointInfo WayPoints,
             int vector_size, ref float[] dataLat, ref float[] dataLong, ref int[] dataT, out int data_size)
         {
@@ -49,18 +49,20 @@ namespace GpsSample.FileSupport
                     Int16 x_int = 0; Int16 y_int = 0; Int16 z_int = 0; Int16 s_int = 0;
                     UInt16 t_16 = 0; UInt16 t_16last = 0; Int32 t_high = 0;
                     double out_lat = 0.0, out_long = 0.0;
+                    UInt32 recordError = 0;
 
-                    while (rd.PeekChar() != -1)
+                    while (true)    //break with EndOfStreamException
                     {
                         // get 5 short ints
                         try
                         {
-                            if (rd.PeekChar() != -1) { x_int = rd.ReadInt16(); } else { break; }
-                            if (rd.PeekChar() != -1) { y_int = rd.ReadInt16(); } else { break; }
-                            if (rd.PeekChar() != -1) { z_int = rd.ReadInt16(); } else { break; }
-                            if (rd.PeekChar() != -1) { s_int = rd.ReadInt16(); } else { break; }
-                            if (rd.PeekChar() != -1) { t_16 = rd.ReadUInt16(); } else { break; }
+                            x_int = rd.ReadInt16();
+                            y_int = rd.ReadInt16();
+                            z_int = rd.ReadInt16();
+                            s_int = rd.ReadInt16();
+                            t_16 = rd.ReadUInt16();
                         }
+                        catch (EndOfStreamException) { break; }
                         catch (Exception e)
                         {
                             Utils.log.Error(" LoadGcc - get 5 short ints ", e);
@@ -68,40 +70,49 @@ namespace GpsSample.FileSupport
                         }
 
                         // check if this is a special record
-                        // battery: z_int = 1
-                        if ((s_int == -1) && (t_16 == 0xFFFF) && (z_int == 1))
+                        if ((s_int == -1) && (t_16 == 0xFFFF))
                         {
-                        }
-                        // origin shift: z_int = 0
-                        else if ((s_int == -1) && (t_16 == 0xFFFF) && (z_int == 0))
-                        {
-                            OriginShiftX += x_int;
-                            OriginShiftY += y_int;
-                        }
-                        // which GPS options were selected: z_int = 2
-                        else if ((s_int == -1) && (t_16 == 0xFFFF) && (z_int == 2))
-                        {
-                        }
-                        // checkpoint
-                        else if ((s_int == -1) && (t_16 == 0xFFFF) && (z_int == 3))
-                        {
-                            // read checkpoint name, if not blank
-                            string name = "";
-                            for (int i = 0; i < x_int; i++)
+                            switch (z_int)
                             {
-                                name += (char)(rd.ReadUInt16());
-                            }
-                            // store new checkpoint
-                            if (WayPoints.WayPointCount < (WayPoints.WayPointDataSize - 1))
-                            {
-                                WayPoints.name[WayPoints.WayPointCount] = name;
-                                WayPoints.lat[WayPoints.WayPointCount] = (float)out_lat;
-                                WayPoints.lon[WayPoints.WayPointCount] = (float)out_long;
-                                WayPoints.WayPointCount++;
+                                case 0: // origin shift: z_int = 0
+                                    OriginShiftX += x_int;
+                                    OriginShiftY += y_int;
+                                    break;
+                                case 1: // battery: z_int = 1
+                                    break;
+                                case 2: // which GPS options were selected: z_int = 2
+                                    break;
+                                case 3: // checkpoint
+                                    // read checkpoint name, if not blank
+                                    string name = "";
+                                    for (int i = 0; i < x_int; i++)
+                                    {
+                                        name += (char)(rd.ReadUInt16());
+                                    }
+                                    // store new checkpoint
+                                    if (WayPoints.WayPointCount < (WayPoints.WayPointDataSize - 1))
+                                    {
+                                        WayPoints.name[WayPoints.WayPointCount] = name;
+                                        WayPoints.lat[WayPoints.WayPointCount] = (float)out_lat;
+                                        WayPoints.lon[WayPoints.WayPointCount] = (float)out_long;
+                                        WayPoints.WayPointCount++;
+                                    }
+                                    break;
+                                case 4: // heart rate
+                                    break;
+                                default:
+                                    if ((1 << z_int & recordError) == 0)
+                                    {
+                                        if (MessageBox.Show("unknown special record " + z_int + "\ntry to load anyway?", "Load Error",
+                                            MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1)
+                                            == DialogResult.Cancel)
+                                            throw new ApplicationException();
+                                        recordError |= 1U << z_int;
+                                    }
+                                    break;
                             }
                         }
-                        // "normal" record
-                        else
+                        else    // "normal" record
                         {
                             // take into account the origin shift
                             double real_x = OriginShiftX + x_int;
@@ -128,16 +139,6 @@ namespace GpsSample.FileSupport
                             t_16last = t_16;
                             dataT[Counter] = t_high + t_16;
                             Counter++;
-
-                            try
-                            {
-                                rd.PeekChar();
-                            }
-                            catch (Exception e)
-                            {
-                                Utils.log.Error(" LoadGcc -  PeekChar", e);
-                                break;
-                            }
                         }
                     }
 

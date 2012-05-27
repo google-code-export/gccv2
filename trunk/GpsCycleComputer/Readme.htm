@@ -12,7 +12,7 @@ content="text/html; charset=iso-8859-1"/>
 
 <table border="0" width="450">
     <tr>
-        <td style="width: 669px"><h1><font face="Arial">GPS Cycle Computer 4.8</font></h1>
+        <td style="width: 669px"><h1><font face="Arial">GPS Cycle Computer 4.9</font></h1>
         <font size="2" face="Arial">Tip: You can copy this file (Readme.htm) to your Desktop
             PC and read it there more comfortable.</font><h2>
                 <font face="Arial" size="3">1. General Description</font></h2>
@@ -75,8 +75,8 @@ content="text/html; charset=iso-8859-1"/>
         <p><font size="2" face="Arial">Copy the
         GpsCycleComputer.CAB file into your Windows Mobile device
         and click on it from your phone FileExplorer to install.
-        The tool can be intalled into any folder, so probably it
-        is better to install it into &quot;Internal
+        The tool can be installed into any folder, so probably it is better to install it on "Storage
+            Card" or into &quot;Internal
         Storage&quot;, to save main memory. The path to the tool
         (on UK Windows) will be then \Internal Storage\Program
         Files\GpsCycleComputer. You can also find this Readme.htm
@@ -245,7 +245,8 @@ content="text/html; charset=iso-8859-1"/>
             <li><strong>File/Export</strong>: file operations like load GCC files and save KML or GPX files&nbsp;</li>
             <li><strong>Track2Follow</strong>: load a track as second line in map which you can follow. Valid file
                 formats are GCC, KML and GPX.</li>
-            <li><strong>ClearTrack</strong> / <strong>Clear2Follow</strong>: clears the main track or 'track to follow'.</li>
+               <li><strong>Restore</strong>: restores the last session (loaded Track and Track2Follow).
+                   This is done automatically after an abnormal termination (crash).&nbsp;</li>
             <li><strong>Exit</strong> </li>
                <li><strong>Navigate</strong>: The navigation screen shows a big arrow which points
                    in the direction which you must drive to follow the Track2Follow. The arrow points
@@ -254,7 +255,10 @@ content="text/html; charset=iso-8859-1"/>
                    to the T2F if it is more than 100m. By means of context menu you can navigate backward
                    on the Track2Follow. Also you can configure if you want to see the navigation button
                    in the bottom menu column (note: go to menu page - Navigate to display navigation
-                   screen and reenable this feature).&nbsp;</li>
+                   screen and reenable this feature).<br />
+                   You can enable or disable voice commands which guides you audible along the T2F.
+                   You can select the language in the first option page. To create your own voice see
+                   <a href = "file:local\Readme.txt">Readme.txt</a> in subdirectory 'local'.  </li>
             <li><strong>Lap</strong>: (see below)&nbsp;</li>
             <li><strong>Recal 1 .. 3</strong>: with
                 these 3 buttons you can recall different option settings. Use the context menu to
@@ -264,22 +268,24 @@ content="text/html; charset=iso-8859-1"/>
                 just recalled. The settings are stored in the application
                 directory in files with the name of the setting extended with .dat.
                 The name of the current loaded setting is displayed in Main display at the top of
-                the Info field&nbsp;</li>
-            <li><strong>BKLight</strong>: by default, you
-                shall be able to switch your phone off by the
-                hardware power button, and the GPS will continue
-                logging. If this does not work on your phone (or
-                you do NOT want to use &quot;read GPS data
-                directly&quot; settings) - then you shall use this button
-                to switch off the screen during logging. Remark: the buttons keep enabled so
-                you can reactivate your device.</li>
+                the Info field</li>
+               <li><strong>ClearTrack</strong> / <strong>Clear2Follow</strong>: clears the main track or 'track to follow'.&nbsp; </li>
             <li><strong>Input LatLon</strong>: is useful to browse map on a specific place or to navigate to a specific position (e. g. Geocaching).
                 <br />
                 The input is allowed in any format (dd.dddddd or Ndd°mm.mmmm' or Ndd°mm'ss.ss").
                 The characters (N,S,E,W and ° ' ") can be omitted or replaced by sign or blank respectively.
                 Lat and Long are separated by semicolon or by the first Letter of Longitude (E,
                 W).</li>
-            <li><strong>Continue</strong>: continues a previous recorded track.</li>
+            <li><strong>Continue</strong>: continues a previous recorded track.
+            A warning is displayed if you try to continue a track which is more than 1km distant.</li>
+               <li><strong>BKLight</strong>: by default, you
+                shall be able to switch your phone off by the
+                hardware power button, and the GPS will continue
+                logging. If this does not work on your phone (or
+                you do NOT want to use &quot;read GPS data
+                directly&quot; settings) - then you shall use this button
+                to switch off the screen during logging. Remark: the buttons keep enabled so
+                you can reactivate your device.&nbsp; </li>
             <li><strong>Help</strong>: displays "Readme.html" in your browser.</li>
             <li><strong>About</strong>: displays "About page".</li>
             </font>
@@ -295,10 +301,10 @@ content="text/html; charset=iso-8859-1"/>
         &quot;year&quot;+&quot;month&quot;+&quot;day&quot;+&#148;_
         &#147;+&#148;hour&quot;+&quot;min&quot;+&quot;sec&quot;+
         .gcc. The files are stored in the directory which you can
-        set in Options. By default this is the directory where
+        set in Options. By default this is&nbsp; a subdirectory "tracks" of the directory where
         the executable is installed. It is also possible to enter
         a custom file name (see Options). Also a file
-        &#147;log.csv&#148;, located in the same folder as gcc
+        “log1.csv”, located in the same folder as gcc
         files, is updated with the summary of the trace (one line
         per trace / gcc file) &#150; to give you a quick overview
         of all your logs in that folder.</font></p>
@@ -334,7 +340,7 @@ content="text/html; charset=iso-8859-1"/>
         <p><font size="2" face="Arial">To view GPX files you can
         try http://utrack.crempa.net/ web site. Also you can view
         GPX files in GoogleEarth (go to File | Load menu).</font></p>
-        <p><font size="2" face="Arial">GCC file are assosiated
+        <p><font size="2" face="Arial">GCC files are assosiated
         with GPS Cycle Computer, so you can also open gcc file by
         clicking on it from FileExplorer on your phone. But the
         tool does not load the settings correctly in this case,
@@ -382,7 +388,11 @@ content="text/html; charset=iso-8859-1"/>
                 folders only</u>, so please create new folders
                 using File Explorer. Also you can use File
                 Explorer to rename/move/copy gcc files, if
-                required. .</font></li>
+                required.</font></li>
+            <li><font face="Arial" size="2"></font><strong>Set local\language directory ...</strong>
+                - select the language/voice for the spoken voice navigation commands.</li>
+            <li>Status display of <strong>Current File Name</strong>, <strong>Track to Follow</strong>
+                and <strong>Info</strong>.&nbsp;</li>
         </ul>
         <p><font size="2" face="Arial"><strong><u>Page &quot;GPS
         options&quot;</u></strong><strong>:</strong></font></p>
@@ -477,6 +487,8 @@ content="text/html; charset=iso-8859-1"/>
                 screen, show altitude relative to the starting
                 point, instead of the absolute altitude. Default
                 off.</font></li>
+            <li><strong>Select fore/back-color...</strong> : you can select the colors from a color
+                stripe or enter RGB values.</li>
         </ul>
         <p><font size="2" face="Arial"><strong><u>Page &quot;Maps
         screen options&quot;</u></strong><strong>:</strong></font></p>
@@ -536,8 +548,8 @@ content="text/html; charset=iso-8859-1"/>
                 style (i.e. each server) using FileExplorer. To
                 specify the map folder, click &quot;Set maps
                 files location&quot; button on the first page of
-                &quot;Options&quot;. For more information see
-                section 6, &quot;Maps&quot; below.</font></li>
+                &quot;Options&quot;. The server address and Download ON/OFF is stored for each map separately. For more
+                information see section 10.5 "Automatic OpenStreetMap download" below.</font></li>
             <li><font size="2" face="Arial"><strong>Default zoom</strong> - specifies the default distance in meters which is displayed
                 in either direction around the current position.</font></li>
         </ul>
@@ -550,7 +562,7 @@ content="text/html; charset=iso-8859-1"/>
                 &quot;absolute&quot;. With this option on, you
                 shall see a 3D line above terrain. When this
                 options is off, then the track line just follows
-                the terrain. Note the the absolute value for the
+                the terrain. Note the absolute value for the
                 altitude is offset by GEOID value (see option
                 below), so you can move the line up/down, if
                 required, by changing the GEOID setting before
@@ -582,6 +594,10 @@ content="text/html; charset=iso-8859-1"/>
                 corresponding time adjustment. &quot;+1&quot;
                 means that 1 hour will be <u>added</u> to every
                 time sample before saving into GPX file.</font></li>
+            <li><span style="font-size: 10pt"><span style="font-family: Arial"><strong>Separate
+                GPX trkseg if gap &gt; 10s </strong>- if checked and the logged track is interrupted
+                for more than 10s (e.g. by pressing Pause or failing GPS signal) the track in GPX
+                export will be separated in different track segments.</span></span>&nbsp;</li>
         </ul>
         <p><font size="2" face="Arial"><strong><u>Page &quot;Live
         logging options&quot;:</u></strong><strong> </strong></font></p>
@@ -649,7 +665,9 @@ content="text/html; charset=iso-8859-1"/>
 			<li><font size="2" face="Arial">&quot;<strong>Speed</strong>&quot;:
 				Directly in the main screen by context menu of the <strong>Speed</strong> field you
                 can choose if speed is taken from the corresponding GPS sentence or if it is calculated
-                from the moving position (or both).</font></li>
+                from the moving position (or both).<br />
+                In addition you can enable heart rate support here (see section 13. Heart
+                Rate Support).</font></li>
 			<li><font size="2" face="Arial">&quot;<strong>Altitude</strong>&quot;:
 				In the <strong>Altitude</strong> field you can choose between <strong>"Altitude gain"</strong> (sum
                 of increasing altitude), <strong>"Altitude loss"</strong> (sum of falling altitude),
@@ -660,33 +678,50 @@ content="text/html; charset=iso-8859-1"/>
 				In the context menu of the <strong>Distance</strong> field, you can choose between the 
 				distance <strong>since start of the trip</strong> or the distance between the current 
 				position and the <strong>track to follow start</strong> or <strong>track to follow end</strong>
-				position (air-line, not real remaining length of the track).</font></li>
+				position (air-line, not real remaining length of the track). Further you can change
+                the display to <strong>"ODO"</strong> (overall distance). You can set your initial
+                ODO in "gccState.txt" 
+                (first line in m; hint: 1 mile is 1609.344m). Don't change anything else!.</font></li>
+            <li><font size="2" face="Arial">"<strong>GPS</strong>": By context menu you can choose to have a beep on GPS fix.
+                The compass can be configured to show "north" instead of "heading" (direction of
+                movement). You can select to log the raw nmea data in \tmp.txt. The compass style can be set to "graphic", "digital" or "letter" (with
+                needle). Finally the format of Lat and Lon can be altered.</font></li>
 		</ul>
         <p><font size="2" face="Arial"><strong><u>Context menu &quot;Map screen&quot;:</u></strong></font></p>
         <p><font size="2" face="Arial">
                 On the <strong>Map screen</strong> you have the following options in the context menu:
 				</font></p>
 		<ul>
-			<li><font size="2" face="Arial">&quot;<strong>Show track to follow - start / end:</strong>&quot;:
-				By selecting this option, the start / end position of the track to follow is displayed in the
-				center of the map screen.<br>
-				If one of this options is activated, the map screen will not follow the current position, 
-				even if you move.
-				This options are only available, if a track to follow is loaded.</font></li>
 			<li><font size="2" face="Arial">&quot;<strong>Reset map (GPS/last)</strong>&quot;:
 				The current or last position is displayed in the center of the screen. If you move, the screen 
 				will follow your movement. This option has the same effect as an double click on the 
 				map screen.</font></li>
+            <li><font face="Arial" size="2">"<strong>Show track to follow - start / end:</strong>&quot;:
+				By selecting this option, the start / end position of the track to follow is displayed in the
+				center of the map screen.<br>
+				If one of this options is activated, the map screen will not follow the current position, 
+				even if you move.
+				This options are only available, if a track to follow is loaded.</font> </li>
+			<li><span style="font-size: 10pt; font-family: Arial">"<strong>Edit t2f (add points)</strong>":
+                You can add points to the "track to follow" direct in map click by click. To leave
+                the edit mode select this menu point again.</span>&nbsp;</li>
 			<li><font size="2" face="Arial">&quot;<strong>Add waypoint</strong>&quot;:
 				You can directly add a waypoint to your current tracklog. This option is only available, 
 				if a tracklog is recorded.</font></li>
 			<li><font size="2" face="Arial">&quot;<strong>Show waypoints</strong>&quot;:
 				If a track to follow is loaded and includes waypoints, you can select to show or hide displaying 
 				waypoints.</font></li>
-            <li><font size="2" face="Arial">&quot;<strong>Hide track</strong>&quot;: here you can hide the track in order to see better the track to follow
-                or the map. This setting is not stored permanently.</font></li>
+            <li><font size="2" face="Arial">&quot;<strong>Navigate backward</strong>": navigate
+                the opposite direction than the t2f was recorded.</font></li>
+            <li><font face="Arial" size="2">"<strong>Hide navigation</strong>": don't show navigation
+                arrows in map.</font></li>
+            <li><font face="Arial" size="2">"<strong>Hide track</strong>": here you can hide the
+                track in order to see better the track to follow or the map. This setting is not
+                stored permanently.</font> </li>
             <li><font size="2" face="Arial">&quot;<strong>Hide map</strong>&quot;: here you can hide the map in order to see better the
                         track. This setting is not stored permanently.</font></li>
+            <li><font face="Arial" size="2"></font><span style="font-size: 10pt; font-family: Arial">
+                "<strong>Reload map tiles</strong>": reload all visible map tiles from osm server.</span>&nbsp;</li>
 		</ul>
             
         <h2>
@@ -732,7 +767,10 @@ content="text/html; charset=iso-8859-1"/>
             <h2>
                 <font face="Arial" size="3">10. Maps</font>
             </h2>
-        <p><font size="2" face="Arial">A &#147;map&#148; is any
+        <p><font size="2" face="Arial">The most powerful and most convenient method of using
+            maps is to use OSM-type maps, described in chapter 10.4.</font></p>
+            <p>
+                <font face="Arial" size="2">A &#147;map&#148; is any
         JPEG image with known coordinates of the corners. It is
         plotted as a background on &#147;Maps&#148; page. Maps
         are automatically selected &#150; the map which has
@@ -932,13 +970,17 @@ content="text/html; charset=iso-8859-1"/>
         <p><font size="2" face="Arial">My favorite is another powerful tool <strong>"Mobile Atlas Creator"</strong>
             to download tiles, which is available from: 
         </font><a
-        href="http://mobac.dnsalias.org/index.html"><font size="2"
-        face="Arial">http://mobac.dnsalias.org/index.html</font></a><font
+        href="http://mobac.sourceforge.net/"><font size="2"
+        face="Arial">http://mobac.sourceforge.net/</font></a><font
         size="2" face="Arial">. Mobile Atlas Creator supports many map sources and 
         can create different map formats. The format<strong> "OSMTracker tile storage"</strong> is compatible
         to GCC. In some cases it may be advantageous to apply the "custom tile
             processing" for example to convert 170kB .png files into 25kB .jpg files (the x/y
-            size must be kept at 256x256!). </font></p>
+            size must be kept at 256x256!).</font></p>
+            <p>
+                If you want to download maps with your mobile device, there is a small tool<font
+                    face="Arial" size="2"> <strong>"PDATileManager"</strong>, with which you can download
+                    tiles for a whole area.</font></p>
         <p><font size="2" face="Arial">For more info visit </font><a
         href="http://www.openstreetmap.org"><font size="2"
         face="Arial">www.openstreetmap.org</font></a><font
@@ -949,7 +991,8 @@ content="text/html; charset=iso-8859-1"/>
         option to automatically download OSM tiles which do not
         exist on your phone, and are required for the current
         display. To enable this option, select a server name to
-        be used from &quot;Download&quot; combo-box. Note that
+        be used from &quot;Download&quot; combo-box and check the
+            Download checkbox. Note that
         different server have maps in different
         &quot;styles&quot;, so you need to select different
         folders for different maps. If you are using this option
@@ -963,32 +1006,41 @@ content="text/html; charset=iso-8859-1"/>
         missing and requried for display will be downloaded
         there. This way your &quot;tile collection&quot; will
         grow. Note that if a tile file already exist, then it
-        will not be downloaded, so if you want to download a tile
-        again, select a new blank folder, or delete files from
-        existing folder.</font></p>
-        <p><font size="2" face="Arial">There is 10 second timeout
+        will not be downloaded automatically.
+            If you want to download the visible tiles
+        again, select "reload map tiles" from
+            context menu.</font></p>
+        <p><font size="2" face="Arial">There is a 30 second timeout
         for a tile download, so if a server does not reply within
         this time, you will see &quot;Download Error&quot; on the
         map display. This could happen if a server is busy, so
         you can try again - just move the map with your finger or
         press zoom buttons - the map update will trigger
         download.</font></p>
-        <p><font size="2" face="Arial">The predefined list of
-        servers are:</font></p>
+        <p><font size="2" face="Arial">The download servers are defined in the file "osm_servers.txt"
+            in the application folder. (the former file osm_server.txt is no more used.)</font></p>
+            
+                <p><font face="Arial" size="2">If the file osm_servers.txt doesn't exist it will be
+                    created with the predefined list of servers:</font></p>
         <ul>
             <li><font size="2" face="Arial">Osmarender </font><a
                 href="http://tah.openstreetmap.org/Tiles/tile/"><font
-                size="2" face="Arial">http://tah.openstreetmap.org/Tiles/tile/</font></a></li>
+                size="2" face="Arial">http://a.tile.openstreetmap.org/</font></a></li>
             <li><font size="2" face="Arial">Mapnik </font><a
                 href="http://tile.openstreetmap.org/mapnik/"><font
                 size="2" face="Arial">http://tile.openstreetmap.org/mapnik/</font></a><font
                 size="2" face="Arial"> </font></li>
-            <li><font size="2" face="Arial">Cyclemap (CloudMade) </font><a
+            <li><font size="2" face="Arial">Cyclemap </font><a
                 href="http://c.andy.sandbox.cloudmade.com/tiles/cycle/"><font
-                size="2" face="Arial">http://c.andy.sandbox.cloudmade.com/tiles/cycle/</font></a></li>
+                size="2" face="Arial">http://c.tile.opencyclemap.org/cycle/</font></a></li>
             <li><font size="2" face="Arial">OpenPisteMap </font><a
                 href="http://openpistemap.org/tiles/contours/"><font
                 size="2" face="Arial">http://tiles.openpistemap.org/contours/</font></a></li>
+            <li><span style="font-size: 10pt; font-family: Arial">OpenPisteMap Landshaded </span>
+                <a
+                href="http://openpistemap.org/tiles/contours/"><font
+                size="2" face="Arial">http://tiles.openpistemap.org/landshaded/</font></a>
+            </li>
             <li><font size="2" face="Arial">CloudMade Web style </font><a
                 href="http://tile.cloudmade.com/8bafab36916b5ce6b4395ede3cb9ddea/1/256/"><font
                 size="2" face="Arial">http://tile.cloudmade.com/8bafab36916b5ce6b4395ede3cb9ddea/1/256/</font></a></li>
@@ -1000,27 +1052,39 @@ content="text/html; charset=iso-8859-1"/>
                 style </font><a
                 href="http://tile.cloudmade.com/8bafab36916b5ce6b4395ede3cb9ddea/3/256/"><font
                 size="2" face="Arial">http://tile.cloudmade.com/8bafab36916b5ce6b4395ede3cb9ddea/3/256/</font></a></li>
+            <li><span style="font-size: 10pt; font-family: Arial">MapQuest </span><a
+                href="http://otile1.mqcdn.com/tiles/1.0.0/osm/">
+                <font
+                size="2" face="Arial">http://otile1.mqcdn.com/tiles/1.0.0/osm/</font></a></li>
+            <li><span style="font-size: 10pt; font-family: Arial">MapQuest Open Aerial </span>
+                <a
+                href="http://oatile1.mqcdn.com/naip/"><font
+                size="2" face="Arial">http://oatile1.mqcdn.com/naip/</font></a></li>
         </ul>
-        <p><font size="2" face="Arial">You can specify any OSM
-        server, if requred - just edit a file called
-        &quot;osm_server.txt&quot;, which is created in the same
-        folder as GpsCycleComputer.exe, then restart the tool
-        (the file is re-loaded when the tool starts), and select
-        &quot;User-defined&quot; in the &quot;Download&quot;
-        combo-box. The osm_server.txt shall contain a single
-        line, which is the name of the server to use. The server
+        <p><font size="2" face="Arial">You can specify any additional OSM server, if requred.
+            The osm_servers.txt shall contain in each line the name of the server (which is
+            displayed in the combobox) and separated with a semicolon (;) the http server address. The server
         address shall finish with &quot;/&quot;, as the required
-        zoom, X coordinates and PNG file name will be appended
+        zoom, X coordinates and Y.PNG file name will be appended
         after the &quot;/&quot;, e.g an example address could be </font><a
         href="http://tah.openstreetmap.org/Tiles/tile/10/12/33.PNG"><font
-        size="2" face="Arial">http://tah.openstreetmap.org/Tiles/tile/10/12/33.PNG</font></a><font
-        size="2" face="Arial"> for a server </font><a
+        size="2" face="Arial">http://a.tile.openstreetmap.org/10/12/33.PNG</font></a>.<font
+        size="2" face="Arial"> The corresponding line in osm_servers.txt should be:<br />
+        </font><a
         href="http://tah.openstreetmap.org/Tiles/tile/"><font
-        size="2" face="Arial">http://tah.openstreetmap.org/Tiles/tile/</font></a><font
-        size="2" face="Arial">. Is is a good idea to try to
+        size="2" face="Arial">OpenStreetMap; http://a.tile.openstreetmap.org/</font></a><font
+        size="2" face="Arial"><br />
+          It is a good idea to try to
         access such a sample address using a web browser, to
         check that you can see PNG images at that server, i.e.the
-        server is working.</font></p>
+        server is working.
+            A list of tile servers is available at: <a href = "http://wiki.openstreetmap.org/wiki/Tileserver">
+            http://wiki.openstreetmap.org/wiki/Tileserver</a>.</font></p>
+        <p>
+        <font size="2" face="Arial">For each map (directory) there is the corresponding download
+        enable state and download server stored in a file "server.txt" in the corresponding map
+        directory.</font></p>
+        
         <p><font size="2" face="Arial"><strong><u>10.6 Map
         selection.</u></strong> The maps are automatically
         selected - as you touch and lift you finger from the
@@ -1083,8 +1147,11 @@ content="text/html; charset=iso-8859-1"/>
         any .gcc files on the &quot;Main&quot; page), then you
         shall be able to see both tracks plotted on the Maps page
         - note that you can set line style (color, width and plot
-        as line/dots) for each track separatelly. </font>
-            </p>
+        as line/dots) for each track separatelly.</font></p>
+            <p><font size="2" face="Arial">You can also enter Track2Follow manually direct in map
+                screen: With context menu switch on "edit t2f
+                (add points)". Then enter t2f click by click in map. With context menu you can "remove
+                last point of t2f" and "undo remove point". Finally switch off edit mode.</font></p>
         <p><font size="2" face="Arial">To clear
         &quot;track-to-follow&quot; press "Clear2Follow"
         button. You shall see message at the bottom of the screen
@@ -1108,7 +1175,7 @@ content="text/html; charset=iso-8859-1"/>
         <h2><font size="3" face="Arial">12. Custom button skins
         and custom back / fore color </font></h2>
         <p><font size="2" face="Arial">You can set your own
-        background / text color and images for all buttons. All
+        images for all buttons. All
         what required is to edit jpeg files which are supplied
         with the source code (look into
         GpsCycleComputerSource.zip) and copy the new images into
@@ -1122,15 +1189,23 @@ content="text/html; charset=iso-8859-1"/>
         (there are two images, as button has two states,
         &quot;normal&quot; and &quot;pressed&quot;). Better do
         not change the image sizes, to avoid image distortions.</font></p>
-            <p>
-                <font face="Arial" size="2">
-        To change the background color, edit file
-        &#147;bk_color.jpg&#148;. The image shall be filled with
-        a single color (one pixel is enough). For the font (fore) color, edit
-        fore_color.jpg (and place them with
-        GpsCycleComputer.exe). For the night scheme
-            use bk_color_night.jpg and fore_color_night.jpg.&nbsp;</font></p>
-        <h2><font size="3" face="Arial">13. Command Line Interface</font></h2>
+            <p><font size="2" face="Arial">
+                The fore and back color can be changed in Options - Main screen - Select fore/back-color. Take care not to use the same color for fore
+                and back-color...</font></p>
+        <h2><font size="3" face="Arial">13. Heart Rate Support</font></h2>
+            <p><font size="2" face="Arial">By context menu (or double click) on the main screen in Speed field you can enable heart rate support
+            and display heart rate below the speed. The configuration "speed + hr + signal" is intended for testing and shows also the signal strength.
+                The heart rate can also be viewed in Graph over time or distance.</font></p>
+            <p><font size="2" face="Arial">You need a hardware to feed the pulses of a common heart rate belt into the microphone input of your device.
+            The simplest way is to replace the microphone of a head set with a coil and place it close to the heart rate belt
+                (use the signals strength indicator to find an optimal position). With an amplifier
+                and filter circuit it is possible to get over a distance of 1m. For details
+                see the wiki page at the project site:<br />
+                <a href="http://code.google.com/p/gccv2/wiki/HeartRate"><span style="font-size: 12pt; font-family: Times New Roman">http://code.google.com/p/gccv2/wiki/HeartRate.</span></a></font></p>
+            <p><font face="Arial" size="2">If you want to make/answer a phone call while using
+                this feature, it may be neccessary not only to unplug the adapter but also to stop
+                the heart rate feature by double click on the speed field.</font></p>
+        <h2><font size="3" face="Arial">14. Command Line Interface</font></h2>
         <p><font size="2" face="Arial">You can create a shortcut with a parameter to load a
             file at startup.<br />
             Valid file types are:<br />
@@ -1145,7 +1220,7 @@ content="text/html; charset=iso-8859-1"/>
             file could look like:<br /></font>
             <font size="1" face="Courier New">101#"\Program Files\GpsCycleComputer\GpsCycleComputer.exe"
                 "\Program Files\GpsCycleComputer\Recall 1.dat"</font><font face="Arial" size="2">&nbsp;</font></p>
-        <h2><font size="3" face="Arial">14. Source code</font></h2>
+        <h2><font size="3" face="Arial">15. Source code</font></h2>
         <p><font size="2" face="Arial">A complete source code (in
         C#) is provided. For GCC file format see file Form1.cs,
         function &quot;LoadGcc&quot; which loads a gcc file.
@@ -1175,8 +1250,8 @@ content="text/html; charset=iso-8859-1"/>
         work, then you actually do not need to build DLL, just
         copy it from the installation (after you install the
         application on your phone).</font></p>
-        <h2><font size="3" face="Arial">15. Useful Info</font></h2>
-        <h3><font size="2" face="Arial">15.1 GPS setup</font></h3>
+        <h2><font size="3" face="Arial">16. Useful Info</font></h2>
+        <h3><font size="2" face="Arial">16.1 GPS setup</font></h3>
         <p><font size="2" face="Arial">There are many ways for a
         software to connect to GPS. Usually it is assumed that
         the GPS hardware is connected to a serial port (e.g.
@@ -1256,7 +1331,7 @@ content="text/html; charset=iso-8859-1"/>
                     need to initialize your GPS receiver you can place a file "\GccInitGps.txt" in the
                     root directory of your device. If this file exists, its content is sent to the GPS
                     receiver on every open of the GPS.</font></p>
-        <h3><font size="2" face="Arial">15.2 Logging raw (NMEA) data from GPS device</font></h3>
+        <h3><font size="2" face="Arial">16.2 Logging raw (NMEA) data from GPS device</font></h3>
             <p><font size="2" face="Arial">
                 By context menu on the main screen in GPS field you can enable "log raw nmea" data.
                 When enabled this logs raw NMEA data from the GPS device and some status information
@@ -1264,11 +1339,10 @@ content="text/html; charset=iso-8859-1"/>
                 non volatile; you must switch off and on gps to have changes an effect).</font></p>
             <p><font size="2" face="Arial">
                 This NMEA data can be useful for
-                evaluation and bug fixing. If the file is renamed to nmea.txt you can choose the
-                corresonding item instead of the COM port to use this data as input for the application.
+                evaluation and bug fixing. If the file is renamed to nmea.txt you can choose this file instead of the COM port to use this data as input for the application.
                 So you can test the application indoor with previous recorded GPS data.</font></p>
-            <h3>
-                <font face="Arial" size="2">15.3 Problems with GoogleMaps installation, if you cannot
+            
+            <h3><font face="Arial" size="2">16.3 Problems with GoogleMaps installation, if you cannot
                     open KML file</font></h3>
         <p><font size="2" face="Arial">There is a problem with
         some versions of GoogleMaps for Mobile - it cannot open a
@@ -1288,7 +1362,7 @@ content="text/html; charset=iso-8859-1"/>
         (e.g. -KML_FILE) required, i.e. they create incorrect
         association and you still will not be able to open KML
         files.</font></p>
-        <h3><font size="3" face="Arial"> <span style="font-size: 10pt">15.4 Updating from older
+        <h3><font size="3" face="Arial"> <span style="font-size: 10pt">16.4 Updating from older
             versions to version 4.x</span></font></h3>
         <p><font size="2" face="Arial">If you are updating from older versions (3.x) to version
             4.x it is very likely that you must correct your setting for GPS COM-port. Due to
@@ -1299,11 +1373,37 @@ content="text/html; charset=iso-8859-1"/>
             <p>
                 <font face="Arial" size="2"></font>&nbsp;</p>
             <h2>
-                <font face="Arial" size="3">16. License</font></h2>
+                <font face="Arial" size="3">17. License</font></h2>
             <p><font size="2" face="Arial">
-                GpsCycleComputer is Freeware and Open Source. Have fun (and include me in your prayers).</font></p>
+                GpsCycleComputer is Freeware and Open Source.<br />
+                But you are not allowed to use the code of GpsCycleComputer or pieces of it in any
+                commercial products. You may use it only for personal purposes and other Freeware
+                products.</font></p>
+            <p>
+                <font face="Arial" size="2"></font>Copyright (c) 2012, AndyZap, Blaustein<br />All
+                rights reserved.</p>
+            <p>
+                Redistribution and use in source and binary forms, with or without modification,
+                are permitted provided that the following conditions are met:</p>
+            <ul>
+                <li>Redistributions of source code must retain the above copyright notice, this list
+                    of conditions and the following disclaimer.</li>
+                <li>Redistributions in binary form must reproduce the above copyright notice, this list
+                    of conditions and the following disclaimer in the documentation and/or other materials
+                    provided with the distribution.</li>
+            </ul>
+            <p>
+                THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+                ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+                OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+                SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+                SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+                OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+                HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+                OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+                THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
             <h2>
-                <font face="Arial" size="3">17. Contact </font>
+                <font face="Arial" size="3">18. Contact </font>
             </h2>
         <p><font size="2" face="Arial">Programming: AndyZap, Blaustein&nbsp;</font></p>
         <p><font size="2" face="Arial">Design: expo7. Special
