@@ -113,11 +113,12 @@ namespace GpsSample.FileSupport
 #else
 
         public bool Load(string filename, ref Form1.WayPointInfo WayPoints,
-                    int vector_size, ref float[] dataLat, ref float[] dataLong, ref int[] dataT, out int data_size)
+                    int vector_size, ref float[] dataLat, ref float[] dataLong, ref Int16[] dataZ, ref Int32[] dataT, ref Int32[] dataD, ref Form1.TrackStatistics ts, out int data_size)
         {
             bool Status = false;
             data_size = 0;
             WayPoints.WayPointCount = 0;
+            ts.Clear();
 
             Cursor.Current = Cursors.WaitCursor;
             try

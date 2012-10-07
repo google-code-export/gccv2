@@ -1,5 +1,22 @@
 GPS Cycle Computer GCC
 
+********* version 4.10 *********
+- display statistics and altitude graph of T2F
+- performance enhancement on display graph
+- gcc file flushed only once a minute to protect the storage device
+- option to have confirm message for 'stop' and 'pause'
+- max. osm zoom level increased from 18 to 23
+- option to "don't log passive time" (log stopped or paused)
+- option to sync system time with GPS time at first GPS fix
+- the lat/long coordinates are displayed of the point where you tap on the map
+- "reset map" can be undone by context menu
+- images for custom button skins now in subdirectory "skin"
+
+- bugfix on continue tracks after restart of GCC
+- bugfix when pressing exit button while logging is active
+- bugfix reading some gpx file format (without <\trkpt> end tag)
+
+
 ********* version 4.9 *********
 - speed up reading files for "Track2Follow"
 - speed up reading GPX files and make it compatible to XML syntax (now compatible to GPX files from crossingways)

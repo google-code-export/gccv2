@@ -18,12 +18,31 @@ namespace GpsUtils
         private double referenceY = 0.0;
         private int referenceZone = 0;
 
+        public double lat2meter = 0.0;
+        public double longit2meter = 0.0;
+        public double meter2lat = 0.0;
+        public double meter2longit = 0.0;
+
+        public bool referenceSet = false;
 
         // set the reference point (to compute distance from...)
         public void setReferencePoint(double lat, double longit)
         {
             ConvertToUtm(lat, longit, -1, 
                          out referenceX, out referenceY, out referenceZone);
+            getXY(lat + 0.001, longit + 0.001, out longit2meter, out lat2meter);
+            lat2meter *= 1000;
+            longit2meter *= 1000;
+            meter2lat = 1 / lat2meter;
+            meter2longit = 1 / longit2meter;
+
+            /*getLatLong(100, 100, out meter2lat, out meter2longit);
+            meter2longit = (meter2longit - longit) / 100;
+            meter2lat = (meter2lat - lat) / 100;
+            longit2meter = 1 / meter2longit;
+            lat2meter = 1 / meter2lat;
+            */
+            referenceSet = true;
         }
 
         // get x/y in metres relative to reference

@@ -12,7 +12,7 @@ content="text/html; charset=iso-8859-1"/>
 
 <table border="0" width="450">
     <tr>
-        <td style="width: 669px"><h1><font face="Arial">GPS Cycle Computer 4.9</font></h1>
+        <td style="width: 645px"><h1><font face="Arial">GPS Cycle Computer 4.10</font></h1>
         <font size="2" face="Arial">Tip: You can copy this file (Readme.htm) to your Desktop
             PC and read it there more comfortable.</font><h2>
                 <font face="Arial" size="3">1. General Description</font></h2>
@@ -215,8 +215,8 @@ content="text/html; charset=iso-8859-1"/>
         &quot;north&quot;, as usual on a map, pointing up. Do not
         be confised - the arrow shows direction of your travel,
         not the &quot;north&quot; direction (north is up).<br />
-            Hint: if you rotate your device so that the arrow points in direction of your movement,
-            the device top points to north.</font></p>
+            Hint: you can configure the arrow in main screen to behave like a compass that means
+            it points to north.</font></p>
         <p><font size="2" face="Arial">Now, if you have any data
         logged, you can stop the logging (press Stop button), and
         see what you can do with the log file.</font></p>
@@ -244,7 +244,8 @@ content="text/html; charset=iso-8859-1"/>
                 the track log includes a link to the audio file.&nbsp;</li>
             <li><strong>File/Export</strong>: file operations like load GCC files and save KML or GPX files&nbsp;</li>
             <li><strong>Track2Follow</strong>: load a track as second line in map which you can follow. Valid file
-                formats are GCC, KML and GPX.</li>
+                formats are GCC, KML and GPX. With context menu on this button
+                you can display the track statistics of the T2F.&nbsp;</li>
                <li><strong>Restore</strong>: restores the last session (loaded Track and Track2Follow).
                    This is done automatically after an abnormal termination (crash).&nbsp;</li>
             <li><strong>Exit</strong> </li>
@@ -487,8 +488,10 @@ content="text/html; charset=iso-8859-1"/>
                 screen, show altitude relative to the starting
                 point, instead of the absolute altitude. Default
                 off.</font></li>
+            <li><strong>Confirm 'Pause' and 'Stop'</strong><span style="font-size: 10pt; font-family: Arial">
+                - shows a confirm message to prevent accidently interrupting the track.</span></li>
             <li><strong>Select fore/back-color...</strong> : you can select the colors from a color
-                stripe or enter RGB values.</li>
+                stripe or enter RGB values. </li>
         </ul>
         <p><font size="2" face="Arial"><strong><u>Page &quot;Maps
         screen options&quot;</u></strong><strong>:</strong></font></p>
@@ -660,8 +663,19 @@ content="text/html; charset=iso-8859-1"/>
 				for about 2 seconds to open the context menu).</font></p>
         <p><font size="2" face="Arial"><strong><u>Context menu &quot;Main page&quot;:</u></strong></font></p>
 		<ul>
-			<li><font size="2" face="Arial">&quot;<strong>Clock</strong>&quot;:
-				By context menu of the clock you can activate day and night scheme.</font></li>
+			<li><font size="2" face="Arial">&quot;<strong>Time</strong>": By context menu on the
+                Time field you can choose between display of "<strong>inclusive stop</strong>" and
+                "<strong>exclusive stop</strong>" of the trip time. You can switch on "<strong>beep
+                    on start/stop</strong>" and you can configure "<strong>not to log passive time</strong>",
+                that is the time when logging is paused or off. In this mode you loose the absolute
+                time respect of your log.&nbsp;</font></li>
+            <li><font face="Arial" size="2">"<strong>Clock</strong>&quot;:
+				By context menu of the clock you can activate <strong>day</strong> or <strong>night scheme</strong>.<br />
+                In addition you can choose to <strong>"sync with GPS"</strong>, then the system
+                time and date is synchronized with the GPS time when the GPS is switched on and has its first
+                fix. This function is disabled if there is an active log, to prevent time anomalies.
+                So if you wish to sync the time before continuing a log, switch on GPS and wait
+                for fix (update of clock) and then continue the log.</font>&nbsp;</li>
 			<li><font size="2" face="Arial">&quot;<strong>Speed</strong>&quot;:
 				Directly in the main screen by context menu of the <strong>Speed</strong> field you
                 can choose if speed is taken from the corresponding GPS sentence or if it is calculated
@@ -696,6 +710,8 @@ content="text/html; charset=iso-8859-1"/>
 				The current or last position is displayed in the center of the screen. If you move, the screen 
 				will follow your movement. This option has the same effect as an double click on the 
 				map screen.</font></li>
+            <li><font face="Arial" size="2"></font><span style="font-size: 10pt; font-family: Arial">
+                "<strong>Undo reset map</strong>": restores the last view before reset map.</span>&nbsp;</li>
             <li><font face="Arial" size="2">"<strong>Show track to follow - start / end:</strong>&quot;:
 				By selecting this option, the start / end position of the track to follow is displayed in the
 				center of the map screen.<br>
@@ -741,6 +757,12 @@ content="text/html; charset=iso-8859-1"/>
                     between Altitude and Speed.<br />
                     Double click on the bottom label changes between Time and Distance.</span></p>
             <p>
+                <span style="font-size: 10pt; font-family: Arial">If you have loaded a Track2Follow,
+                    the altitude graph of this track is shown in the background in different color.</span></p>
+            <p>
+                <span style="font-size: 10pt; font-family: Arial">If heart rate is enabled you can also
+                    show the heart rate graph here, by clicking the graph button several times.</span></p>
+            <p>
                 <span style="font-size: 10pt; font-family: Arial"></span>&nbsp;</p>
             <h2>
                 <span style="font-size: 12pt; font-family: Arial">9. Lap </span>
@@ -760,7 +782,7 @@ content="text/html; charset=iso-8859-1"/>
                     (in distance based mode) of the current (and the last lap). If current lap has just
                     begun (&lt;5%) the current lap value is just the last value (extrapolation would
                     be too inaccurate). For the rest of the lap (5% to 100%) the current lap value is
-                    extrapolated to the whole lap distance so that the current value can easy be compared
+                    extrapolated to the whole lap distance so that the current value can easily be compared
                     to the last value.</span></p>
             <p>
                 <font face="Arial" size="3"></font>&nbsp;</p>
@@ -1178,8 +1200,8 @@ content="text/html; charset=iso-8859-1"/>
         images for all buttons. All
         what required is to edit jpeg files which are supplied
         with the source code (look into
-        GpsCycleComputerSource.zip) and copy the new images into
-        the folder with GpsCycleComputer.exe on your WinMobile,
+            GpsCycleComputerSource.zip). An example of a black skin is supplied in the download
+            area. Create a new subfolder "skin" in the application directory (where GpsCycleComputer.exe resides) and copy the new images in this skin folder,
         then re-start GpsCycleComputer. The new images will be
         loaded at the startup. If you want to change just a
         single button, just copy the files for that button, all
@@ -1188,7 +1210,8 @@ content="text/html; charset=iso-8859-1"/>
         files &#147;map.jpg&#148; and &#147;map_p.jpg&#148;
         (there are two images, as button has two states,
         &quot;normal&quot; and &quot;pressed&quot;). Better do
-        not change the image sizes, to avoid image distortions.</font></p>
+        not change the image sizes, to avoid image distortions.
+            Hint: to temporarily switch between skins, you can rename the skin folder.</font></p>
             <p><font size="2" face="Arial">
                 The fore and back color can be changed in Options - Main screen - Select fore/back-color. Take care not to use the same color for fore
                 and back-color...</font></p>

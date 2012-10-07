@@ -239,18 +239,6 @@ namespace GpsUtils
         {
             get
             {
-                if(dwVersion == 2)
-                {
-                    DateTime now = DateTime.UtcNow;
-
-                    int h = ((dwFlags >> 16) & 0xFF);
-                    int m = ((dwFlags >> 8) & 0xFF);
-                    int s = (dwFlags & 0xFF);
-
-                    DateTime time2 = new DateTime(now.Year, now.Month, now.Day, h, m, s, 0);
-                    return time2;
-                }
-
                 DateTime time = new DateTime(stUTCTime.year, stUTCTime.month, stUTCTime.day, stUTCTime.hour, stUTCTime.minute, stUTCTime.second, stUTCTime.millisecond);
                 return time;
             }

@@ -35,7 +35,8 @@ namespace GpsUtils
             }
             corner.Type = 0;
             corner.processedIndex = -1;
-            hourglass = new Bitmap(Assembly.GetExecutingAssembly().GetManifestResourceStream("GpsSample.Graphics.hourglass.png"));
+            //hourglass = new Bitmap(Assembly.GetExecutingAssembly().GetManifestResourceStream("GpsSample.Graphics.hourglass.png"));
+            hourglass = Form1.LoadBitmap("hourglass.png");
         }
 
         public struct MapInfo
@@ -100,7 +101,7 @@ namespace GpsUtils
 
         // vars to work with OpenStreetMap tiles
         private bool OsmTilesMode = false;
-        private const int OsmNumZoomLevels = 19;    //19  is too high - most servers do not respond on zoom level 18
+        private const int OsmNumZoomLevels = 24;    //max zoom level is 23   -   most servers do not respond on zoom level 18 and higher
         private bool[] OsmZoomAvailable = new bool[OsmNumZoomLevels]; // if a directories for this zoom level found (true/false)
         public string OsmServer = "http://";
         private string OsmFileExtension = "";
@@ -1677,7 +1678,7 @@ namespace GpsUtils
             }
         }
 
-        private void DrawTickLabel(Graphics g, Pen p, int tick_dist_screen, double tick_dist_units, string unit_name)
+        private void DrawTickLabel(Graphics g, Pen p, int tick_dist_screen, double tick_dist_units, string unit_name, string clickLatLon)
         {
             // draw text: Create font and brush.
             Font drawFont = new Font("Arial", 8, FontStyle.Regular);
@@ -1687,6 +1688,12 @@ namespace GpsUtils
             string str_map = GetBestMapName();
             SizeF size = g.MeasureString(str_map, drawFont);
             g.DrawString(str_map, drawFont, drawBrush, ScreenX - size.Width - 2, 0);
+
+            if (clickLatLon != null)
+            {
+                size = g.MeasureString(clickLatLon, drawFont);
+                g.DrawString(clickLatLon, drawFont, drawBrush, ScreenX - size.Width - 2, size.Height);
+            }
 
             // tick distance
             int x_point1 = 5;
@@ -1777,10 +1784,16 @@ namespace GpsUtils
             {
                 double last_x = PlotLong[PlotSize - 1];
                 double last_y = PlotLat[PlotSize - 1];
-                DataLongMin = last_x - Meter2Long * DefaultZoomRadius;
-                DataLongMax = last_x + Meter2Long * DefaultZoomRadius;
-                DataLatMin = last_y - Meter2Lat * DefaultZoomRadius;
-                DataLatMax = last_y + Meter2Lat * DefaultZoomRadius;
+                double extend_x = 1.0;
+                double extend_y = 1.0;
+                if (ScreenY > ScreenX)
+                    extend_y = (double)ScreenY / (double)ScreenX;
+                else
+                    extend_x = (double)ScreenX / (double)ScreenY;
+                DataLongMin = last_x - Meter2Long * DefaultZoomRadius * extend_x;
+                DataLongMax = last_x + Meter2Long * DefaultZoomRadius * extend_x;
+                DataLatMin = last_y - Meter2Lat * DefaultZoomRadius * extend_y;
+                DataLatMax = last_y + Meter2Lat * DefaultZoomRadius * extend_y;
             }
             else
             {
@@ -1827,7 +1840,7 @@ namespace GpsUtils
                              float[] PlotLong, float[] PlotLat, int PlotSize, Color line_color, int line_width, bool plot_dots,
                              Form1.WayPointInfo WayPoints, bool ShowWaypoints,
                              float[] PlotLong2, float[] PlotLat2, int PlotSize2, Color line_color2, int line_width2, bool plot_dots2,
-                             float[] CurLong, float[] CurLat, int heading, Color CurrentGpsLedColor)
+                             float[] CurLong, float[] CurLat, int heading, string clickLatLon)
         {
             /*
             if ((PlotSize == 0) && (PlotSize2 == 0)) // nothing to draw     KB: draw last position
@@ -2006,7 +2019,7 @@ namespace GpsUtils
             int tick_distance_screen = (int)(tick_distance_units * (Data2Screen * ZoomValue) / unit_cff * Meter2Long);
 
             pen.Color = line_color;
-            DrawTickLabel(BackBufferGraphics, pen, tick_distance_screen, tick_distance_units, unit_name);
+            DrawTickLabel(BackBufferGraphics, pen, tick_distance_screen, tick_distance_units, unit_name, clickLatLon);
 
             // draw back buffer on screen
             g.DrawImage(BackBuffer, 0, 0);
