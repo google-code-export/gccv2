@@ -98,17 +98,19 @@ namespace GpsUtils
             {
                 if(useGccDll)
                 {
-                    int hour; int min; int sec;
+                    short hour; short min; short sec; short msec;
                     double latitude;  double longitude;
                     double hdop; double altitude; double geoid_sep;
                     int    max_snr;   int    num_sat;
                     double speed;     double heading;
+                    short day; short month; short year;
 
-                    int status = GccReadGps(out hour, out min, out sec,
+                    int status = GccReadGps(out hour, out min, out sec, out msec,
                                             out latitude, out longitude,
                                             out num_sat, out hdop, out altitude,
                                             out geoid_sep, out max_snr,
-                                            out speed, out heading);
+                                            out speed, out heading,
+                                            out day, out month, out year);
 
                     /*  defines from GccGPS
                         READ_NO_ERRORS 0x01
@@ -138,7 +140,7 @@ namespace GpsUtils
                             gpsPosition.flVerticalDilutionOfPrecision = (float) max_snr;
                             gpsPosition.dwValidFields |= 0x00000400;
 
-                            if(num_sat != 0)
+                            if(num_sat != -1)
                             {
                                 gpsPosition.dwSatellitesInView = num_sat % 100;
                                 gpsPosition.dwSatelliteCount = num_sat / 100;
@@ -149,6 +151,7 @@ namespace GpsUtils
                         // GPGGA is OK
                         if((status & 0x08) != 0)
                         {
+                            /*   time and position only from GPRMC because of possible date and time unconsistency
                             // use dwFlags to fill today time (do not want to fill stUTCTime!)
                             if( hour != -1)
                             {
@@ -168,6 +171,7 @@ namespace GpsUtils
                                 gpsPosition.dwValidFields |= 0x00000002;
                                 gpsPosition.dwValidFields |= 0x00000004;
                             }
+                            */
 
                             if(hdop != Int16.MinValue)
                             {
@@ -191,13 +195,15 @@ namespace GpsUtils
                         // GPRMC is OK
                         if((status & 0x10) != 0)
                         {
-                            if (hour != -1)
+                            if (hour != -1 && day != -1)
                             {
-                                // encode in 3 lower bytes
-                                gpsPosition.dwFlags = 0;
-                                gpsPosition.dwFlags |= (sec & 0xFF);
-                                gpsPosition.dwFlags |= ((min & 0xFF) << 8);
-                                gpsPosition.dwFlags |= ((hour & 0xFF) << 16);
+                                gpsPosition.stUTCTime.millisecond = msec;
+                                gpsPosition.stUTCTime.second = sec;
+                                gpsPosition.stUTCTime.minute = min;
+                                gpsPosition.stUTCTime.hour = hour;
+                                gpsPosition.stUTCTime.day = day;
+                                gpsPosition.stUTCTime.month = month;
+                                gpsPosition.stUTCTime.year = (short)(year + 2000);
 
                                 gpsPosition.dwValidFields |= 0x00000001;
                             }
@@ -282,11 +288,12 @@ namespace GpsUtils
         [DllImport("GccGPS.dll")]
         static extern int GccIsGpsOpened();
         [DllImport("GccGPS.dll")]
-        static extern int GccReadGps(out int hour, out int min, out int sec,
+        static extern int GccReadGps(out short hour, out short min, out short sec, out short msec,
                                      out double latitude, out double longitude,
                                      out int num_sat, out double hdop, out double altitude,
                                      out double geoid_sep, out int max_snr,
-                                     out double speed, out double heading);
+                                     out double speed, out double heading,
+                                     out short day, out short month, out short year);
 
         [DllImport("GccGPS.dll")]
         static extern int GccReadGpsTest1();

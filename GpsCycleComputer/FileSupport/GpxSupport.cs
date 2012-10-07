@@ -301,11 +301,14 @@ namespace GpsSample.FileSupport
 
 #else
         public bool Load(string filename, ref Form1.WayPointInfo WayPoints,
-            int vector_size, ref float[] dataLat, ref float[] dataLong, ref int[] dataT, out int data_size)
+            int vector_size, ref float[] dataLat, ref float[] dataLong, ref Int16[] dataZ, ref Int32[] dataT, ref Int32[] dataD, ref Form1.TrackStatistics ts, out int data_size)
         {
             bool Status = false;
             DateTime StartTime = DateTime.MinValue;
-
+            ts.Clear();
+            Int16 ReferenceAlt = Int16.MaxValue;
+            UtmUtil utmUtil = new UtmUtil();
+            double OldLat = 0.0, OldLong = 0.0;
             data_size = 0;
             WayPoints.WayPointCount = 0;
             Cursor.Current = Cursors.WaitCursor;
@@ -333,6 +336,7 @@ namespace GpsSample.FileSupport
                                 {
                                     if (reader.Name == "trkpt")
                                     {
+                                    trkpt:
                                         if (data_size >= vector_size)     // check if we need to decimate arrays
                                         {
                                             for (int i = 0; i < vector_size / 2; i++)
@@ -345,14 +349,44 @@ namespace GpsSample.FileSupport
                                         }
                                         dataLat[data_size] = (float)Convert.ToDouble(reader.GetAttribute("lat"), IC);
                                         dataLong[data_size] = (float)Convert.ToDouble(reader.GetAttribute("lon"), IC);
-                                        dataT[data_size] = 0;           //clear data in case there is no <time> field
+                                        if (!utmUtil.referenceSet)
+                                        {
+                                            utmUtil.setReferencePoint(dataLat[data_size], dataLong[data_size]);
+                                            OldLat = dataLat[data_size];
+                                            OldLong = dataLong[data_size];
+                                        }
+                                        double deltax = (dataLong[data_size] - OldLong) * utmUtil.longit2meter;
+                                        double deltay = (dataLat[data_size] - OldLat) * utmUtil.lat2meter;
+                                        ts.Distance += Math.Sqrt(deltax * deltax + deltay * deltay);
+                                        OldLong = dataLong[data_size]; OldLat = dataLat[data_size];
+                                        dataD[data_size] = (int)ts.Distance;
+                                        dataT[data_size] = 0;                   //clear data in case there is no <time> field
+                                        dataZ[data_size] = Int16.MinValue;      //preset invalid Alt in case there is no <ele> field
                                         reader.Read();
                                         while (reader.NodeType == XmlNodeType.Element)       //read subtree
                                         {
                                             switch (reader.Name)
                                             {
                                                 case "ele":
-                                                    reader.Skip();
+                                                    Int16 z_int = (Int16)reader.ReadElementContentAsDouble();
+                                                    dataZ[data_size] = z_int;
+                                                    // compute elevation gain
+                                                    if (z_int != Int16.MinValue)        //MinValue = invalid
+                                                    {
+                                                        if (ts.AltitudeStart == Int16.MinValue) ts.AltitudeStart = z_int;
+
+                                                        if (z_int > ReferenceAlt)
+                                                        {
+                                                            ts.AltitudeGain += z_int - ReferenceAlt;
+                                                            ReferenceAlt = z_int;
+                                                        }
+                                                        else if (z_int < ReferenceAlt - (short)Form1.AltThreshold)
+                                                        {
+                                                            ReferenceAlt = z_int;
+                                                        }
+                                                        if (z_int > ts.AltitudeMax) ts.AltitudeMax = z_int;
+                                                        if (z_int < ts.AltitudeMin) ts.AltitudeMin = z_int;
+                                                    }
                                                     break;
                                                 case "time":
                                                     if (StartTime == DateTime.MinValue)
@@ -368,6 +402,9 @@ namespace GpsSample.FileSupport
                                                 case "speed":
                                                     reader.Skip();
                                                     break;
+                                                case "trkpt":           //trkpt without EndElement <trkpt lat="47.2615199999997" lon="10.2016400000003"/>
+                                                    data_size++;
+                                                    goto trkpt;
                                                 default:
                                                     reader.Skip();
                                                     break;

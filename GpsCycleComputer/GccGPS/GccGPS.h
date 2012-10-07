@@ -31,9 +31,9 @@ extern "C" __declspec(dllexport) int GccGpsStatus();
 extern "C" __declspec(dllexport) int GccOpenGps(int com_port, int rate);
 extern "C" __declspec(dllexport) int GccCloseGps();
 extern "C" __declspec(dllexport) int GccIsGpsOpened();
-extern "C" __declspec(dllexport) int GccReadGps(int &hour, int &min, int &sec,                  // from GPGGA
+extern "C" __declspec(dllexport) int GccReadGps(short &hour, short &min, short &sec, short &msec,                 // from GPGGA
                                                 double &latitude, double &longitude,
                                                 int &num_sat, double &hdop, double &altitude,
                                                 double &geoid_sep, int &max_snr,                                   // from GPGSV
-                                                double &speed, double &heading);
-
+                                                double &speed, double &heading,
+												short &day, short &month, short &year);

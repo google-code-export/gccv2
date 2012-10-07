@@ -271,7 +271,7 @@ namespace GpsCycleComputer
             Close();
         }
 
-        public void Close()         //I can not control when destuctor is called, so make this function
+        public void Close()         //I can not control when destructor is called, so make this function
         {
             if (hwWaveIn == IntPtr.Zero)
                 return;
@@ -369,6 +369,13 @@ namespace GpsCycleComputer
                 Debug.WriteLine(noise + "  " + thresh + "  " + s_env_max);
 
                 MMRESULT res;
+                res = waveInUnprepareHeader(hwWaveIn, whdr[cur_whdr], whdrsize);    //test if neccessary
+                if (res != MMRESULT.MMSYSERR_NOERROR)
+                    GpsUtils.Utils.log.Error("waveInUnprepareHeader", null);
+                Marshal.WriteInt32(whdr[cur_whdr], dwFlags, 0);                        //dwFlags = 0;
+                res = waveInPrepareHeader(hwWaveIn, whdr[cur_whdr], whdrsize);    //test if neccessary
+                if (res != MMRESULT.MMSYSERR_NOERROR)
+                    GpsUtils.Utils.log.Error("waveInPrepareHeader", null);
                 res = waveInAddBuffer(hwWaveIn, whdr[cur_whdr], whdrsize);        //feed buffer in queue again
                 if (res != MMRESULT.MMSYSERR_NOERROR)
                     GpsUtils.Utils.log.Error("waveInAddBuffer", null);

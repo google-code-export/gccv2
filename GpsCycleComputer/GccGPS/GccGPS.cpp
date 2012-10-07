@@ -529,7 +529,7 @@ bool CheckFloatWord( std::string &word)
     return true;
 }
 //-----------------------------------------------------------------------------
-int ___max_snr = 0; int ___num_sat = 0;
+int ___max_snr = -1; int ___num_sat = -1;
 
 // var used in this function only, the next expected GPSSV rec number
 int ___expected_rec_number = 1; 
@@ -588,15 +588,14 @@ void ParseGPGSV( std::vector<std::string> &words)
     ___expected_rec_number++;
 }
 //-----------------------------------------------------------------------------
-int    ___hour = 0, ___min = 0, ___sec = 0;
-double ___latitude = 0.0, ___longitude = 0.0;
-double ___hdop = 0.0; double ___altitude = 0.0; double ___geoid_sep = 0.0;
+
+double ___hdop = -32768.0; double ___altitude = -32768.0; double ___geoid_sep = -32768.0;
 
 void ParseGPGGA( std::vector<std::string> &words)
 {
-    ___hour = -1; ___min = 0; ___sec = 0;
-    ___latitude = -32768.0;
-    ___longitude = -32768.0;
+    //___hour = -1; ___min = 0; ___sec = 0;
+    //___latitude = -32768.0;
+    //___longitude = -32768.0;
     ___hdop = -32768.0;
     ___altitude = -32768.0;
 	___geoid_sep = -32768.0;
@@ -604,9 +603,9 @@ void ParseGPGGA( std::vector<std::string> &words)
     if(words.size() < 13) { return; }
 
     // word counter
-    int pos = 1;
+    int pos = 7;
 
-    // word 1 - UTC ------------------------------------------
+    /*// word 1 - UTC ------------------------------------------        don't read time (and lat lon) from GPGGA because of possible time-date inconsistencies at midnight
     if(CheckFloatWord(words[pos]))
     {
         ___hour =  atoi( words[pos].substr(0, 2).c_str() );
@@ -640,7 +639,7 @@ void ParseGPGGA( std::vector<std::string> &words)
     pos++;
 
     // word 6 : fix quality - skip
-    pos++;
+    pos++;  */
 
     // word 7 : num sats in use - skip?
 	___num_sat %= 100;		//clear high part
@@ -681,17 +680,21 @@ void ParseGPGGA( std::vector<std::string> &words)
     }*/
 }
 //-----------------------------------------------------------------------------
+int    ___hour = -1, ___min = -1, ___sec = -1, ___msec = -1;
+double ___latitude = -32768.0, ___longitude = -32768.0;
 double ___speed = -1.0;
 double ___heading = -1.0;
+int ___day = -1, ___month = -1, ___year = -1;
 
 void ParseGPRMC( std::vector<std::string> &words)
 {
-	___hour = -1; ___min = 0; ___sec = 0;
+	___hour = -1; ___min = 0; ___sec = 0; ___msec = 0;
     ___latitude = -32768.0;
     ___longitude = -32768.0;
 
     ___speed = -1.0;
     ___heading = -1.0;
+	___day = -1; ___month = -1; ___year = -1;
 
     if(words.size() < 12) { return; }
 
@@ -703,6 +706,7 @@ void ParseGPRMC( std::vector<std::string> &words)
         ___hour =  atoi( words[pos].substr(0, 2).c_str() );
         ___min  =  atoi( words[pos].substr(2, 2).c_str() );
         ___sec  =  atoi( words[pos].substr(4, 2).c_str() );
+		___msec = (int)(1000 * atof( words[pos].substr(6, 4).c_str()));
     }
 
 	// word 3 : latitude  ------------------------------------
@@ -744,6 +748,14 @@ void ParseGPRMC( std::vector<std::string> &words)
     if(CheckFloatWord(words[pos]))
     {
         ___heading = atof( words[pos].c_str() );
+    }
+	// word 9 : date  -------------------------------------
+	pos = 9;
+	if(CheckFloatWord(words[pos]))
+    {
+        ___day = atoi( words[pos].substr(0, 2).c_str() );
+        ___month = atoi( words[pos].substr(2, 2).c_str() );
+        ___year = atoi( words[pos].substr(4, 2).c_str() );
     }
 }
 
@@ -927,11 +939,12 @@ extern "C" __declspec(dllexport) int GccIsGpsOpened()
 
 int gpgsv_trust_count = 0;
 
-extern "C" __declspec(dllexport) int GccReadGps(int &hour, int &min, int &sec,                  // from GPGGA
-                                                double &latitude, double &longitude,
-                                                int &num_sat, double &hdop, double &altitude,
+extern "C" __declspec(dllexport) int GccReadGps(short &hour, short &min, short &sec, short &msec,                 // from GPRMC
+                                                double &latitude, double &longitude,                              // from GPRMC
+                                                int &num_sat, double &hdop, double &altitude,                 // from GPGGA
                                                 double &geoid_sep, int &max_snr,                                   // from GPGSV
-                                                double &speed, double &heading)                 // from GPRMC
+                                                double &speed, double &heading,                        // from GPRMC
+												short &day, short &month, short &year)                 // from GPRMC
 {
     if(__read_lock) { return 0; }
 	
@@ -948,10 +961,12 @@ extern "C" __declspec(dllexport) int GccReadGps(int &hour, int &min, int &sec,  
 	}
 
     // reset output vars
-    hour = 0;       min = 0;         sec = 0;
-    latitude = 0.0; longitude = 0.0;
-    num_sat = 0;    hdop = 0.0;      altitude = 0.0;
-    max_snr = 0;    speed = -1.0;    heading = -1.0;
+    hour = -1;       min = -1;         sec = -1;
+    latitude = -32768.0; longitude = -32768.0;
+    num_sat = -1;    hdop = -32768.0;      altitude = -32768.0;
+    geoid_sep = -32768.0;     max_snr = -1;
+	speed = -1.0;    heading = -1.0;
+	day = -1;       month = -1;       year = -1;
 
     if(__hGpsPort == INVALID_HANDLE_VALUE)
     { 
@@ -1084,9 +1099,9 @@ extern "C" __declspec(dllexport) int GccReadGps(int &hour, int &min, int &sec,  
 
                 return_status |= READ_HAS_GPGGA;
 
-                hour     = ___hour;     min       = ___min;       sec = ___sec;
-                latitude = ___latitude; longitude = ___longitude;
-                hdop      = ___hdop;    altitude = ___altitude;    geoid_sep = ___geoid_sep;
+                //hour     = ___hour;     min       = ___min;       sec = ___sec;
+                //latitude = ___latitude; longitude = ___longitude;
+                hdop = ___hdop;    altitude = ___altitude;    geoid_sep = ___geoid_sep;
             }
             else if(words[0] == "$GPRMC")
             {
@@ -1094,9 +1109,10 @@ extern "C" __declspec(dllexport) int GccReadGps(int &hour, int &min, int &sec,  
 
                 return_status |= READ_HAS_GPRMC;
 
-				hour     = ___hour;     min       = ___min;       sec = ___sec;
+				hour = ___hour;     min = ___min;       sec = ___sec;    msec = ___msec;
 				latitude = ___latitude; longitude = ___longitude;
                 speed = ___speed; heading = ___heading;
+				day = ___day; month = ___month; year = ___year;
             }
         }
 		else if (logRawNmea)
