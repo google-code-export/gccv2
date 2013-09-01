@@ -1,4 +1,4 @@
-#summary Description of the proprietary binary format of `*.gcc` files.
+#summary Description of the proprietary binary format of *.gcc files.
 
 
 =GCC file format:=
