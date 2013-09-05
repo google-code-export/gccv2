@@ -115,28 +115,20 @@ For some Options you must stop logging and switch off and on GPS to have an effe
 
 == Loading the *.gcc files back for viewing ==
 
-Click "Load .gcc" to load an existing file. You see the file name on a red background
+Click "File/Export" to load an existing file. 
 
-on the top of the main tab, to warn you that this is a file data, not a current log.
-
- 
 
 "Units" and "Exclude stop time" can be changed, display will be automatically updated.
-
  
 
 Click "Save .kml" - to save into KML the currently loaded file or the current
 
 log (after you pressed Stop). The .kml file has the same name as the corresponding gcc file.
 
- 
 
 Click "Save .gpx" - to save into GPX the currently loaded file or the current
 
 log (after you pressed Stop). The .gpx file has the same name as the corresponding gcc file.
-
- 
-
  
 
 KML files can be view with Google Earth (very nice!), and you might view them
@@ -144,6 +136,11 @@ KML files can be view with Google Earth (very nice!), and you might view them
 with the Google Maps Mobile according to Google help (the one installed on Diamond?)
 
 - but I was not able to do make it work on Diamond.
+----
+
+== Track to Follow ==
+
+You can load a .gpx .kml or .gcc file as "Track2Follow". Then tis track is displayed on map in different color and you can follow it. A navigation arrow and navigation commands in text and voice guides you along the route loades as Track2Follow.
 ----
 
 == Custom button skins and custom back / fore color ==
@@ -159,17 +156,16 @@ If you want to change just a single button, just copy the files for that button,
 
  
 
-For example, if you want the change “Graph” button for bottom menu, edit files “btm_graph.jpg” (normal)
+For example, if you want the change “Graph” button for menu, edit files “graph.jpg” (normal)
 
-and “btm_graph_p.jpg” (pressed - there are two images, as button has two states). Note you must
+and “graph_p.jpg” (pressed - there are two images, as button has two states). Note you must
 
 not change the image sizes!
 
  
 
-To change the background color, edit file “bk_color.jpg”. The image shall be filled with a single color - at best it contains only one pixel. 
+The background color and foreground color (text color) can be changed in Options - Main screen - Select fore/back/mapLabel-color. 
 
-For the font (fore) color, edit fore_color.jpg (and place them with GpsCycleComputer.exe).
 ----
 
 == Source code ==
@@ -182,10 +178,19 @@ the data is written as 5 short int (short int = 16 bits = 2 bytes) which are :
 
 x, y, z (in metres, relative to starting point), speed (in kmh*10) and time (sec, relative
 
-to start). Also there are a few special records (also as 5 short ints) to save some
+to start). Also there are a few special records (also as 5 short ints) to store some
 
 control info, like battery status.
-
  
 
 Feel free to change anything you like, but please send me you comments/bug fixes.
+----
+
+== Documentation and Support ==
+Documentation is here:
+http://gccv2.googlecode.com/files/Readme.htm
+
+Support is provided in the project Forum:
+http://forum.xda-developers.com/showthread.php?t=424423
+
+
