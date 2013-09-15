@@ -8,7 +8,7 @@ and then any number of records each with 10 bytes
 (except waypoints which have additional 2 bytes for each character of the name)
 
 ==Header (26 bytes):==
- * 3 characters: "GCC"
+ * 3 characters (bytes): "GCC"
  * 1 byte: version number currently 1 (binary)
  * 6 bytes: start time in format: year-2000, month, day, hour, minute, second
  * 8 bytes double: reference latitude (start point y)
@@ -62,3 +62,23 @@ and then any number of records each with 10 bytes
  * (z) 4 (heart rate)
  * (s) -1 (special record)
  * (t) 0xFFFF (special record)
+
+
+special record numbers > 31 have unicode string appended
+
+*name (32):*
+ * (x) number of characters
+ * (y)
+ * (z) 32 (name)
+ * (s) -1 (special record)
+ * (t) 0xFFFF (special record)
+ * track name (unicode string preceeded by length)
+
+
+*description (33):*
+ * (x) number of characters
+ * (y)
+ * (z) 33 (description)
+ * (s) -1 (special record)
+ * (t) 0xFFFF (special record)
+ * track description (unicode string preceeded by length)
