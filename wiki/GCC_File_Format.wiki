@@ -5,7 +5,7 @@
 
 There is one header with 26 bytes
 and then any number of records each with 10 bytes
-(except waypoints which have additional 2 bytes for each character of the name)
+(except waypoints which have additional 2 bytes for each character of the name and special records >31 which have an unicode string appended).
 
 ==Header (26 bytes):==
  * 3 characters (bytes): "GCC"
