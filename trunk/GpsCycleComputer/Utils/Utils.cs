@@ -9,6 +9,7 @@ using System.IO;
 using System.Drawing;
 using System.Net;
 using System.Xml;
+using Microsoft.Win32;
 
 using Log;
 #endregion
@@ -45,6 +46,7 @@ namespace GpsUtils
 
     public class Utils
     {
+        public static GpsCycleComputer.Form1 form1ref;
         public static Logger log = new Logger (Path.GetDirectoryName (System.Reflection.Assembly.GetExecutingAssembly ().GetName ().CodeBase)); // current dir
 
         public Utils() {}
@@ -69,10 +71,235 @@ namespace GpsUtils
             }
         }
 
-        public static UInt32 SwitchBacklight()
+        public static bool backlightState = true;
+        public static UInt32 SwitchBacklight(bool on)
         {
-            return SetSystemPowerState(null, 0x00100000, 0);    //screenoff
+            const UInt32 POWER_STATE_ON = 0x00010000;        // on state
+            const UInt32 POWER_STATE_IDLE = 0x00100000;        // idle state
+            //const UInt32 POWER_STATE_SUSPEND = 0x00200000;        // suspend state
+            backlightState = on;
+            if (on)
+            {
+                if (gpsPowerHandleTouch != IntPtr.Zero)
+                {
+                    ReleasePowerRequirement(gpsPowerHandleTouch);
+                    gpsPowerHandleTouch = IntPtr.Zero;
+                }
+                return SetSystemPowerState(null, POWER_STATE_ON, 0);
+            }
+            else
+            {
+                if (form1ref.checkTouchOn.Checked)
+                    gpsPowerHandleTouch = SetPowerRequirement("KPD1:", CedevicePowerState.D0, POWER_NAME | POWER_FORCE, null, 0);  //touch screen on
+                return SetSystemPowerState(null, POWER_STATE_IDLE, 0);    //screenoff
+            }
         }
+        public static bool IsSystemPowerStateOn()
+        {
+            string ps = new string('\0', 4);
+            uint pflag = 0;
+            GetSystemPowerState(ps, 12, ref pflag);
+            if ((pflag & 0x00010000) > 0 || ps.StartsWith("on"))
+                return true;
+            else
+                return false;
+        }
+
+        static IntPtr gpsPowerHandleTouch = IntPtr.Zero;
+        static IntPtr gpsPowerHandle1 = IntPtr.Zero;
+        static IntPtr gpsPowerHandle2 = IntPtr.Zero;
+        static IntPtr gpsPowerHandle3 = IntPtr.Zero;
+#if GPSPOWERTEST
+        static IntPtr gpsPowerHandle4 = IntPtr.Zero;
+        static IntPtr gpsPowerHandle5 = IntPtr.Zero;
+#endif
+
+        // KeepToolRunning changes the settings of the power manager, to keep the application running, even
+        // if the device is switched off via the power button
+        public static void KeepGpsRunning(bool run)
+        {
+            if (run)
+            {
+                // this is what you need to keep tool running if power turned off
+                if (true) //checkShowBkOff.Checked == false)
+                {
+                    try
+                    {
+                        PowerPolicyNotify(PPN_UNATTENDEDMODE, 1);
+#if !GPSPOWERTEST
+                        if (form1ref.checkkeepAliveReg.Checked)
+                        {
+                            RegistryKey rk = Registry.LocalMachine.OpenSubKey("System\\CurrentControlSet\\Control\\Power\\State\\Unattended", true);
+                            rk.SetValue("gpd0:", 0, RegistryValueKind.DWord);    // set to 0, i.e. GPS is ON
+                            rk = Registry.LocalMachine.OpenSubKey("System\\CurrentControlSet\\Control\\Power\\State\\Resuming", true);
+                            rk.SetValue("gpd0:", 0, RegistryValueKind.DWord);    // set to 0, i.e. GPS is ON
+                            rk = Registry.LocalMachine.OpenSubKey("System\\CurrentControlSet\\Control\\Power\\State\\Suspend", true);
+                            rk.SetValue("gpd0:", 0, RegistryValueKind.DWord);    // set to 0, i.e. GPS is ON
+                        }
+                        else
+                        {
+                            gpsPowerHandle1 = SetPowerRequirement("GPD0:", CedevicePowerState.D0, POWER_NAME | POWER_FORCE, null, 0);
+                            gpsPowerHandle2 = SetPowerRequirement("GPS0:", CedevicePowerState.D0, POWER_NAME | POWER_FORCE, null, 0);
+                            if (form1ref.mapUtil.playVoiceCommand)
+                                gpsPowerHandle3 = SetPowerRequirement("WAV1:", CedevicePowerState.D0, POWER_NAME | POWER_FORCE, null, 0);
+                        }
+#else
+
+                        switch ((int)numericAvg.Value)
+                        {
+                            case 1:
+                                //problem HTC Diamond HD2 (hardware power button disables gps)
+                                gpsPowerHandle1 = SetPowerRequirement("gps0:", CedevicePowerState.D0, POWER_NAME | POWER_FORCE, null, 0);
+                                break;
+                            case 2:
+                                gpsPowerHandle2 = SetPowerRequirement("GPD0:", CedevicePowerState.D0, POWER_NAME | POWER_FORCE, null, 0);
+                                break;
+                            case 3:
+                                gpsPowerHandle1 = SetPowerRequirement("gps0:", CedevicePowerState.D0, POWER_NAME | POWER_FORCE, null, 0);
+                                gpsPowerHandle2 = SetPowerRequirement("gpd0:", CedevicePowerState.D0, POWER_NAME | POWER_FORCE, null, 0);
+                                break;
+                            case 4:
+                                gpsPowerHandle3 = SetPowerRequirement("NAV1:", CedevicePowerState.D0, POWER_NAME | POWER_FORCE, null, 0);
+                                break;
+                            case 5:
+                                gpsPowerHandle1 = SetPowerRequirement("gps0:", CedevicePowerState.D0, POWER_NAME | POWER_FORCE, null, 0);
+                                gpsPowerHandle2 = SetPowerRequirement("gpd0:", CedevicePowerState.D0, POWER_NAME | POWER_FORCE, null, 0);
+                                gpsPowerHandle3 = SetPowerRequirement("NAV1:", CedevicePowerState.D0, POWER_NAME | POWER_FORCE, null, 0);
+                                break;
+                            case 6:
+                                gpsPowerHandle1 = SetPowerRequirement("gps0:", CedevicePowerState.D0, POWER_NAME | POWER_FORCE, null, 0);
+                                gpsPowerHandle2 = SetPowerRequirement("gpd0:", CedevicePowerState.D0, POWER_NAME | POWER_FORCE, null, 0);
+                                gpsPowerHandle3 = SetPowerRequirement("NAV1:", CedevicePowerState.D0, POWER_NAME | POWER_FORCE, null, 0);
+                                gpsPowerHandle4 = SetPowerRequirement("COM4:", CedevicePowerState.D0, POWER_NAME | POWER_FORCE, null, 0);
+                                break;
+                            case 7:
+                                gpsPowerHandle1 = SetPowerRequirement("gps0:", CedevicePowerState.D0, POWER_NAME | POWER_FORCE, null, 0);
+                                gpsPowerHandle2 = SetPowerRequirement("gpd0:", CedevicePowerState.D0, POWER_NAME | POWER_FORCE, null, 0);
+                                gpsPowerHandle3 = SetPowerRequirement("NAV1:", CedevicePowerState.D0, POWER_NAME | POWER_FORCE, null, 0);
+                                gpsPowerHandle4 = SetPowerRequirement("COM4:", CedevicePowerState.D0, POWER_NAME | POWER_FORCE, null, 0);
+                                gpsPowerHandle5 = SetPowerRequirement("COM1:", CedevicePowerState.D0, POWER_NAME | POWER_FORCE, null, 0);
+                                break;
+                            case 8:
+                                gpsPowerHandle1 = SetPowerRequirement("{8DD679CE-8AB4-43c8-A14A-EA4963FAA715}\\GPD0:", CedevicePowerState.D0, POWER_NAME | POWER_FORCE, null, 0);
+                                break;
+                            case 9:
+                                gpsPowerHandle1 = SetPowerRequirement("{8DD679CE-8AB4-43c8-A14A-EA4963FAA715}\\GPD0:", CedevicePowerState.D0, POWER_NAME | POWER_FORCE, null, 0);
+                                gpsPowerHandle2 = SetPowerRequirement("{8DD679CE-8AB4-43c8-A14A-EA4963FAA715}\\COM1:", CedevicePowerState.D0, POWER_NAME | POWER_FORCE, null, 0);
+                                break;
+                            case 10:
+                                // need to update registry settings as well to keep GPS on
+                                RegistryKey rk = Registry.LocalMachine.OpenSubKey("System\\CurrentControlSet\\Control\\Power\\State\\Unattended", true);
+                                //object tmp_obj = rk.GetValue("gpd0:");
+                                //if (tmp_obj != null) { SaveGpdUnattendedValue = (Int32)tmp_obj; }
+                                //else { SaveGpdUnattendedValue = 4; } // default is 4
+                                rk.SetValue("gpd0:", 0, RegistryValueKind.DWord);    // set to 0, i.e. GPS is ON
+                                break;
+                            case 11:
+                                rk = Registry.LocalMachine.OpenSubKey("System\\CurrentControlSet\\Control\\Power\\State\\Unattended", true);
+                                rk.SetValue("gpd0:", 0, RegistryValueKind.DWord);    // set to 0, i.e. GPS is ON
+                                rk = Registry.LocalMachine.OpenSubKey("System\\CurrentControlSet\\Control\\Power\\State\\Resuming", true);
+                                rk.SetValue("gpd0:", 0, RegistryValueKind.DWord);    // set to 0, i.e. GPS is ON
+                                rk = Registry.LocalMachine.OpenSubKey("System\\CurrentControlSet\\Control\\Power\\State\\Suspend", true);
+                                rk.SetValue("gpd0:", 0, RegistryValueKind.DWord);    // set to 0, i.e. GPS is ON
+                                break;
+                            case 12:
+                                gpsPowerHandle2 = SetPowerRequirement("gpd0:", CedevicePowerState.D0, POWER_NAME | POWER_FORCE, null, 0);
+                                break;
+                            case 13:
+                                gpsPowerHandle1 = SetPowerRequirement("GPS0:", CedevicePowerState.D0, POWER_NAME | POWER_FORCE, null, 0);
+                                gpsPowerHandle2 = SetPowerRequirement("GPD0:", CedevicePowerState.D0, POWER_NAME | POWER_FORCE, null, 0);
+                                break;
+                        }
+#endif
+                        //bklightPowerHandle = SetPowerRequirement("BKL1:", CedevicePowerState.D0, POWER_NAME | POWER_FORCE, "D4", 0);   //bklight goes off, pbtn function
+                        //bklightPowerHandle = SetPowerRequirement("BKL1:", CedevicePowerState.D0, POWER_NAME | POWER_FORCE, "D0", 0);   //bklight goes off, pbtn function
+                        //bklightPowerHandle = SetPowerRequirement("BKL1:", CedevicePowerState.D0, POWER_NAME | POWER_FORCE, null, 0);   //bklight stays on, pbtn no function
+                    }
+                    catch (Exception e)
+                    {
+                        Utils.log.Error(" KeepToolRunning 1 ", e);
+                    }
+                }
+            }
+            else
+            {
+                if (true) //checkShowBkOff.Checked == false)
+                {
+                    try
+                    {
+                        PowerPolicyNotify(PPN_UNATTENDEDMODE, 0);
+#if !GPSPOWERTEST
+                        if (form1ref.checkkeepAliveReg.Checked)
+                        {
+                            RegistryKey rk = Registry.LocalMachine.OpenSubKey("System\\CurrentControlSet\\Control\\Power\\State\\Unattended", true);
+                            rk.SetValue("gpd0:", 4, RegistryValueKind.DWord);    // set to 4, i.e. GPS is OFF
+                            rk = Registry.LocalMachine.OpenSubKey("System\\CurrentControlSet\\Control\\Power\\State\\Resuming", true);
+                            rk.SetValue("gpd0:", 4, RegistryValueKind.DWord);    // set to 4, i.e. GPS is OFF
+                            rk = Registry.LocalMachine.OpenSubKey("System\\CurrentControlSet\\Control\\Power\\State\\Suspend", true);
+                            rk.SetValue("gpd0:", 4, RegistryValueKind.DWord);    // set to 4, i.e. GPS is OFF
+                        }
+                        else
+                        {
+                            ReleasePowerRequirement(gpsPowerHandle1);
+                            ReleasePowerRequirement(gpsPowerHandle2);
+                            if (gpsPowerHandle3 != IntPtr.Zero)
+                            {
+                                ReleasePowerRequirement(gpsPowerHandle3);
+                                gpsPowerHandle3 = IntPtr.Zero;
+                            }
+                        }
+#else
+
+                        switch ((int)numericAvg.Value)
+                        {
+                            case 10:
+                                // need to restore registry settings
+                                RegistryKey rk = Registry.LocalMachine.OpenSubKey("System\\CurrentControlSet\\Control\\Power\\State\\Unattended", true);
+                                rk.SetValue("gpd0:", 4, RegistryValueKind.DWord);
+                                break;
+                            case 11:
+                                rk = Registry.LocalMachine.OpenSubKey("System\\CurrentControlSet\\Control\\Power\\State\\Unattended", true);
+                                rk.SetValue("gpd0:", 4, RegistryValueKind.DWord);    // set to 0, i.e. GPS is ON
+                                rk = Registry.LocalMachine.OpenSubKey("System\\CurrentControlSet\\Control\\Power\\State\\Resuming", true);
+                                rk.SetValue("gpd0:", 4, RegistryValueKind.DWord);    // set to 0, i.e. GPS is ON
+                                rk = Registry.LocalMachine.OpenSubKey("System\\CurrentControlSet\\Control\\Power\\State\\Suspend", true);
+                                rk.SetValue("gpd0:", 4, RegistryValueKind.DWord);    // set to 0, i.e. GPS is ON
+                                break;
+
+                            default:
+                                ReleasePowerRequirement(gpsPowerHandle1);
+                                ReleasePowerRequirement(gpsPowerHandle2);
+                                ReleasePowerRequirement(gpsPowerHandle3);
+                                ReleasePowerRequirement(gpsPowerHandle4);
+                                ReleasePowerRequirement(gpsPowerHandle5);
+                                break;
+                        }
+#endif
+
+                        //ReleasePowerRequirement(bklightPowerHandle);
+                    }
+                    catch (Exception e)
+                    {
+                        Utils.log.Error(" KeepToolRunning 0 ", e);
+                    }
+                }
+            }
+        }
+
+
+        // reset Idle Timer (to stop phone switching off)
+        public static void timerIdleReset_Tick()
+        {
+            //MessageBeep(BeepType.SimpleBeep);
+
+            if (Utils.IsSystemPowerStateOn())
+            {
+                PowerPolicyNotify(PPN_APPBUTTONPRESSED, 0);   //KB; informs PowerManager PPN_APPBUTTONPRESSED; would switch backlight on (if manual off)
+            }
+            SystemIdleTimerReset();         //only functions on WM5.0?
+        }
+
+
         public static Int32 GetBatteryStatus()
         {
             _SYSTEM_POWER_STATUS_EX2 pwrStat;
@@ -104,6 +331,40 @@ namespace GpsUtils
         }
 
         #region PInvokes to coredll.dll
+
+        [DllImport("coredll.dll")]
+        static extern void SystemIdleTimerReset();
+
+        [DllImport("coredll.dll")]
+        static extern void PowerPolicyNotify(UInt32 powermode, UInt32 flags);
+
+        [DllImport("coredll.dll", SetLastError = true)]
+        public static extern IntPtr SetPowerRequirement(string pvDevice, CedevicePowerState deviceState, uint deviceFlags, string pvSystemState, ulong stateFlags);
+
+        [DllImport("coredll.dll", SetLastError = true)]
+        public static extern int ReleasePowerRequirement(IntPtr hPowerReq);
+
+        public const int PPN_UNATTENDEDMODE = 0x0003;
+        public const int PPN_APPBUTTONPRESSED = 0x0006;
+        public const int POWER_NAME = 0x00000001;
+        public const int POWER_FORCE = 0x00001000;
+
+        public enum CedevicePowerState : int
+        {
+            PwrDeviceUnspecified = -1,
+            D0 = 0,
+            D1,
+            D2,
+            D3,
+            D4,
+        }
+
+        #endregion
+
+        #region PInvokes to coredll.dll
+
+        [DllImport("coredll.dll")]
+        public static extern int GetSystemPowerState(string sb, uint length, ref uint flags);
 
         [DllImport("coredll.dll")]
         static extern UInt32 SetSystemPowerState(StringBuilder psState, UInt32 StateFlags, UInt32 Options);
@@ -269,8 +530,10 @@ namespace GpsUtils
             int x3 = (int)(x0 + (rad-1 - tick / 2) * Math.Cos(Math.PI / 2.0 - (sec * Math.PI / 30.0)));
             int y3 = (int)(y0 - (rad-1 - tick / 2) * Math.Sin(Math.PI / 2.0 - (sec * Math.PI / 30.0)));
 
-            // draw min/sec
-            string str = tm.Hour.ToString("00") + ":" + tm.Minute.ToString("00");
+            // draw hour:min
+            string str = tm.ToString("t");      // tm.Hour.ToString("00") + ":" + tm.Minute.ToString("00");
+            try { str = str.Substring(0, 5); }
+            catch { }       //do nothing if exception: str shorter than 5
             Font f = new Font("Arial", font_size, FontStyle.Regular);
             SizeF sz = g.MeasureString(str, f);
             SolidBrush br = new SolidBrush(col);
@@ -330,6 +593,14 @@ namespace GpsUtils
             }
         }
 
+        public static Color modifyColor(Color c, int mod)     //adds mod to color components
+        {
+            int r, g, b;
+            r = c.R + mod; if (r > 255) r = 255; if (r < 0) r = 0;
+            g = c.G + mod; if (g > 255) g = 255; if (g < 0) g = 0;
+            b = c.B + mod; if (b > 255) b = 255; if (b < 0) b = 0;
+            return Color.FromArgb(r, g, b);
+        }
 
         public static void update(string Revision)
         {
@@ -498,7 +769,8 @@ namespace GpsUtils
             inputPanel.Enabled = true;
             DialogResult dialogResult = form.ShowDialog();
             inputPanel.Enabled = false;
-            value = textBox.Text;
+            if (dialogResult == DialogResult.OK)
+                value = textBox.Text;
             return dialogResult;
         }
 

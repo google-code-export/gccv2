@@ -12,9 +12,24 @@ content="text/html; charset=iso-8859-1"/>
 
 <table border="0" width="450">
     <tr>
-        <td style="width: 645px"><h1><font face="Arial">GPS Cycle Computer 4.10</font></h1>
+        <td style="width: 645px"><h1><font face="Arial">GPS Cycle Computer 4.11</font></h1>
         <font size="2" face="Arial">Tip: You can copy this file (Readme.htm) to your Desktop
-            PC and read it there more comfortable.</font><h2>
+            PC and read it there more comfortable.<br />
+            <br />
+            The latest version and some other tools or information is downloadable at:<br />
+            <a
+        href="http://code.google.com/p/gccv2/downloads/list"><font
+        size="2" face="Arial">http://code.google.com/p/gccv2/downloads/list</font></a>
+            <br />
+            <br />
+            There is an official forum:<br />
+            <a
+            href="http://forum.xda-developers.com/showthread.php?t=424423"><font
+            size="2" face="Arial">http://forum.xda-developers.com/showthread.php?t=424423</font></a>&nbsp;<br />
+            where you can get any further help or submit any bug reports or feature requests.<br />
+            <br />
+            <br />
+        </font><h2>
                 <font face="Arial" size="3">1. General Description</font></h2>
         <p><font size="2" face="Arial">This is a GPS tracking
         application for Windows Mobile. You do not need any other
@@ -227,11 +242,21 @@ content="text/html; charset=iso-8859-1"/>
                 button you get to the Menu page. This is the central navigation point through all
                 the functions of the application. The three buttons at the bottom are fixed and
                 allow to get back to Main screen or to scroll down and up the menu items (you can
-                also drag on the menu to shift up and down).</font></p>
+                also drag on the menu to shift up and down). Currently
+                not available functions are indicated by greyed buttons.</font></p>
             <p><font size="2" face="Arial">
                 Functions:</font></p>
            <ul><font size="2" face="Arial">
-            <li><strong>Main</strong></li>
+            <li><strong>BKLight</strong>: by default, you
+                shall be able to switch your phone off by the
+                hardware power button, and the GPS will continue
+                logging. If this does not work on your phone (or
+                you do NOT want to use &quot;read GPS data
+                directly&quot; settings) - then you shall use this button
+                to switch off the screen during logging. Remark: the buttons keep enabled so
+                you can reactivate your device. With a click
+                   on the left half screen you return to the main, on the right hafl screen you return
+                   to the map screen.&nbsp; </li>
             <li><strong>Map</strong> </li>
             <li><strong>Options</strong>: (see below)</li>
             <li><strong>Altitude</strong>: show altitude graph over time (see Graph below)&nbsp;</li>
@@ -250,16 +275,18 @@ content="text/html; charset=iso-8859-1"/>
                    This is done automatically after an abnormal termination (crash).&nbsp;</li>
             <li><strong>Exit</strong> </li>
                <li><strong>Navigate</strong>: The navigation screen shows a big arrow which points
-                   in the direction which you must drive to follow the Track2Follow. The arrow points
+                   in the direction which you should drive to follow the Track2Follow. The arrow points
                    at a point 100m ahead on the T2F, based on your current direction of movement. At
                    the bottom the distance to the destination is displayed or the shortest distance
                    to the T2F if it is more than 100m. By means of context menu you can navigate backward
                    on the Track2Follow. Also you can configure if you want to see the navigation button
                    in the bottom menu column (note: go to menu page - Navigate to display navigation
-                   screen and reenable this feature).<br />
+                   screen to reenable this feature; note2: from the map screen you can get to the navigation
+                   screen by a click on the navigation arrow in the upper right corner of the map).<br />
                    You can enable or disable voice commands which guides you audible along the T2F.
                    You can select the language in the first option page. To create your own voice see
-                   <a href = "file:local\Readme.txt">Readme.txt</a> in subdirectory 'local'.  </li>
+                   <a href = "file:local\Readme.txt">Readme.txt</a> in subdirectory 'local'.  A click
+                   on navigation screen repeats the last active voice command.&nbsp;</li>
             <li><strong>Lap</strong>: (see below)&nbsp;</li>
             <li><strong>Recal 1 .. 3</strong>: with
                 these 3 buttons you can recall different option settings. Use the context menu to
@@ -279,14 +306,7 @@ content="text/html; charset=iso-8859-1"/>
                 W).</li>
             <li><strong>Continue</strong>: continues a previous recorded track.
             A warning is displayed if you try to continue a track which is more than 1km distant.</li>
-               <li><strong>BKLight</strong>: by default, you
-                shall be able to switch your phone off by the
-                hardware power button, and the GPS will continue
-                logging. If this does not work on your phone (or
-                you do NOT want to use &quot;read GPS data
-                directly&quot; settings) - then you shall use this button
-                to switch off the screen during logging. Remark: the buttons keep enabled so
-                you can reactivate your device.&nbsp; </li>
+               <li><strong>Heart Rate</strong>: show heart rate graph over time (see Graph below) </li>
             <li><strong>Help</strong>: displays "Readme.html" in your browser.</li>
             <li><strong>About</strong>: displays "About page".</li>
             </font>
@@ -490,8 +510,25 @@ content="text/html; charset=iso-8859-1"/>
                 off.</font></li>
             <li><strong>Confirm 'Pause' and 'Stop'</strong><span style="font-size: 10pt; font-family: Arial">
                 - shows a confirm message to prevent accidently interrupting the track.</span></li>
-            <li><strong>Select fore/back-color...</strong> : you can select the colors from a color
+            <li><span style="font-size: 10pt; font-family: Arial"><strong>Keep touch on while backlight
+                off</strong> - this allows to reactivate the display with a touch on the screen.
+                A click on the left half screen brings you to the main display, a click on the right
+                gets you to the map display.</span></li>
+            <li><span style="font-size: 10pt"><span style="font-family: Arial"><strong>Show 'Exit'
+                after Stop</strong> - this shows temporarily the Exit button on the right, so you
+                can quicker shut down the application.</span></span></li>
+            <li><span style="font-size: 10pt"><span style="font-family: Arial"><strong>Change menu
+                'Options' &lt;-&gt; 'BKLight'</strong> - this changes the position of the two buttons
+                in the menu page, to have easier access to the buttons you need.</span></span></li>
+            <li><span style="font-size: 10pt"><span style="font-family: Arial"></span></span><strong>
+                Select fore/back/mapLabel-color...</strong> : you can select the colors from a color
                 stripe or enter RGB values. </li>
+            <li>&nbsp;<span style="font-size: 10pt"><span style="font-family: Arial"><strong>Data
+                array size:</strong> - here you can select the size of the internal data arrays.
+                Default is 4k (4096). If logging once a second this allows data storage for 1h 8min
+                without data decimation (when decimating, every second point is deleded). If you change the array size the data gets lost. If you
+                use big arrays GCC may slow down significantly. The data arrays uses 40 bytes per
+                point.</span></span>&nbsp;</li>
         </ul>
         <p><font size="2" face="Arial"><strong><u>Page &quot;Maps
         screen options&quot;</u></strong><strong>:</strong></font></p>
@@ -687,7 +724,10 @@ content="text/html; charset=iso-8859-1"/>
                 of increasing altitude), <strong>"Altitude loss"</strong> (sum of falling altitude),
                 <strong>"Altitude max"</strong> (highest altitude), <strong>"Altitude min"</strong>
                 (lowest altitude),and <strong>"Slope"</strong>
-                in percent.</font></li>
+                in percent. You can also choose <strong>
+                    "&lt;sequential&gt;"</strong> that means all 5 values are displayed automatically
+                in sequence, each for 4 seconds. If you tap into the field the sequence stops or
+                restarts again. </font>&nbsp;</li>
 			<li><font size="2" face="Arial">&quot;<strong>Distance</strong>&quot;:
 				In the context menu of the <strong>Distance</strong> field, you can choose between the 
 				distance <strong>since start of the trip</strong> or the distance between the current 
@@ -746,24 +786,28 @@ content="text/html; charset=iso-8859-1"/>
         <h2>
                 <span style="font-size: 12pt; font-family: Arial">8. Graph</span></h2>
             <p>
-                <span style="font-size: 10pt"><span style="font-family: Arial">Display graph of altitude or speed over time or distance. You can
-                zoom the axes by dragging a point at the axis (outline) of the drawing in either direction. In other words you can 'take' for example the
+                <span style="font-size: 10pt"><span style="font-family: Arial">Display graph of altitude or speed (or heart rate if enabled) over time or distance. You can zoom the x-axis
+                    with the zoom buttons or you can zoom either axis separately by dragging a point at the axis (outline) of the drawing in either direction. In other words you can 'take' for example the
                     point "2 min" and dragg it to the desired new position, either right or left. Dragging
                 inside the drawing moves the graph. A double click does autoscale to fit the whole
-                data.<br />
+                data. If you have zoomed in and logging is active, the
+                    first "autoscale" changes to "track mode", this means zoom is preseved but the current
+                    value is kept visible. The second "autoscale" does fit the whole graph.<br />
                 </span>
                 </span>
                 <span style="font-size: 10pt; font-family: Arial">Double click on the top label changes
-                    between Altitude and Speed.<br />
+                    between Altitude and Speed (and Heart Rate if enabled).<br />
                     Double click on the bottom label changes between Time and Distance.</span></p>
             <p>
                 <span style="font-size: 10pt; font-family: Arial">If you have loaded a Track2Follow,
-                    the altitude graph of this track is shown in the background in different color.</span></p>
-            <p>
-                <span style="font-size: 10pt; font-family: Arial">If heart rate is enabled you can also
-                    show the heart rate graph here, by clicking the graph button several times.</span></p>
+                    the altitude graph of this track is shown in the background in different color.
+                    The nearest point of this track to your current position is denoted by a Point.
+                    If you enable in context menu "align t2f" then the Track2Follow is shifted in x
+                    direction to match the current position.</span></p>
             <p>
                 <span style="font-size: 10pt; font-family: Arial"></span>&nbsp;</p>
+            <p>
+                <span style="font-size: 10pt; font-family: Arial"></span></p>
             <h2>
                 <span style="font-size: 12pt; font-family: Arial">9. Lap </span>
             </h2>
@@ -925,6 +969,11 @@ content="text/html; charset=iso-8859-1"/>
         <p><font size="2" face="Arial">Note that the map must not
         be rotated, i.e. the north must be up (as with all other
         maps used by GpsCycleComputer).</font></p>
+            <p>
+                <font face="Arial" size="2">There is a freeware <strong>Map Calibrator</strong>, which simplifies greatly
+                    the generation of the gmi files. As image size is limited on Windows Mobile,
+                    it also can split a big jpg into several tiles
+                    (uncheck the option: 'use only one calibration file..').</font></p>
         <p><font size="2" face="Arial">As with the txt and kml
         files, you need to place the <strong>jpg and gmi</strong>
         files into folder with your maps (by default, this is the
@@ -1181,7 +1230,7 @@ content="text/html; charset=iso-8859-1"/>
         will see only &quot;main&quot; track plotted on the Maps
         page. If you want to do opposite (i.e. to clear the main
         track, and view only track-to-follow, then you need to
-        clear the main track as well - press the
+        clear both tracks - press the
             button twice "Clear2Follow" then "ClearTrack". You shall see message &quot;All
         tracks cleared&quot;. Now you can load the
         track-to-follow, and only the 2nd line will be displayed.
@@ -1213,7 +1262,7 @@ content="text/html; charset=iso-8859-1"/>
         not change the image sizes, to avoid image distortions.
             Hint: to temporarily switch between skins, you can rename the skin folder.</font></p>
             <p><font size="2" face="Arial">
-                The fore and back color can be changed in Options - Main screen - Select fore/back-color. Take care not to use the same color for fore
+                The fore and back color can be changed in Options - Main screen - Select fore/back/mapLabel-color. Take care not to use the same color for fore
                 and back-color...</font></p>
         <h2><font size="3" face="Arial">13. Heart Rate Support</font></h2>
             <p><font size="2" face="Arial">By context menu (or double click) on the main screen in Speed field you can enable heart rate support

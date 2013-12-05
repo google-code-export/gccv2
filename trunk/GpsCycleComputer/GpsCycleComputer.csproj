@@ -86,6 +86,7 @@
     </Compile>
     <Compile Include="GPS.cs" />
     <Compile Include="GpsPosition.cs" />
+    <Compile Include="Utils\Graph.cs" />
     <Compile Include="Utils\HeartBeat.cs" />
     <Compile Include="Utils\Logger.cs" />
     <Compile Include="Utils\MapUtil.cs" />
