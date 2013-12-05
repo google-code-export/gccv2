@@ -176,6 +176,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_C7E787262421482791CE4039B73807CC"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_C8C4C0B4C7054D5CAFDAE03FB0B6EC8B"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -720,6 +726,24 @@
             {
             "SourcePath" = "8:..\\local\\ger\\Seq_test.txt"
             "TargetName" = "8:Seq_test.txt"
+            "Tag" = "8:"
+            "Folder" = "8:_384AE00896AA4E2E8DD115E77E35F952"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_C7E787262421482791CE4039B73807CC"
+            {
+            "SourcePath" = "8:..\\local\\ger\\TurnOver.wav"
+            "TargetName" = "8:TurnOver.wav"
             "Tag" = "8:"
             "Folder" = "8:_384AE00896AA4E2E8DD115E77E35F952"
             "Condition" = "8:"

@@ -10,9 +10,10 @@ namespace GpsSample.FileSupport
     class GccSupport : IFileSupport
     {                                                                   //load as T2F (WayPoints)
         public bool Load(string filename, ref Form1.WayPointInfo WayPoints,
-            int vector_size, ref float[] dataLat, ref float[] dataLong, ref Int16[] dataZ, ref Int32[] dataT, ref Int32[] dataD, ref Form1.TrackStatistics ts, out int data_size)
+            int vector_size, ref float[] dataLat, ref float[] dataLong, ref Int16[] dataZ, ref Int32[] dataT, ref Int32[] dataD, ref Form1.TrackSummary ts, out int data_size)
         {
             int Counter = 0;
+            int DecimateCount = 0, Decimation = 1;
             double OriginShiftX = 0.0;
             double OriginShiftY = 0.0;
             bool Status = false;
@@ -22,26 +23,28 @@ namespace GpsSample.FileSupport
             UtmUtil utmUtil = new UtmUtil();
 
             data_size = 0;
-            WayPoints.WayPointCount = 0;
+            WayPoints.Count = 0;
 
             Cursor.Current = Cursors.WaitCursor;
+            ts.filename = Path.GetFileName(filename);
 
             do
             {
                 try
                 {
                     FileStream fs = new FileStream(filename, FileMode.Open, FileAccess.Read);
-                    BinaryReader rd = new BinaryReader(fs);
+                    BinaryReader rd = new BinaryReader(fs, System.Text.Encoding.Unicode);
 
-                    // load header "GCC1" (1 is version)
-                    if (rd.ReadChar() != 'G') break; if (rd.ReadChar() != 'C') break;
-                    if (rd.ReadChar() != 'C') break; if (rd.ReadChar() != 1) break;
+                    // load header "GCC1" (1 is version in binary)
+                    if (rd.ReadByte() != 'G') break; if (rd.ReadByte() != 'C') break;
+                    if (rd.ReadByte() != 'C') break; if (rd.ReadByte() != 1) break;
 
                     // read time as 6 bytes: year, month...
-                    int t1 = (int)rd.ReadByte(); t1 += 2000;
-                    int t2 = (int)rd.ReadByte(); int t3 = (int)rd.ReadByte();
-                    int t4 = (int)rd.ReadByte(); int t5 = (int)rd.ReadByte();
-                    int t6 = (int)rd.ReadByte();
+                    int tyear = (int)rd.ReadByte(); tyear += 2000;
+                    int tmonth = (int)rd.ReadByte(); int tday = (int)rd.ReadByte();
+                    int thour = (int)rd.ReadByte(); int tmin = (int)rd.ReadByte();
+                    int tsec = (int)rd.ReadByte();
+                    ts.StartTime = new DateTime(tyear, tmonth, tday, thour, tmin, tsec);
 
                     // read lat/long for the starting point
                     double data_lat = rd.ReadDouble();
@@ -52,9 +55,10 @@ namespace GpsSample.FileSupport
                     UInt16 t_16 = 0; UInt16 t_16last = 0; Int32 t_high = 0;
                     double out_lat = 0.0, out_long = 0.0;
                     double OldX = 0.0; double OldY = 0.0;
-                    UInt32 recordError = 0;
+                    UInt64 recordError = 0UL;
 
-                    while (true)    //break with EndOfStreamException
+                    bool loop = true;
+                    while (loop)    //break with EndOfStreamException
                     {
                         // get 5 short ints
                         try
@@ -85,33 +89,42 @@ namespace GpsSample.FileSupport
                                     break;
                                 case 2: // which GPS options were selected: z_int = 2
                                     break;
-                                case 3: // checkpoint
-                                    // read checkpoint name, if not blank
+                                case 3: // waypoint
+                                    // read waypoint name, if not blank
                                     string name = "";
                                     for (int i = 0; i < x_int; i++)
                                     {
                                         name += (char)(rd.ReadUInt16());
                                     }
-                                    // store new checkpoint
-                                    if (WayPoints.WayPointCount < (WayPoints.WayPointDataSize - 1))
+                                    // store new waypoint
+                                    if (WayPoints.Count < WayPoints.DataSize)
                                     {
-                                        WayPoints.name[WayPoints.WayPointCount] = name;
-                                        WayPoints.lat[WayPoints.WayPointCount] = (float)out_lat;
-                                        WayPoints.lon[WayPoints.WayPointCount] = (float)out_long;
-                                        WayPoints.WayPointCount++;
+                                        WayPoints.name[WayPoints.Count] = name;
+                                        WayPoints.lat[WayPoints.Count] = (float)out_lat;
+                                        WayPoints.lon[WayPoints.Count] = (float)out_long;
+                                        WayPoints.Count++;
                                     }
                                     break;
-                                case 4: // heart rate
+                                case 4: // heart rate not supported in T2F
+                                    break;
+
+                                case 32: // name
+                                    ts.name = rd.ReadString();
+                                    break;
+                                case 33: // desc
+                                    ts.desc = rd.ReadString();
                                     break;
                                 default:
-                                    if ((1 << z_int & recordError) == 0)
+                                    if ((1UL << z_int & recordError) == 0)
                                     {
-                                        if (MessageBox.Show("unknown special record " + z_int + "\ntry to load anyway?", "Load Error",
+                                        if (MessageBox.Show("unknown special record " + z_int + " at " + Counter + "\ntry to continue load anyway?", "Load Error",
                                             MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1)
                                             == DialogResult.Cancel)
-                                            throw new ApplicationException();
-                                        recordError |= 1U << z_int;
+                                            loop = false; ;
+                                        recordError |= 1UL << z_int;
                                     }
+                                    if (loop && z_int >= 32)
+                                        rd.ReadString();   //read unknown string in order to have correct record bounds
                                     break;
                             }
                         }
@@ -124,9 +137,12 @@ namespace GpsSample.FileSupport
                                 {
                                     dataLat[i] = dataLat[i * 2];
                                     dataLong[i] = dataLong[i * 2];
+                                    dataZ[i] = dataZ[i * 2];
                                     dataT[i] = dataT[i * 2];
+                                    dataD[i] = dataD[i * 2];
                                 }
                                 Counter /= 2;
+                                Decimation *= 2;
                             }
 
                             // take into account the origin shift
@@ -138,17 +154,11 @@ namespace GpsSample.FileSupport
                             ts.Distance += Math.Sqrt(deltax * deltax + deltay * deltay);
                             OldX = real_x; OldY = real_y;
 
-                            dataD[Counter] = (int)ts.Distance;
-                            utmUtil.getLatLong(real_x, real_y, out out_lat, out out_long);
-                            dataLat[Counter] = (float)out_lat;
-                            dataLong[Counter] = (float)out_long;
-
-                            dataZ[Counter] = z_int;
                             // compute elevation gain
                             if (z_int != Int16.MinValue)        //MinValue = invalid
                             {
-                                if (ts.AltitudeStart == Int16.MinValue) ts.AltitudeStart = z_int;
-
+                                //if (ts.AltitudeStart == Int16.MinValue)
+                                //    ts.AltitudeStart = z_int;
                                 if (z_int > ReferenceAlt)
                                 {
                                     ts.AltitudeGain += z_int - ReferenceAlt;
@@ -158,22 +168,31 @@ namespace GpsSample.FileSupport
                                 {
                                     ReferenceAlt = z_int;
                                 }
-                                if (z_int > ts.AltitudeMax) ts.AltitudeMax = z_int;
-                                if (z_int < ts.AltitudeMin) ts.AltitudeMin = z_int;
+                                if (z_int > (short)ts.AltitudeMax) ts.AltitudeMax = z_int;
+                                if (z_int < (short)ts.AltitudeMin) ts.AltitudeMin = z_int;
                             }
 
-                            if (t_16 < t_16last)        // handle overflow
-                                t_high += 65536;
-                            t_16last = t_16;
-                            dataT[Counter] = t_high + t_16;
-                            Counter++;
+                            if (DecimateCount == 0)    //when decimating, add only first sample, ignore rest of decimation
+                            {                          //but calculate distance and elevation from all points
+                                utmUtil.getLatLong(real_x, real_y, out out_lat, out out_long);
+                                dataLat[Counter] = (float)out_lat;
+                                dataLong[Counter] = (float)out_long;
+                                dataZ[Counter] = z_int;
+                                if (t_16 < t_16last)        // handle overflow
+                                    t_high += 65536;
+                                t_16last = t_16;
+                                dataT[Counter] = t_high + t_16;
+                                dataD[Counter] = (int)ts.Distance;
+                                Counter++;
+                            }
+                            DecimateCount++;
+                            if (DecimateCount >= Decimation)
+                                DecimateCount = 0;
                         }
                     }
 
                     rd.Close();
                     fs.Close();
-
-                    data_size = Counter;
                     Status = true;
                 }
                 catch (Exception e)
@@ -181,6 +200,7 @@ namespace GpsSample.FileSupport
                     Utils.log.Error(" LoadGcc ", e);
                 }
             } while (false);
+            data_size = Counter;
             Cursor.Current = Cursors.Default;
 
             return Status;

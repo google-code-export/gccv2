@@ -13,7 +13,7 @@ namespace GpsSample.FileSupport
             // allocated vector size (for dataX/Y/T)
             int vector_size,          
             // x and y realive to origin, in metres, t in sec ralative to start
-            ref float[] dataLat, ref float[] dataLong, ref Int16[] dataZ, ref  Int32[] dataT, ref Int32[] dataD, ref Form1.TrackStatistics ts,
+            ref float[] dataLat, ref float[] dataLong, ref Int16[] dataZ, ref  Int32[] dataT, ref Int32[] dataD, ref Form1.TrackSummary ts,
             out int data_size);
     }
 }

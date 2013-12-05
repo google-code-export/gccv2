@@ -25,7 +25,7 @@ namespace Log
             }
             catch (Exception /*e*/)
             {
-                MessageBox.Show("Loger Creation Exception:\r\n" + filePath , "ERROR");
+                MessageBox.Show("Logger Creation Exception:\r\n" + filePath , "ERROR");
             }
             logFileLocked = false;
         }
@@ -88,7 +88,7 @@ namespace Log
             }
             catch (Exception /*e*/)
             {
-                MessageBox.Show("Loger Creation Exception:\r\n" + filePath, "ERROR");
+                MessageBox.Show("Logger ReCreation Exception:\r\n" + filePath, "ERROR");
             }
             logFileLocked = false;
         }

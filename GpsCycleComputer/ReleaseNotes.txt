@@ -1,5 +1,29 @@
 GPS Cycle Computer GCC
 
+********* version 4.11 *********
+- display track summary on load
+- improved time unit display when > 24h
+- backlightOff button now on first position in menue. Reactivation with click on left half screen -> main; on right half -> map
+- redraw map while shifting map (can be deactivated in context menue)
+- map label color can be configured in Options - Main screen - Select fore/back/mapLabel-color...
+- data array size can be configured (from standard 4096 points up to 256k points)
+- T2F can be saved as gpx or kml
+- improved navigation
+- improved track display (no disappearance of track when points outside of screen)
+- improved graph display (speed, altitude units according options; undo autoscale; align t2f; hide track; hide t2f)
+- in T2F altitude graph the nearest point to current position is marked with a dot
+- rearranged the buttons in menue page and disabled buttons when function is not available
+- option to show 'Exit' button on main screen after Stop
+- option to exchange 'Options' and 'BKLight' button
+- optional sequential display of altitude gain/loss/max/min/slope (hint: can be stopped and restarted with tap on this field)
+- track name and track description is stored in .gcc files
+- removed redundant display of distance to T2F at the bottom of map
+
+- bugfix: T2F import with large files (>4096 points)
+- bugfix: small track offset on some configurations
+- some minor bugfixes and improvements
+
+
 ********* version 4.10 *********
 - display statistics and altitude graph of T2F
 - performance enhancement on display graph

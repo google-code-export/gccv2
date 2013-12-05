@@ -6,7 +6,7 @@ using System.Diagnostics;
 
 namespace GpsCycleComputer
 {
-    class HeartBeat
+    public class HeartBeat
     {
         /// <summary>
 

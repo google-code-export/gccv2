@@ -301,16 +301,17 @@ namespace GpsSample.FileSupport
 
 #else
         public bool Load(string filename, ref Form1.WayPointInfo WayPoints,
-            int vector_size, ref float[] dataLat, ref float[] dataLong, ref Int16[] dataZ, ref Int32[] dataT, ref Int32[] dataD, ref Form1.TrackStatistics ts, out int data_size)
+            int vector_size, ref float[] dataLat, ref float[] dataLong, ref Int16[] dataZ, ref Int32[] dataT, ref Int32[] dataD, ref Form1.TrackSummary ts, out int data_size)
         {
             bool Status = false;
-            DateTime StartTime = DateTime.MinValue;
+            TimeSpan tspan;
             ts.Clear();
             Int16 ReferenceAlt = Int16.MaxValue;
             UtmUtil utmUtil = new UtmUtil();
             double OldLat = 0.0, OldLong = 0.0;
+            int DecimateCount = 0, Decimation = 1;
             data_size = 0;
-            WayPoints.WayPointCount = 0;
+            WayPoints.Count = 0;
             Cursor.Current = Cursors.WaitCursor;
             try
             {
@@ -319,6 +320,7 @@ namespace GpsSample.FileSupport
                 settings.IgnoreWhitespace = true;
                 StreamReader sr = new StreamReader(filename, System.Text.Encoding.UTF8);        //use StreamReader to overwrite encoding ISO-8859-1, which is not supported by .NETCF (no speed drawback)
                 XmlReader reader = XmlReader.Create(sr, settings);
+                ts.filename = Path.GetFileName(filename);
                 //reader.MoveToContent();
                 reader.ReadToFollowing("gpx");
                 reader.Read();
@@ -337,81 +339,92 @@ namespace GpsSample.FileSupport
                                     if (reader.Name == "trkpt")
                                     {
                                     trkpt:
+                                        bool jumptrkpt = false;
                                         if (data_size >= vector_size)     // check if we need to decimate arrays
                                         {
                                             for (int i = 0; i < vector_size / 2; i++)
                                             {
                                                 dataLat[i] = dataLat[i * 2];
                                                 dataLong[i] = dataLong[i * 2];
+                                                dataZ[i] = dataZ[i * 2];
                                                 dataT[i] = dataT[i * 2];
+                                                dataD[i] = dataD[i * 2];
                                             }
                                             data_size = vector_size / 2;
+                                            Decimation *= 2;
                                         }
-                                        dataLat[data_size] = (float)Convert.ToDouble(reader.GetAttribute("lat"), IC);
-                                        dataLong[data_size] = (float)Convert.ToDouble(reader.GetAttribute("lon"), IC);
+                                        double lat = Convert.ToDouble(reader.GetAttribute("lat"), IC);
+                                        double lon = Convert.ToDouble(reader.GetAttribute("lon"), IC);
                                         if (!utmUtil.referenceSet)
                                         {
-                                            utmUtil.setReferencePoint(dataLat[data_size], dataLong[data_size]);
-                                            OldLat = dataLat[data_size];
-                                            OldLong = dataLong[data_size];
+                                            utmUtil.setReferencePoint(lat, lon);
+                                            OldLat = lat;
+                                            OldLong = lon;
                                         }
-                                        double deltax = (dataLong[data_size] - OldLong) * utmUtil.longit2meter;
-                                        double deltay = (dataLat[data_size] - OldLat) * utmUtil.lat2meter;
+                                        double deltax = (lon - OldLong) * utmUtil.longit2meter;
+                                        double deltay = (lat - OldLat) * utmUtil.lat2meter;
                                         ts.Distance += Math.Sqrt(deltax * deltax + deltay * deltay);
-                                        OldLong = dataLong[data_size]; OldLat = dataLat[data_size];
-                                        dataD[data_size] = (int)ts.Distance;
-                                        dataT[data_size] = 0;                   //clear data in case there is no <time> field
-                                        dataZ[data_size] = Int16.MinValue;      //preset invalid Alt in case there is no <ele> field
+                                        OldLong = lon; OldLat = lat;
+                                        tspan = TimeSpan.Zero;             //clear data in case there is no <time> field
+                                        Int16 z_int = Int16.MinValue;      //preset invalid Alt in case there is no <ele> field
                                         reader.Read();
                                         while (reader.NodeType == XmlNodeType.Element)       //read subtree
                                         {
                                             switch (reader.Name)
                                             {
                                                 case "ele":
-                                                    Int16 z_int = (Int16)reader.ReadElementContentAsDouble();
-                                                    dataZ[data_size] = z_int;
+                                                    z_int = (Int16)reader.ReadElementContentAsDouble();
                                                     // compute elevation gain
-                                                    if (z_int != Int16.MinValue)        //MinValue = invalid
+                                                    //if (ts.AltitudeStart == Int16.MinValue)
+                                                    //    ts.AltitudeStart = z_int;
+                                                    if (z_int > ReferenceAlt)
                                                     {
-                                                        if (ts.AltitudeStart == Int16.MinValue) ts.AltitudeStart = z_int;
-
-                                                        if (z_int > ReferenceAlt)
-                                                        {
-                                                            ts.AltitudeGain += z_int - ReferenceAlt;
-                                                            ReferenceAlt = z_int;
-                                                        }
-                                                        else if (z_int < ReferenceAlt - (short)Form1.AltThreshold)
-                                                        {
-                                                            ReferenceAlt = z_int;
-                                                        }
-                                                        if (z_int > ts.AltitudeMax) ts.AltitudeMax = z_int;
-                                                        if (z_int < ts.AltitudeMin) ts.AltitudeMin = z_int;
+                                                        ts.AltitudeGain += z_int - ReferenceAlt;
+                                                        ReferenceAlt = z_int;
                                                     }
+                                                    else if (z_int < ReferenceAlt - (short)Form1.AltThreshold)
+                                                    {
+                                                        ReferenceAlt = z_int;
+                                                    }
+                                                    if (z_int > (short)ts.AltitudeMax) ts.AltitudeMax = z_int;
+                                                    if (z_int < (short)ts.AltitudeMin) ts.AltitudeMin = z_int;
                                                     break;
                                                 case "time":
-                                                    if (StartTime == DateTime.MinValue)
+                                                    if (ts.StartTime == DateTime.MinValue)
                                                     {
-                                                        StartTime = reader.ReadElementContentAsDateTime();
+                                                        ts.StartTime = reader.ReadElementContentAsDateTime();
                                                     }
                                                     else
                                                     {
-                                                        TimeSpan tspan = reader.ReadElementContentAsDateTime() - StartTime;
-                                                        dataT[data_size] = (int)tspan.TotalSeconds;
+                                                        tspan = reader.ReadElementContentAsDateTime() - ts.StartTime;
                                                     }
                                                     break;
                                                 case "speed":
                                                     reader.Skip();
                                                     break;
                                                 case "trkpt":           //trkpt without EndElement <trkpt lat="47.2615199999997" lon="10.2016400000003"/>
-                                                    data_size++;
-                                                    goto trkpt;
+                                                    jumptrkpt = true;
+                                                    goto savepoint;
                                                 default:
                                                     reader.Skip();
                                                     break;
                                             }
                                         }
                                         reader.ReadEndElement();
-                                        data_size++;
+                                    savepoint:
+                                        if (DecimateCount == 0)    //when decimating, add only first sample, ignore rest of decimation
+                                        {
+                                            dataLat[data_size] = (float)lat;
+                                            dataLong[data_size] = (float)lon;
+                                            dataZ[data_size] = z_int;
+                                            dataT[data_size] = (int)tspan.TotalSeconds;
+                                            dataD[data_size] = (int)ts.Distance;
+                                            data_size++;
+                                        }
+                                        DecimateCount++;
+                                        if (DecimateCount >= Decimation)
+                                            DecimateCount = 0;
+                                        if (jumptrkpt) goto trkpt;
                                     }
                                     else
                                         reader.Skip();
@@ -420,7 +433,11 @@ namespace GpsSample.FileSupport
                             }
                             else if (reader.Name == "name")
                             {
-                                string trkname = reader.ReadElementString();       //prepared for later use
+                                ts.name = reader.ReadElementString();
+                            }
+                            else if (reader.Name == "desc")
+                            {
+                                ts.desc = reader.ReadElementString();
                             }
                             else
                                 reader.Skip();
@@ -429,15 +446,15 @@ namespace GpsSample.FileSupport
                     }
                     else if (reader.Name == "wpt")
                     {
-                        WayPoints.lat[WayPoints.WayPointCount] = (float)Convert.ToDouble(reader.GetAttribute("lat"), IC);
-                        WayPoints.lon[WayPoints.WayPointCount] = (float)Convert.ToDouble(reader.GetAttribute("lon"), IC);
+                        WayPoints.lat[WayPoints.Count] = (float)Convert.ToDouble(reader.GetAttribute("lat"), IC);
+                        WayPoints.lon[WayPoints.Count] = (float)Convert.ToDouble(reader.GetAttribute("lon"), IC);
                         reader.Read();
                         while (reader.NodeType == XmlNodeType.Element)
                         {
                             if (reader.Name == "name")
                             {
-                                WayPoints.name[WayPoints.WayPointCount] = reader.ReadElementString();
-                                WayPoints.WayPointCount++;
+                                WayPoints.name[WayPoints.Count] = reader.ReadElementString();
+                                WayPoints.Count++;
                             }
                             else if (reader.Name == "desc")
                             {
@@ -467,14 +484,14 @@ namespace GpsSample.FileSupport
 
 
 
-        public void Write(String gpx_file, int CheckPointCount,
-            Form1.CheckPointInfo[] CheckPoints,
+        public void Write(String gpx_file, Form1.WayPointInfo WayPoints,
             CheckBox checkGpxRte, CheckBox checkGpxSpeedMs, CheckBox checkGPXtrkseg,
             float[] PlotLat, float[] PlotLong, int PlotCount,
-            short[] PlotS, int[] PlotT, short[] PlotZ, short[] PlotH, DateTime StartTime,
-            NumericUpDown numericGpxTimeShift,
-            string dist_unit, string speed_unit, string alt_unit, string exstop_info,
-                string dist, string speed_cur, string speed_avg, string speed_max, string run_time_label, string last_sample_time, string altitude, string battery
+            short[] PlotS, int[] PlotT, short[] PlotZ, short[] PlotH,
+            Form1.TrackSummary ts,
+            NumericUpDown numericGpxTimeShift
+            //string dist_unit, string speed_unit, string alt_unit, string exstop_info,
+            //    string dist, string speed_cur, string speed_avg, string speed_max, string run_time_label, string last_sample_time, string altitude, string battery
             )
         {
             FileStream fs = null;
@@ -502,42 +519,39 @@ namespace GpsSample.FileSupport
                 wr.WriteLine(" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd\">");
                 wr.WriteLine();
                  */
-                if (CheckPointCount != 0)
+                if (WayPoints.Count > 0)
                 {
-                    for (int chk = 0; chk < CheckPointCount; chk++)
+                    for (int wpc = 0; wpc < WayPoints.Count; wpc++)
                     {
                         // need to replace chars not supported by XML
-                        string chk_name = CheckPoints[chk].name.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;").Replace("\"", "&quot;").Replace("'", "&apos;");
-                        string chk_link = null;
-                        int link_idx = chk_name.IndexOf('\x02');
+                        string wp_name = WayPoints.name[wpc].Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;").Replace("\"", "&quot;").Replace("'", "&apos;");
+                        string wp_link = null;
+                        int link_idx = wp_name.IndexOf('\x02');
                         if (link_idx != -1)                     //audio file is present
                         {
-                            chk_link = chk_name.Substring(link_idx + 1);
+                            wp_link = wp_name.Substring(link_idx + 1);
                             if (link_idx == 0)
-                                chk_name = chk_name.Remove(0, 1);
+                                wp_name = wp_name.Remove(0, 1);
                             else
-                                chk_name = chk_name.Remove(link_idx, chk_name.Length - link_idx);
+                                wp_name = wp_name.Remove(link_idx, wp_name.Length - link_idx);
                         }
 
                         // GPS Track Analyser expects a newline between wpt and name
-                        wr.WriteLine("<wpt lat=\"" + CheckPoints[chk].lat.ToString("0.##########", IC)
-                                    + "\" lon=\"" + CheckPoints[chk].lon.ToString("0.##########", IC)
+                        wr.WriteLine("<wpt lat=\"" + WayPoints.lat[wpc].ToString("0.##########", IC)
+                                    + "\" lon=\"" + WayPoints.lon[wpc].ToString("0.##########", IC)
                                     + "\" >");
-                        wr.WriteLine("<name>" + chk_name + "</name>");
+                        wr.WriteLine("<name>" + wp_name + "</name>");
                         if (link_idx != -1)
-                            wr.WriteLine("<link href=\"" + chk_link + "\" />");
+                            wr.WriteLine("<link href=\"" + wp_link + "\" />");
                         wr.WriteLine("</wpt>");
                     }
                 }
 
                 wr.WriteLine(checkGpxRte.Checked ? "<rte>" : "<trk>");
-                wr.WriteLine("<name>" + StartTime + "</name>");
+                wr.WriteLine("<name>" + ts.name + "</name>");
                 // GPS Track Analyser expects a newline between desc and Data
                 wr.WriteLine("<desc>");
-                wr.WriteLine("<![CDATA[" + dist + " " + dist_unit + " " + run_time_label + " " + exstop_info
-                               + " " + speed_cur + " " + speed_avg + " " + speed_max + " " + speed_unit
-                               + " battery " + battery
-                               + "]]>");
+                wr.WriteLine("<![CDATA[" + ts.desc + "]]>");
                 wr.WriteLine("</desc>");
 
                 if (checkGpxRte.Checked == false) { wr.WriteLine("<trkseg>"); }
@@ -567,21 +581,18 @@ namespace GpsSample.FileSupport
                         wr.WriteLine("<ele>" + PlotZ[i] + "</ele>");
                     }
                     TimeSpan run_time = new TimeSpan(Decimal.ToInt32(numericGpxTimeShift.Value), 0, PlotT[i]);
-                    string utcTime_str = (StartTime.ToUniversalTime() + run_time).ToString("s") + "Z";
+                    string utcTime_str = (ts.StartTime.ToUniversalTime() + run_time).ToString("s") + "Z";
                     wr.WriteLine("<time>" + utcTime_str + "</time>");
 
-                    /*if (PlotS[i] != Int16.MinValue)     //ignore invalid value        //speed is invalid in gpx v1.1
+                    /*if (checkSaveSpeed.Checked && PlotS != null && PlotS[i] != Int16.MinValue)     //ignore invalid value        //speed is invalid in gpx v1.1
                     {
+                        double speed = PlotS[i] * 0.1;
                         if (checkGpxSpeedMs.Checked) // speed in m/s instead of km/h
-                        {
-                            wr.WriteLine("<speed>" + (PlotS[i] * (0.1 / 3.6)).ToString("0.##########", IC) + "</speed>");
-                        }
-                        else
-                        {
-                            wr.WriteLine("<speed>" + (PlotS[i] * 0.1).ToString("0.##########", IC) + "</speed>");
-                        }
+                            speed /= 3.6;
+                        wr.WriteLine("<speed>" + speed.ToString("0.##########", IC) + "</speed>");
+                 
                     }*/
-                    if (PlotH[i] != 0)              //heart rate
+                    if (PlotH != null && PlotH[i] != 0)              //heart rate
                     {
                         wr.WriteLine("<extensions><gpxtpx:TrackPointExtension><gpxtpx:hr>{0}</gpxtpx:hr></gpxtpx:TrackPointExtension></extensions>", PlotH[i]);
                     }

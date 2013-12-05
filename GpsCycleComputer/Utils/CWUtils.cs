@@ -76,48 +76,38 @@ namespace LiveTracker
         /// <param name="username">username</param>
         /// <param name="password">password in cleartext</param>
         /// <returns>status (if it starts with 00 everyting is fine)</returns>
-        public static string VerifyCredentialsOnCrossingwaysViaHTTP(string server, string username, string password)
+        public static string VerifyCredentialsOnCrossingwaysViaHTTP(string server, string username, string passwordhash)
         {
-            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
-                return "50 - Please enter username and pasword!";
-            else
+            //string url = "http://www.crossingways.com/services/livetracking.asmx/VerifyCredentials";
+            string url = server + "/services/livetracking.asmx/VerifyCredentials";
+            string payload = "";
+            payload += "username=" + UrlEncode(username) + "&";
+            payload += "passwordhash=" + passwordhash + "&";
+            payload += "control=" + "CWRocks2008";
+
+            string result = "";
+            bool valid = false;
+            try
             {
-                // Create a Passwordhash
-                // Not ideal but better than sending the password in cleatext...
-                string pwhash = CWUtils.HashPassword(password);
-
-                //string url = "http://www.crossingways.com/services/livetracking.asmx/VerifyCredentials";
-                string url = server + "/services/livetracking.asmx/VerifyCredentials";
-                string payload = "";
-                payload += "username=" + UrlEncode(username) + "&";
-                payload += "passwordhash=" + pwhash + "&";
-                payload += "control=" + "CWRocks2008";
-                
-                string result = "";
-                bool valid = false;
-                try
-                {
-                    WebResponse resp = doPost(url, payload);
-                    Encoding encode = System.Text.Encoding.GetEncoding("utf-8");
-                    StreamReader readStream = new StreamReader(resp.GetResponseStream(), encode);
-                    result = readStream.ReadToEnd();
-                    result = result.Replace("<?xml version=\"1.0\" encoding=\"utf-8\"?>", "");
-                    result = result.Replace("\r\n", "");
-                    result = result.Replace("<boolean xmlns=\"" + server + "/\">", "");
-                    result = result.Replace("</boolean>", "");
-                }
-                catch
-                {
-                    return "90 - Could not establish a connection to the server!";
-                }
-
-                valid = bool.Parse(result);
-                if (valid)
-                    return "00 - Credentials verified!";
-                else
-                    return "50 - Invalid credentials!";
-
+                WebResponse resp = doPost(url, payload);
+                Encoding encode = System.Text.Encoding.GetEncoding("utf-8");
+                StreamReader readStream = new StreamReader(resp.GetResponseStream(), encode);
+                result = readStream.ReadToEnd();
+                result = result.Replace("<?xml version=\"1.0\" encoding=\"utf-8\"?>", "");
+                result = result.Replace("\r\n", "");
+                result = result.Replace("<boolean xmlns=\"" + server + "/\">", "");
+                result = result.Replace("</boolean>", "");
             }
+            catch
+            {
+                return "90 - Could not establish a connection to the server!";
+            }
+
+            valid = bool.Parse(result);
+            if (valid)
+                return "00 - Credentials verified!";
+            else
+                return "50 - Invalid credentials!";
         }
 
       /*  /// <summary>

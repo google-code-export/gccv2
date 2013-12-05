@@ -170,6 +170,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_87D54A42FA0843CA937E009577B6CDE5"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_881DB0E20BC44ABBB37CD4A4BA7217FB"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -882,6 +888,24 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_87D54A42FA0843CA937E009577B6CDE5"
+            {
+            "SourcePath" = "8:..\\local\\eng\\TurnOver.wav"
+            "TargetName" = "8:TurnOver.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_1B99BCB9ECF347FAA1A9E11716EB71AC"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{BA458234-9B71-4F46-8107-E91156377184}:_881DB0E20BC44ABBB37CD4A4BA7217FB"
             {
             "SourcePath" = "8:..\\local\\eng\\Seq_destination.txt"
@@ -1518,7 +1542,7 @@
         {
             "{605BE39E-5046-48BD-AEC0-63C3A46626D5}:_5A23394E9E8C42468666EFEFA9F0B926"
             {
-            "SourcePath" = "8:..\\obj\\Release\\GpsCycleComputer.exe"
+            "SourcePath" = "8:..\\obj\\Debug\\GpsCycleComputer.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_A279FA883AA84AE392BA265B237C07ED"
