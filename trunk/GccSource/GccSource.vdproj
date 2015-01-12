@@ -31,6 +31,17 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+                "Items"
+                {
+                }
+            }
         }
         "Release"
         {
@@ -140,7 +151,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:GccSource"
         "ProductCode" = "8:{EFF6AC84-B7B1-47BF-910F-53ACFA5EF9D1}"
-        "PackageCode" = "8:{211EA5A7-E969-4AA5-89E3-A7E478F14C93}"
+        "PackageCode" = "8:{8A390958-4951-4E6A-8457-B39E5862B1B3}"
         "UpgradeCode" = "8:{BB920030-12AA-4CDC-BE71-77DC512C3C04}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:FALSE"

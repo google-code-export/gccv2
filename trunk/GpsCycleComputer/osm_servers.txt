@@ -1,0 +1,11 @@
+OpenStreetMap;        	http://a.tile.openstreetmap.org/
+Cycle Map;           	http://c.tile.thunderforest.com/cycle/
+Outdoor Map;		http://c.tile.thunderforest.com/outdoors/
+Landscape Map;		http://c.tile.thunderforest.com/landscape/
+MapQuest Open Aerial;   http://otile1.mqcdn.com/tiles/1.0.0/sat/
+MapQuest OpenStreetMap; http://otile1.mqcdn.com/tiles/1.0.0/map/
+Hikebikes;		http://a.www.toolserver.org/tiles/hikebike/
+Wikipedia OSM;		http://a.www.toolserver.org/tiles/osm/
+CloudMade Web Style;    http://tile.cloudmade.com/8bafab36916b5ce6b4395ede3cb9ddea/1/256/
+CloudMade Mobile Style; http://tile.cloudmade.com/8bafab36916b5ce6b4395ede3cb9ddea/2/256/
+CloudMade No Name Style;http://tile.cloudmade.com/8bafab36916b5ce6b4395ede3cb9ddea/3/256/

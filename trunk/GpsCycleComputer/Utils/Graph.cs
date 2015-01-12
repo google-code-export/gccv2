@@ -38,6 +38,7 @@ namespace GpsCycleComputer
         public bool alignT2f = false;
         public bool hideTrack = false;
         public bool hideT2f = false;
+        public bool autoHideButtons = false;
 
         public enum SourceX
         { Time, Distance, Old }
@@ -398,8 +399,8 @@ namespace GpsCycleComputer
 
             Pen p = new Pen(Color.Gray, 1);
             SolidBrush b = new SolidBrush(parent.GetLineColor(parent.comboBoxKmlOptColor));
-            Font f = new Font("Tahoma", 8F, System.Drawing.FontStyle.Regular);
-            Font f2 = new Font("Tahoma", 12F, System.Drawing.FontStyle.Bold);
+            Font f = new Font("Tahoma", 8F * parent.df, System.Drawing.FontStyle.Regular);
+            Font f2 = new Font("Tahoma", 12F * parent.df, System.Drawing.FontStyle.Bold);
 
             int x0 = BackBuffer.Width / 24;        //10   4.16%
             int y0 = BackBuffer.Height * 472 / 508;     //h-18
@@ -549,7 +550,7 @@ namespace GpsCycleComputer
 
                 if (Index2draw < 0)
                 {
-                    Debug.WriteLine("Draw full");
+                    //Debug.WriteLine("Draw full");
                     Index2draw = 0;
                     BackBufferGraphics.Clear(Form1.bkColor);
 
@@ -679,8 +680,6 @@ namespace GpsCycleComputer
         int xs, ys, x2Ofs, x2OfsDrawn;
         private void GetIntersection()
         {
-            parent.mapUtil.GetNavigationData(parent.Plot2ndLong, parent.Plot2ndLat, parent.Plot2ndCount, parent.CurrentLong, parent.CurrentLat);
-            parent.mapUtil.DoVoiceCommand();
             int index = (int)parent.mapUtil.nav.ixd_intersec;
             xs = x2[index];
             ys = y2[index];

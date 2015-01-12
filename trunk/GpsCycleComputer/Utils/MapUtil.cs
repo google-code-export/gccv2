@@ -37,10 +37,9 @@ namespace GpsUtils
                 Maps[i].bmp = null;
                 Maps[i].fname = "";
             }
-            corner.Type = 0;
-            corner.processedIndex = -1;
             //hourglass = new Bitmap(Assembly.GetExecutingAssembly().GetManifestResourceStream("GpsSample.Graphics.hourglass.png"));
             hourglass = Form1.LoadBitmap("hourglass.png");
+            clearNav(false);
         }
 
         public class MapInfo            //class is 4 times faster in sorting than struct
@@ -52,7 +51,7 @@ namespace GpsUtils
             public double zoom_level;              // ratio of the map screen size to the original size
             public double qfactor;                 // quality function, based on map zoom level
             public bool was_removed;               // flag that map was completely covered and was removed
-            public int scrX1, scrX2, scrY1, scrY2; // current screen coordinates in pixels
+            public int scrX1_ix, scrX2_iz, scrY1_iy, scrY2; // current screen coordinates in pixels
             public Bitmap bmp;                     // the bitmap
         };
 
@@ -71,41 +70,55 @@ namespace GpsUtils
         public MapInfo[] Maps = new MapInfo[MaxNumMaps];
         //public MapInfo[] Maps = new MapInfo[MaxNumMaps];
         public string MapsFilesDirectory;
+        string mapCopyright = null;
 
         public enum ShowTrackToFollow
         {
             T2FOff,
             T2FStart,
-            T2FEnd
+            T2FEnd,
+            T2FCurrent
         };
+        //public enum Voice
+        //{
+        //    Off,
+        //    On,
+        //    OnEssential,
+        //}
+        //public Voice VoiceCommand = Voice.Off;
 
         // Show the current position on the map or the start/stop position of the track
         public ShowTrackToFollow ShowTrackToFollowMode = ShowTrackToFollow.T2FOff;
 
+        public bool hideAllInfos = false;   //not permanent stored
         public bool hideTrack = false;
+        public bool hideT2f = false;
         public bool hideMap = false;
-        public bool hideNav = false;
-        public bool navigate_backward = false;
+
+        public bool autoHideButtons = false;
+        public bool showMapLabel = true;
+        public bool showNav = true;
         public bool show_nav_button = true;
-        public bool playVoiceCommand = true;
         public bool doneVoiceCommand = false;
         public bool reDownloadMaps = false;
 
-        private int ScreenX = 100;         // screen (drawing) size in pixels
+        private int ScreenX = 100;         // screen (Backbuffer) size in pixels
         private int ScreenY = 100;
-        private double Data2Screen = 1.0;  // Coefficient to convert from data to screen values
+        public double Long2Pixel = 1.0;  // Coefficient to convert from data to screen values
+        public double Lat2Pixel = 1.0;
         public double ZoomValue = 1.0;    // zoom coefficient, to multiply Data2Screen
         public int DefaultZoomRadius = 200;    //default zoom in m (in either direction)
-        private double DataLongMin = 1.0E9, DataLongMax = -1.0E9, DataLatMin = 1.0E9, DataLatMax = -1.0E9;
-        private double RatioMeterLatLong = 1.0;
-
-        UtmUtil utmUtil = new UtmUtil();
+        private double DataLongMiddle = 0.0;
+        private double DataLatMiddle = 0.0;
+        private int ScreenTileRefX = 0;     //reference upper left corner of all tiles in screen coordinates
+        private int ScreenTileRefY = 0;
 
         // vars required to support screen shifting
-        public int ScreenShiftX = 0;      // (total) screen shift (pixels)
-        public int ScreenShiftY = 0;
-        public int ScreenShiftSaveX = 0;  // screen shift as mouse move started (pixels)
-        public int ScreenShiftSaveY = 0;
+        public double LongShift = 0.0;      // (total) map shift (degree)
+        public double LatShift = 0.0;
+        public double LongShiftSave = 0.0;  // map shift as mouse move started (degree)
+        public double LatShiftSave = 0.0;
+        public double Lat2PixelSave;        // save Lat2Pixel because otherwise map jumps up and down while shifting
 
         // vars to work with OpenStreetMap tiles
         private bool OsmTilesMode = false;
@@ -114,6 +127,14 @@ namespace GpsUtils
         private int[] OsmNumberOfTilesInZoom = new int[OsmNumZoomLevels];
         public string OsmServer = "http://";
         private string OsmFileExtension = "";
+        private int OsmN = 1;       //number of tiles in x
+        private int OsmNz = 1;      //inclusive tile zoom
+        private int OsmZoom = 1;    //zoom level 0..23
+        private int centerTile_x = 0;
+        private int centerTile_y = 0;
+        private double centerTile_yd = 0.0;
+        private int tilezoom = 0;   // -1 = zoom out;   +1 = zoom in
+        private int tilePixel = 256;    //pixel of one tile
 
         // map error codes
         private const int __MapNoError = 0;
@@ -123,6 +144,8 @@ namespace GpsUtils
         private const int __MapErrorNotFound = 4;
 
         private int MapErrors = __MapNoError;
+        public void ClearMapError()
+        { MapErrors = __MapNoError; }
 
         public struct CornerInfo
         {
@@ -141,18 +164,141 @@ namespace GpsUtils
 
         public struct NavInfo
         {
-            public int ix;                 //index of point to overdrive at next
+            public bool backward;           //navigate backward
+            public int ix;                 //index of point closest to CurrentPosition
             public double ixd_intersec;     //index of intersection with calculated fraction
+            public int ix_next_drive;       //index of point next to overdrive
             public double MinDistance;     //CurPos to Track
-            public double LongMinDistance; //long of min distance (intersection) point
-            public double LatMinDistance;  //lat of min distance (intersection) point
+            public double LongIntersection; //long of min distance (intersection) point
+            public double LatIntersection;  //lat of min distance (intersection) point
             public double Distance2Dest;     //inclusive MinDistance
             public int Angle100mAhead;       //-180 .. 180 degree; related to Cur; 0=North
-            public int ShortSearch;          //if > 0: only short search from ix until minDistance gets larger; decremented every second
+            public int ShortSearch;          //if != 0: only short search from ix until minDistance gets larger; decremented every second
             public bool voicePlayed_toRoute;
             public bool voicePlayed_dest;
+            public string strCmd;
+            public string strDistance2Dest;
+            public Point[] Symbol;
+            public Orientation orient;
+            public bool SkyDirection;
         } public NavInfo nav;
+        public void clearNav(bool backward)
+        {
+            nav.backward = backward;
+            if (backward && parent.Plot2ndCount > 0)
+                nav.ix = parent.Plot2ndCount - 1;
+            else
+                nav.ix = 0;
+            nav.ixd_intersec = nav.ix;
+            nav.ix_next_drive = nav.ix;
+            nav.MinDistance = -1.0;
+            nav.ShortSearch = -1;        //no full search of minDistance
+            nav.strCmd = "";
+            nav.strDistance2Dest = "";
+            nav.Symbol = null;
+            nav.SkyDirection = false;
+            invalidateCorner();
+        }
+        //Navigation Symbols
+        Point[] arrow_r = new Point[] {
+            new Point(20, 100),
+            new Point(20, 20),
+            new Point(60, 20),
+            new Point(60, 0),
+            new Point(100, 30),
+            new Point(60, 60),
+            new Point(60, 40),
+            new Point(40, 40),
+            new Point(40, 100), };
+        Point[] arrow_hr = new Point[] {
+            new Point(20, 100),
+            new Point(20, 50),
+            new Point(48, 22),
+            new Point(34, 8),
+            new Point(84, 0),
+            new Point(76, 50),
+            new Point(62, 36),
+            new Point(40, 58),
+            new Point(40, 100), };
+        Point[] arrow_sr = new Point[] {
+            new Point(14, 100),
+            new Point(14, 0),
+            new Point(50, 0),
+            new Point(78, 28),
+            new Point(92, 14),
+            new Point(100, 64),
+            new Point(50, 56),
+            new Point(64, 42),
+            new Point(42, 20),
+            new Point(34, 20),
+            new Point(34, 100), };
+        Point[] arrow_to = new Point[] {
+            new Point(40, 100),
+            new Point(40, 50),
+            new Point(20, 50),
+            new Point(50, 10),
+            new Point(80, 50),
+            new Point(60, 50),
+            new Point(60, 100), };
+        Point[] line_to = new Point[] {
+            new Point(0, 0),
+            new Point(100, 0),
+            new Point(100, 8),
+            new Point(0, 8), };
+        Point[] arrow_turn = new Point[] {
+            new Point(6, 100),
+            new Point(6, 0),
+            new Point(80, 0),
+            new Point(80, 60),
+            new Point(100, 60),
+            new Point(70, 100),
+            new Point(40, 60),
+            new Point(60, 60),
+            new Point(60, 20),
+            new Point(26, 20),
+            new Point(26, 100), };
+        Point[] destination = new Point[] {
+            new Point(16, 82),
+            new Point(16, 44),
+            new Point(6, 44),
+            new Point(6, 10),
+            new Point(94, 10),
+            new Point(94, 44),
+            new Point(84, 44),
+            new Point(84, 82),
+            new Point(78, 82),
+            new Point(78, 44),
+            new Point(22, 44),
+            new Point(22, 82), };
+        int NavSymbol_size = 100;
+        public enum Orientation
+        {
+            normal,
+            mirrorX,    //right-left
+            mirrorY,    //up-down
+            right,
+            left
+        };
 
+        public void ScaleNavSymbols(int scx_p, int scx_q)
+        {
+            ScaleNavSymbol(arrow_r, scx_p, scx_q);
+            ScaleNavSymbol(arrow_hr, scx_p, scx_q);
+            ScaleNavSymbol(arrow_sr, scx_p, scx_q);
+            ScaleNavSymbol(arrow_to, scx_p, scx_q);
+            ScaleNavSymbol(line_to, scx_p, scx_q);
+            ScaleNavSymbol(arrow_turn, scx_p, scx_q);
+            ScaleNavSymbol(destination, scx_p, scx_q);
+            NavSymbol_size = (NavSymbol_size * scx_p + scx_q / 2) / scx_q;
+        }
+        void ScaleNavSymbol(Point[] pa, int scx_p, int scx_q)
+        {
+            for (int i = 0; i < pa.Length; i++)
+            {
+                pa[i].X = (pa[i].X * scx_p + scx_q / 2) / scx_q;
+                pa[i].Y = (pa[i].Y * scx_p + scx_q / 2) / scx_q;
+            }
+        }
 
         // return true if only sub-directories with names "0".."18" exist in this folder
         public bool DetectOsmTiles()
@@ -214,7 +360,7 @@ namespace GpsUtils
         {
             return (xtile / n * 360.0 - 180.0);
         }
-        public double OsmYTile2Lat(double n, int ytile)
+        public double OsmYTile2Lat(double n, double ytile)
         {
             double lat_rad = Math.Atan(__sinh(Math.PI * (1.0 - 2.0 * ytile / n)));
             return (lat_rad * 180.0 / Math.PI);
@@ -223,10 +369,10 @@ namespace GpsUtils
         {
             return (int)((lon_deg + 180.0) / 360.0 * n);
         }
-        public int OsmLat2YTile(double n, double lat_deg)
+        public double OsmLat2YTile(double n, double lat_deg)       //cast return value to int to get number of tile (upper left corner)
         {
             double lat_rad = lat_deg * Math.PI / 180.0;
-            return (int)((1.0 - Math.Log(Math.Tan(lat_rad) + (1 / Math.Cos(lat_rad))) / Math.PI) / 2.0 * n);
+            return ((1.0 - Math.Log(Math.Tan(lat_rad) + (1 / Math.Cos(lat_rad))) / Math.PI) / 2.0 * n);
         }
         private void LoadOsmServer()
         {
@@ -540,40 +686,65 @@ namespace GpsUtils
                 }
             }
         }*/
-        //int NumMapsExist;
+
+        public void ShiftMap(int dx, int dy)
+        {
+            LongShift = LongShiftSave + dx / Long2Pixel;
+            LatShift = LatShiftSave + dy / Lat2PixelSave;
+            if (DataLongMiddle - LongShift < -180) LongShift = DataLongMiddle + 180;
+            if (DataLongMiddle - LongShift > 179.999999999999) LongShift = DataLongMiddle - 179.999999999999;
+            if (DataLatMiddle + LatShift > 85.051) LatShift = 85.051 - DataLatMiddle;      //85.051;
+            if (DataLatMiddle + LatShift < -85.051) LatShift = -85.051 - DataLatMiddle;
+            System.Diagnostics.Debug.WriteLine(LatShift);
+        }
+        
         public void FillOsmTiles(int MapMode)
         {
-            //NumMapsExist = NumMaps;
             for (int i = 0; i < NumMaps; i++)
             {
                 //Maps[i].qfactor = 0.0;
-                Maps[i].was_removed = true;     //mark all tiles as unneccessary
+                Maps[i].was_removed = true;     //mark all tiles as unnecessary
             }
-
-            double longMin = ToDataX(0);
-            double longMax = ToDataX(ScreenX);
-            double latMin = ToDataY(ScreenY);
-            double latMax = ToDataY(0);
-
-            int n = 1;      // num tiles in this zoom level
-            int iz;
-            for (iz = 0; iz < OsmNumZoomLevels - 1; iz++)       //search optimum zoom level
+            int n = OsmN;
+            int iz = 0;
+            while ((n >>= 1) > 0)
+                iz++;
+            OsmZoom = iz;
+            tilezoom = 0;
+            tilePixel = 256;
+            if ((MapMode == 2 || MapMode == 3) && iz > 0)
             {
-                double deltaLong = 360.0 / n;       //for one tile
-                double tileCoverage = deltaLong / (longMax - longMin);
-                if (tileCoverage < 0.7 * MapMode)
-                    break;
-                n <<= 1;
+                iz--; tilezoom++; tilePixel *= 2;
+                if (MapMode == 3 && iz > 0) { iz--; tilezoom++; tilePixel *= 2; }
             }
-            //osmZoom = iz;
-            int xtile_min = OsmLong2XTile(n, longMin);
-            int xtile_max = OsmLong2XTile(n, longMax);
-            int ytile_min = OsmLat2YTile(n, latMax);
-            int ytile_max = OsmLat2YTile(n, latMin);
-            int num_tiles_in_this_zoom = (ytile_max - ytile_min + 1) * (xtile_max - xtile_min + 1);
-            int center_x = (xtile_min + xtile_max) / 2;
-            int center_y = (ytile_min + ytile_max) / 2;
+            else if (MapMode == 4 && iz < OsmNumZoomLevels - 1) { iz++; tilezoom = -1; tilePixel /= 2; }
+            OsmNz = 1 << iz;
+            double centerTile_xd = (DataLongMiddle - LongShift + 180.0) / 360.0 * OsmNz;
+            centerTile_x = (int)centerTile_xd;
+            ScreenTileRefX = centerTile_x * tilePixel - (int)(centerTile_xd * tilePixel) + ScreenX / 2;
+            int xtile_min = ((int)(centerTile_xd * tilePixel) - ScreenX/2) / tilePixel;
+            int xtile_max = ((int)(centerTile_xd * tilePixel) + ScreenX/2) / tilePixel;
+            if (xtile_min < 0) xtile_min = 0;
+            if (xtile_max >= OsmNz) xtile_max = OsmNz - 1;
 
+            centerTile_yd = OsmLat2YTile(OsmNz, DataLatMiddle + LatShift);
+            centerTile_y = (int)centerTile_yd;
+            ScreenTileRefY = centerTile_y * tilePixel - (int)(centerTile_yd * tilePixel) + ScreenY / 2;
+            int ytile_min = ((int)(centerTile_yd * tilePixel) - ScreenY/2) / tilePixel;
+            int ytile_max = ((int)(centerTile_yd * tilePixel) + ScreenY/2) / tilePixel;
+            if (ytile_min < 0) ytile_min = 0;
+            if (ytile_max >= OsmNz) ytile_max = OsmNz - 1;
+
+            /*int xtile_min = OsmLong2XTile(n, ToDataX(0));
+            int xtile_max = OsmLong2XTile(n, ToDataX(ScreenX));
+            int ytile_min = (int)OsmLat2YTile(n, ToDataY(0));
+            int ytile_max = (int)OsmLat2YTile(n, ToDataY(ScreenY));
+            int num_tiles_in_this_zoom = (ytile_max - ytile_min + 1) * (xtile_max - xtile_min + 1);
+            centerTile_x = (xtile_min + xtile_max) / 2;
+            centerTile_y = (ytile_min + ytile_max) / 2;
+            ScreenTileRefX = ToScreenX(OsmXTile2Long(n, centerTile_x));
+            ScreenTileRefY = ToScreenY(OsmYTile2Lat(n, centerTile_y));
+            */
             for (int ix = xtile_min; ix <= xtile_max; ix++)
             {
                 for (int iy = ytile_min; iy <= ytile_max; iy++)
@@ -586,8 +757,8 @@ namespace GpsUtils
                         while (iz >= dec && !LoadTileFromSD(iz - dec, ix >> dec, iy >> dec))    //load next lower zoom
                             dec++;
                     }
-                    if (ix == center_x && iy == center_y)
-                        osmMapName = iz.ToString() + ((dec > 0) ? (-dec).ToString() : "") + "\\" + center_x.ToString() + "\\" + center_y.ToString();
+                    if (ix == centerTile_x && iy == centerTile_y)
+                        osmMapName = iz.ToString() + ((dec > 0) ? (-dec).ToString() : "") + "\\" + (ix >> dec).ToString() + "\\" + (iy >> dec).ToString();
 
                     // hopefully having 512 tiles within THIS screen is enough
                     if (NumMaps >= MaxNumMaps) { return; }
@@ -604,7 +775,7 @@ namespace GpsUtils
                     MapInfo tmp;
                     for (int j = i; j < NumMaps - 1; j++)
                     {
-                        tmp = Maps[j];              // necesarry with MapInfo as class, otherwise this MapInfo will be disposed by GC
+                        tmp = Maps[j];              // necessary with MapInfo as class, otherwise this MapInfo will be disposed by GC
                         Maps[j] = Maps[j + 1];
                         Maps[j + 1] = tmp;
                     }
@@ -616,24 +787,22 @@ namespace GpsUtils
 
         bool LoadTileFromSD(int iz, int ix, int iy)
         {
-            if (OsmZoomAvailable[iz] == false)
+            if (iz >= OsmNumZoomLevels || OsmZoomAvailable[iz] == false)
                 return false;
             Maps[NumMaps].fname = MapsFilesDirectory + "\\" + iz.ToString() +
                                           "\\" + ix.ToString() + "\\" + iy.ToString() + OsmFileExtension;
-            int n = 1 << iz;
-            Maps[NumMaps].lon1 = OsmXTile2Long(n, ix);
-            Maps[NumMaps].lon2 = OsmXTile2Long(n, ix + 1);
-            Maps[NumMaps].lat2 = OsmYTile2Lat(n, iy);
-            Maps[NumMaps].lat1 = OsmYTile2Lat(n, iy + 1);
 
+            Maps[NumMaps].scrX1_ix = ix;
+            Maps[NumMaps].scrY1_iy = iy;
+            Maps[NumMaps].scrX2_iz = iz;
             // check that this record is not exist in the area with stored bitmaps
             bool record_exist_with_bitmaps = false;
             int k;
             for (k = 0; k < NumMaps; k++)
             {
-                if ((Maps[NumMaps].lat1 == Maps[k].lat1) &&
-                    (Maps[NumMaps].lat2 == Maps[k].lat2) &&
-                    (Maps[NumMaps].lon1 == Maps[k].lon1))
+                if ((Maps[NumMaps].scrX1_ix == Maps[k].scrX1_ix) &&
+                    (Maps[NumMaps].scrY1_iy == Maps[k].scrY1_iy) &&
+                    (Maps[NumMaps].scrX2_iz == Maps[k].scrX2_iz))
                 {
                     record_exist_with_bitmaps = true;
                     break;
@@ -668,13 +837,13 @@ namespace GpsUtils
                         return false;
                 }
                 Maps[NumMaps].overlap = 1.0;
-                Maps[NumMaps].zoom_level = iz;
+                
                 Maps[NumMaps].was_removed = false;
                 NumMaps++;
 
                 MapInfo tmp;        //sort tiles with decreasing zoom
                 for (int i = NumMaps - 1; i > 0; i--)
-                    if (Maps[i].zoom_level > Maps[i - 1].zoom_level)
+                    if (Maps[i].scrX2_iz > Maps[i - 1].scrX2_iz)
                     {
                         tmp = Maps[i - 1];
                         Maps[i - 1] = Maps[i];
@@ -702,6 +871,24 @@ namespace GpsUtils
                 Maps[i].qfactor = 0.0;
             }
 
+            string crFile = mapsFilesDirectory + "\\copyright.txt";
+            if (File.Exists(crFile))
+            {
+                StreamReader sr = null;
+                try
+                {
+                    sr = new StreamReader(crFile, Encoding.UTF7);
+                    mapCopyright = sr.ReadLine();
+                }
+                catch
+                {
+                    mapCopyright = null;
+                }
+                if (sr != null) sr.Close();
+            }
+            else
+                mapCopyright = null;
+
             OsmTilesMode = DetectOsmTiles();
             if (!OsmTilesMode && parent.checkDownloadOsm.Checked)
             {                            // if want to download - force OsmTilesMode and enable all zoom levels
@@ -726,7 +913,7 @@ namespace GpsUtils
 
             // loop over possible map names and load existing map info
             Cursor.Current = Cursors.WaitCursor;
-
+            OsmZoom = 1;            //otherwise zoom out may be prevented
             // load jpeg and jpg files
             string[] jfiles1 = Directory.GetFiles(mapsFilesDirectory, "*.jpg");
             string[] jfiles2 = Directory.GetFiles(mapsFilesDirectory, "*.jpeg");
@@ -825,12 +1012,13 @@ namespace GpsUtils
                             double sizex = center_range * Math.Tan(30.11 * (Math.PI / 180.0));
                             double sizey = sizex * Maps[NumMaps].sizeY /Maps[NumMaps].sizeX;
                             double tmp;
+                            UtmUtil utmUtil1 = new UtmUtil();
 
-                            utmUtil.setReferencePoint(center_lat, center_long);
-                            utmUtil.getLatLong(-sizex, 0.0, out tmp, out Maps[NumMaps].lon1);
-                            utmUtil.getLatLong( sizex, 0.0, out tmp, out Maps[NumMaps].lon2);
-                            utmUtil.getLatLong(0.0,-sizey, out Maps[NumMaps].lat1, out tmp);
-                            utmUtil.getLatLong(0.0, sizey, out Maps[NumMaps].lat2, out tmp);
+                            utmUtil1.setReferencePoint(center_lat, center_long);
+                            utmUtil1.getLatLong(-sizex, 0.0, out tmp, out Maps[NumMaps].lon1);
+                            utmUtil1.getLatLong( sizex, 0.0, out tmp, out Maps[NumMaps].lon2);
+                            utmUtil1.getLatLong(0.0,-sizey, out Maps[NumMaps].lat1, out tmp);
+                            utmUtil1.getLatLong(0.0, sizey, out Maps[NumMaps].lat2, out tmp);
                         }
                         else
                             { kml_has_problems = true; }
@@ -1134,6 +1322,7 @@ namespace GpsUtils
             else if (MapMode == 1)  { NumBitmaps = 4; scaleCorrection = 1.0; }
             else if (MapMode == 2)  { NumBitmaps = 4; scaleCorrection = 0.5;}
             else if (MapMode == 3)  { NumBitmaps = 4; scaleCorrection = 0.25;}
+            else if (MapMode == 4)  { NumBitmaps = 4; scaleCorrection = 2.0; }
             else    { NumBitmaps = 1; scaleCorrection = 1.0;}
 
             // compute overlap for each map and map qfactor (function from the zoom level)
@@ -1141,12 +1330,12 @@ namespace GpsUtils
 
             for (int i = 0; i < NumMaps; i++)
             {
-                double overlap_area = (double)GetLineOverLap(Maps[i].scrX1, Maps[i].scrX2, 0, ScreenX) *
-                                      (double)GetLineOverLap(Maps[i].scrY2, Maps[i].scrY1, 0, ScreenY);
+                double overlap_area = (double)GetLineOverLap(Maps[i].scrX1_ix, Maps[i].scrX2_iz, 0, ScreenX) *
+                                      (double)GetLineOverLap(Maps[i].scrY2, Maps[i].scrY1_iy, 0, ScreenY);
 
                 Maps[i].overlap = overlap_area / screen_area;
 
-                double zoom_level = scaleCorrection * (double)(Maps[i].scrX2 - Maps[i].scrX1) / (double)Maps[i].sizeX;
+                double zoom_level = scaleCorrection * (double)(Maps[i].scrX2_iz - Maps[i].scrX1_ix) / (double)Maps[i].sizeX;
 
                 Maps[i].zoom_level = zoom_level;
 
@@ -1219,15 +1408,15 @@ namespace GpsUtils
             // checking if map i is within j, so do not need to be plotted
             // limit to screen size only
             // swap Y, to have correct comparion againt ScreenY
-            int i_scrX1 = (Maps[i].scrX1 >= 0 ? Maps[i].scrX1 : 0);
-            int i_scrX2 = (Maps[i].scrX2 <= ScreenX ? Maps[i].scrX2 : ScreenX);
+            int i_scrX1 = (Maps[i].scrX1_ix >= 0 ? Maps[i].scrX1_ix : 0);
+            int i_scrX2 = (Maps[i].scrX2_iz <= ScreenX ? Maps[i].scrX2_iz : ScreenX);
             int i_scrY1 = (Maps[i].scrY2 >= 0 ? Maps[i].scrY2 : 0);
-            int i_scrY2 = (Maps[i].scrY1 <= ScreenY ? Maps[i].scrY1 : ScreenY);
+            int i_scrY2 = (Maps[i].scrY1_iy <= ScreenY ? Maps[i].scrY1_iy : ScreenY);
 
-            int j_scrX1 = (Maps[j].scrX1 >= 0 ? Maps[j].scrX1 : 0);
-            int j_scrX2 = (Maps[j].scrX2 <= ScreenX ? Maps[j].scrX2 : ScreenX);
+            int j_scrX1 = (Maps[j].scrX1_ix >= 0 ? Maps[j].scrX1_ix : 0);
+            int j_scrX2 = (Maps[j].scrX2_iz <= ScreenX ? Maps[j].scrX2_iz : ScreenX);
             int j_scrY1 = (Maps[j].scrY2 >= 0 ? Maps[j].scrY2 : 0);
-            int j_scrY2 = (Maps[j].scrY1 <= ScreenY ? Maps[j].scrY1 : ScreenY);
+            int j_scrY2 = (Maps[j].scrY1_iy <= ScreenY ? Maps[j].scrY1_iy : ScreenY);
 
             // now compare - if i is within j
             if ((i_scrX1 >= j_scrX1) && (i_scrX2 <= j_scrX2) && (i_scrY1 >= j_scrY1) && (i_scrY2 <= j_scrY2)) { return true; }
@@ -1352,37 +1541,58 @@ namespace GpsUtils
             displayTile:
                 // check that it was loaded OK
                 if (Maps[i].bmp == null) { continue; }
-                
-                int bX1 = ToScreenX(Maps[i].lon1);
-                int bX2 = ToScreenX(Maps[i].lon2);
-                int bY1 = ToScreenY(Maps[i].lat1);
-                int bY2 = ToScreenY(Maps[i].lat2);
 
-                // if picture is smaller than the screen - map while picture to screen
-                if (((bX2 - bX1) < ScreenX) || ((bY1 - bY2) < ScreenY))
+                if (OsmTilesMode)
                 {
-                    Rectangle src_rec = new Rectangle(0, 0, Maps[i].sizeX, Maps[i].sizeY);
-                    Rectangle dest_rec = new Rectangle(bX1, bY2, bX2 - bX1, bY1 - bY2);
-
-                    g.DrawImage(Maps[i].bmp, dest_rec, src_rec, GraphicsUnit.Pixel);
+                    int z_red = OsmZoom - Maps[i].scrX2_iz;
+                    if (z_red == 0 && tilezoom == 0)
+                    {
+                        int x = (Maps[i].scrX1_ix - centerTile_x) * 256 + ScreenTileRefX;
+                        int y = (Maps[i].scrY1_iy - centerTile_y) * 256 + ScreenTileRefY;
+                        g.DrawImage(Maps[i].bmp, x, y);
+                    }
+                    else
+                    {
+                        int x = ((Maps[i].scrX1_ix << z_red+1) - (centerTile_x << tilezoom+1)) * 128 + ScreenTileRefX;
+                        int y = ((Maps[i].scrY1_iy << z_red+1) - (centerTile_y << tilezoom+1)) * 128 + ScreenTileRefY;
+                        int factor = 1 << z_red+1;
+                        Rectangle src_rec = new Rectangle(-x * 2 / factor, -y * 2 / factor, ScreenX * 2 / factor, ScreenY * 2 / factor);
+                        Rectangle dest_rec = new Rectangle(0, 0, ScreenX, ScreenY);
+                        g.DrawImage(Maps[i].bmp, dest_rec, src_rec, GraphicsUnit.Pixel);
+                    }
                 }
-                else // else need to take required portion of the whole picture, otherwise it is very slow to map
+                else
                 {
-                    double scalex = (double)Maps[i].sizeX / (bX2 - bX1);
-                    double scaley = (double)Maps[i].sizeY / (bY1 - bY2);
+                    int bX1 = ToScreenX(Maps[i].lon1);
+                    int bY2 = ToScreenY(Maps[i].lat2);
+                    int bX2 = ToScreenX(Maps[i].lon2);
+                    int bY1 = ToScreenY(Maps[i].lat1);
 
-                    Rectangle src_rec = new Rectangle((int)( - bX1 * scalex), (int)( - bY2 * scaley),
-                                                      (int)(ScreenX * scalex), (int)(ScreenY * scaley));
-                    Rectangle dest_rec = new Rectangle(0, 0, ScreenX, ScreenY);
+                    // if picture is smaller than the screen - map while picture to screen
+                    if (((bX2 - bX1) < ScreenX) || ((bY1 - bY2) < ScreenY))
+                    {
+                        Rectangle src_rec = new Rectangle(0, 0, Maps[i].sizeX, Maps[i].sizeY);
+                        Rectangle dest_rec = new Rectangle(bX1, bY2, bX2 - bX1, bY1 - bY2);
 
-                    g.DrawImage(Maps[i].bmp, dest_rec, src_rec, GraphicsUnit.Pixel);
+                        g.DrawImage(Maps[i].bmp, dest_rec, src_rec, GraphicsUnit.Pixel);
+                    }
+                    else // else need to take required portion of the whole picture, otherwise it is very slow to map
+                    {
+                        double scalex = (double)Maps[i].sizeX / (bX2 - bX1);
+                        double scaley = (double)Maps[i].sizeY / (bY1 - bY2);
+
+                        Rectangle src_rec = new Rectangle((int)(-bX1 * scalex), (int)(-bY2 * scaley),
+                                                          (int)(ScreenX * scalex), (int)(ScreenY * scaley));
+                        Rectangle dest_rec = new Rectangle(0, 0, ScreenX, ScreenY);
+
+                        g.DrawImage(Maps[i].bmp, dest_rec, src_rec, GraphicsUnit.Pixel);
+                    }
                 }
             }
             reDownloadMaps = false;
         }
         public void DrawMovingImage(Graphics g, Bitmap BackBuffer, int dx, int dy)
         {
-            ScreenX = BackBuffer.Width; ScreenY = BackBuffer.Height;
             // draw back buffer on screen, take into account the shift
             if (dx > 0)
             {
@@ -1438,19 +1648,27 @@ namespace GpsUtils
 
         public int ToScreenX(double x)
         {
-            return (ScreenShiftX + (int)((x - DataLongMin) * Data2Screen * ZoomValue));
+            return (int)((x + LongShift - DataLongMiddle) * Long2Pixel) + ScreenX / 2;
         }
         public double ToDataX(int scr_x)
         {
-            return (DataLongMin + (double)(scr_x - ScreenShiftX) / (Data2Screen * ZoomValue));
+            return (DataLongMiddle - LongShift + (double)(scr_x - ScreenX /2) / Long2Pixel);
         }
         public int ToScreenY(double y)
         {
-            return (ScreenShiftY - (int)((y - DataLatMax) * RatioMeterLatLong * Data2Screen * ZoomValue));
+            return (ScreenY / 2 - (int)((y - DataLatMiddle - LatShift) * Lat2Pixel));
         }
         public double ToDataY(int scr_y)
         {
-            return (DataLatMax + (double)(ScreenShiftY - scr_y) / (RatioMeterLatLong * Data2Screen * ZoomValue));
+            return (DataLatMiddle + LatShift + (double)(ScreenY / 2 - scr_y) / Lat2Pixel);
+        }
+        public double ToDataYexact(int scr_y)
+        {
+            if (OsmTilesMode)
+            {
+                return OsmYTile2Lat(OsmNz, centerTile_yd + (double)(scr_y - ScreenY / 2) / tilePixel);
+            }
+            else return ToDataY(scr_y);
         }
         private void DrawCurrentPoint(Graphics g, double Long, double Lat, int size, Color col)
         {
@@ -1461,7 +1679,7 @@ namespace GpsUtils
             g.FillEllipse(drawBrush, x_point - size / 2, y_point - size / 2, size, size);
         }
         //KB draw arrow   (size = radius)
-        private void DrawArrow(Graphics g, int x0, int y0, int heading_int, int size, Color col)
+        public void DrawArrow(Graphics g, int x0, int y0, int heading_int, int size, Color col)
         {
             SolidBrush br = new SolidBrush(col);
 
@@ -1777,7 +1995,7 @@ namespace GpsUtils
         {
             int i = 0;      //0..Plotsize
             SolidBrush br = new SolidBrush(col);
-            Font drawFont = new Font("Arial", 8, FontStyle.Regular);
+            Font drawFont = new Font("Arial", 8 * parent.df, FontStyle.Regular);
             Point[] pa = new Point[3];
 
             while (i < WayPoints.Count)
@@ -1828,7 +2046,7 @@ namespace GpsUtils
         private void DrawTickLabel(Graphics g, Pen p, int tick_dist_screen, double tick_dist_units, string unit_name, string clickLatLon)
         {
             // draw text: Create font and brush.
-            Font drawFont = new Font("Arial", 8, FontStyle.Bold);
+            Font drawFont = new Font("Arial", 8 * parent.df, FontStyle.Bold);
             SolidBrush drawBrush = new SolidBrush(p.Color);
 
             // draw map info, check the text size to draw in the right corner
@@ -1838,8 +2056,11 @@ namespace GpsUtils
 
             if (clickLatLon != null)
             {
-                size = g.MeasureString(clickLatLon, drawFont);
-                g.DrawString(clickLatLon, drawFont, drawBrush, ScreenX - size.Width - 2, size.Height);
+                float offset = 0;
+                if (mapCopyright != null)
+                    offset = ScreenY / 20;
+                SizeF size2 = g.MeasureString(clickLatLon, drawFont);
+                g.DrawString(clickLatLon, drawFont, drawBrush, ScreenX - size2.Width - 2, size.Height + offset);
             }
 
             // tick distance
@@ -1858,6 +2079,48 @@ namespace GpsUtils
             string text = tick_dist_units.ToString() + unit_name;
 
             g.DrawString(text, drawFont, drawBrush, x_point1 + 2, 0);
+        }
+
+        private void DrawMapValues(Graphics g, Color col)
+        {
+            int number;
+            string[] arStrName = new string[3];
+            string[] arStrValue = new string[3];
+            string[] arStrUnit = new string[3];
+            number = parent.GetValuesToDisplayInMap(ref arStrName, ref arStrValue, ref arStrUnit);
+            if (number == 0) return;
+
+            int x = ScreenX / (number * 2);
+            int txtPoints;
+            if (number > 2)
+                txtPoints = 14;
+            else
+                txtPoints = 18;
+            Font drawFont = new Font("Arial", txtPoints * parent.df, FontStyle.Bold);
+            Font drawFont2 = new Font("Arial", txtPoints * 0.7f * parent.df, FontStyle.Bold);
+            SolidBrush backBrush = new SolidBrush(Back_Color);
+            SolidBrush txtBrush = new SolidBrush(col);
+            SizeF sizeVal, sizeUnit;
+            for (int i = 0; i < 3; i++)
+            {
+                if (arStrValue[i] == null) continue;
+                sizeVal = g.MeasureString(arStrValue[i], drawFont);
+                sizeUnit = g.MeasureString(arStrUnit[i], drawFont2);
+                int dx = (int)(sizeVal.Width + sizeUnit.Width);
+                int y = ScreenY - (int)sizeVal.Height;
+                if (parent.mapValuesCleanBack)
+                {
+                    g.FillRectangle(backBrush, x - dx / 2, y, dx, (int)sizeVal.Height);
+                }
+                g.DrawString(arStrValue[i], drawFont, txtBrush, x - dx / 2, y);
+                g.DrawString(arStrUnit[i], drawFont2, txtBrush, x - dx / 2 + sizeVal.Width, y + sizeVal.Height * 9 / 10 - sizeUnit.Height);
+                if (parent.mapValuesShowName)
+                {
+                    sizeVal = g.MeasureString(arStrName[i], drawFont2);
+                    g.DrawString(arStrName[i], drawFont2, txtBrush, x - (int)sizeVal.Width / 2, y - (int)sizeVal.Height);
+                }
+                x += ScreenX / number;
+            }
         }
 
         public string GetBestMapName()
@@ -1918,68 +2181,78 @@ namespace GpsUtils
             return (mant * mult);
         }
 
-        private void SetAutoScale(float[] PlotLong, float[] PlotLat, int PlotSize, bool lifeview)
+        double DataLongMin, DataLongMax, DataLatMin, DataLatMax;
+        private void SetAutoScale(UtmUtil utmUtil, float[] PlotLong, float[] PlotLat, int PlotSize, bool lifeview)
         {
-            // compute difference in Lat/Long scale
-            utmUtil.setReferencePoint(PlotLat[PlotSize - 1], PlotLong[PlotSize - 1]);
-            RatioMeterLatLong = utmUtil.meter2longit / utmUtil.meter2lat;
-
-            // during liveview (logging), set a fixed scale with current point in the middle
-            if (lifeview || (PlotSize == 1))
+            if (PlotSize > 0)
             {
-                double last_x = PlotLong[PlotSize - 1];
-                double last_y = PlotLat[PlotSize - 1];
-                double extend_x = 1.0;
-                double extend_y = 1.0;
-                if (ScreenY > ScreenX)
-                    extend_y = (double)ScreenY / (double)ScreenX;
+                if (!utmUtil.referenceSet)
+                {
+                    utmUtil.setReferencePoint(PlotLat[PlotSize - 1], PlotLong[PlotSize - 1]);
+                    utmUtil.referenceSet = false;       //better not fix to an old point
+                }
+                if (lifeview || (PlotSize == 1))   // during liveview (logging), set a fixed scale with current point in the middle
+                {
+                    double last_x = PlotLong[PlotSize - 1];
+                    double last_y = PlotLat[PlotSize - 1];
+                    double extend_x = 1.0;
+                    double extend_y = 1.0;
+                    if (!OsmTilesMode)
+                        if (ScreenY > ScreenX)
+                            extend_y = (double)ScreenY / (double)ScreenX;
+                        else
+                            extend_x = (double)ScreenX / (double)ScreenY;
+                    DataLongMin = last_x - utmUtil.meter2longit * DefaultZoomRadius * extend_x;
+                    DataLongMax = last_x + utmUtil.meter2longit * DefaultZoomRadius * extend_x;
+                    DataLatMin = last_y - utmUtil.meter2lat * DefaultZoomRadius * extend_y;
+                    DataLatMax = last_y + utmUtil.meter2lat * DefaultZoomRadius * extend_y;
+                }
                 else
-                    extend_x = (double)ScreenX / (double)ScreenY;
-                DataLongMin = last_x - utmUtil.meter2longit * DefaultZoomRadius * extend_x;
-                DataLongMax = last_x + utmUtil.meter2longit * DefaultZoomRadius * extend_x;
-                DataLatMin = last_y - utmUtil.meter2lat * DefaultZoomRadius * extend_y;
-                DataLatMax = last_y + utmUtil.meter2lat * DefaultZoomRadius * extend_y;
+                {
+                    // compute data limits
+                    DataLongMin = 1.0E9; DataLongMax = -1.0E9; DataLatMin = 1.0E9; DataLatMax = -1.0E9;
+                    for (int i = 0; i < PlotSize; i++)
+                    {
+                        if (PlotLong[i] < DataLongMin) { DataLongMin = PlotLong[i]; }
+                        if (PlotLong[i] > DataLongMax) { DataLongMax = PlotLong[i]; }
+                        if (PlotLat[i] < DataLatMin) { DataLatMin = PlotLat[i]; }
+                        if (PlotLat[i] > DataLatMax) { DataLatMax = PlotLat[i]; }
+                    }
+                    double dx = (DataLongMax - DataLongMin) / 20;       //make ca. 10% larger
+                    double dy = (DataLatMax - DataLatMin) / 20;
+                    if (dx < 0.0001) dx = 0.0001;
+                    if (dy < 0.0001) dy = 0.0001;
+                    DataLongMin -= dx;
+                    DataLongMax += dx;
+                    DataLatMin -= dy;
+                    DataLatMax += dy;
+                }
+            }
+            double xscale = (double)ScreenX / (DataLongMax - DataLongMin);
+            double yscale = (double)ScreenY / ((OsmLat2YTile(1, DataLatMin) - OsmLat2YTile(1, DataLatMax)) * 360);
+            DataLongMiddle = (DataLongMin + DataLongMax) / 2;
+            DataLatMiddle = (DataLatMin + DataLatMax) / 2;
+            if (OsmTilesMode)
+            {
+                UInt32 xTiles = (UInt32)((yscale > xscale ? xscale : yscale) * 360 / 256);
+                for (OsmN = 1 << 30; OsmN > 1; OsmN >>= 1)
+                    if ((xTiles & OsmN) > 0)
+                        break;                      //OsmN is next smaller power of 2
+                OsmN = (int)(OsmN * ZoomValue);
+                Long2Pixel = OsmN * 32 / 45.0;      //  OsmN * 256 / 360.0
+                double yMiddleTile = OsmLat2YTile(OsmN, DataLatMiddle + LatShift);     //linearize at middle of display
+                Lat2Pixel = 1 / (OsmYTile2Lat(OsmN, yMiddleTile - 1.0 / 512) - OsmYTile2Lat(OsmN, yMiddleTile + 1.0 / 512));    //linearize with +/- 0.5 pixel
             }
             else
             {
-                // compute data limits
-                DataLongMin = 1.0E9; DataLongMax = -1.0E9; DataLatMin = 1.0E9; DataLatMax = -1.0E9;
-                for (int i = 0; i < PlotSize; i++)
-                {
-                    if (PlotLong[i] < DataLongMin) { DataLongMin = PlotLong[i]; }
-                    if (PlotLong[i] > DataLongMax) { DataLongMax = PlotLong[i]; }
-                    if (PlotLat[i] < DataLatMin) { DataLatMin = PlotLat[i]; }
-                    if (PlotLat[i] > DataLatMax) { DataLatMax = PlotLat[i]; }
-                }
-                double dx = (DataLongMax - DataLongMin);       //make ca. 10% larger
-                double dy = (DataLatMax - DataLatMin);
-                if (dy > dx) dx = dy;
-                dx /= 20;
-                DataLongMin -= dx;
-                DataLongMax += dx;
-                DataLatMin -= dx;
-                DataLatMax += dx;
+                Long2Pixel = (yscale > xscale ? xscale : yscale) * ZoomValue;
+                Lat2Pixel = Long2Pixel * utmUtil.meter2longit / utmUtil.meter2lat;
             }
-
-            // set plot scale, must be equal for both axis to plot map
-            double xsize = DataLongMax - DataLongMin;
-            double ysize = DataLatMax - DataLatMin;
-
-            // check that size not 0
-            const double delta = 0.001;
-            if (xsize <= delta)
-            { xsize += delta; DataLongMax += delta / 2; DataLongMin -= delta / 2; }
-            if (ysize <= delta)
-            { ysize += delta; DataLatMax += delta / 2; DataLatMin -= delta / 2; }
-
-            double xscale = (double)ScreenX / xsize;
-            double yscale = (double)ScreenY / (ysize * RatioMeterLatLong);
-            Data2Screen = (yscale > xscale ? xscale : yscale);
         }
 
         public bool drawWhileShift = true;
         // draw map and 2 lines (main and "to follow"). Shift is the x/y shift of the second line origin.
-        public void DrawMaps(Graphics g, Bitmap BackBuffer, Graphics BackBufferGraphics, 
+        public void DrawMaps(Graphics g, Bitmap BackBuffer, Graphics BackBufferGraphics, UtmUtil utmUtil,
                              bool MouseMoving, bool lifeview, int MapMode, 
                              double unit_cff, string unit_name,
                              float[] PlotLong, float[] PlotLat, int PlotSize, Color line_color, int line_width, bool plot_dots,
@@ -1987,51 +2260,51 @@ namespace GpsUtils
                              float[] PlotLong2, float[] PlotLat2, int PlotSize2, Color line_color2, int line_width2, bool plot_dots2,
                              double CurrentLong, double CurrentLat, int heading, string clickLatLon, Color mapLabelColor)
         {
-            
+            ScreenX = BackBuffer.Width; ScreenY = BackBuffer.Height;
             // if picture is moving - draw existing picture
             if (MouseMoving && !drawWhileShift)
             {
-                DrawMovingImage(g, BackBuffer, ScreenShiftX - ScreenShiftSaveX, ScreenShiftY - ScreenShiftSaveY);
+                DrawMovingImage(g, BackBuffer, (int)((LongShift - LongShiftSave) * Long2Pixel), (int)((LatShift - LatShiftSave) * Lat2Pixel));
                 return;
             }
-
-            // store current drawing screen size and set scale from "main" or the "track-to-follow" (if main not exist)
-            ScreenX = BackBuffer.Width; ScreenY = BackBuffer.Height;
+            // set scale from "main" or the "track-to-follow" (if main not exist)
             float[] CurLongA = { (float)CurrentLong };
             float[] CurLatA = { (float)CurrentLat };
-            if (ShowTrackToFollowMode == ShowTrackToFollow.T2FStart && PlotSize2 != 0)
+            if (ShowTrackToFollowMode == ShowTrackToFollow.T2FStart && PlotSize2 > 0)
             {
                 // Show start position of track to follow
-                SetAutoScale(PlotLong2, PlotLat2, 1, false);
+                SetAutoScale(utmUtil, PlotLong2, PlotLat2, 1, false);
             }
-            else if (ShowTrackToFollowMode == ShowTrackToFollow.T2FEnd && PlotSize2 != 0)
+            else if (ShowTrackToFollowMode == ShowTrackToFollow.T2FEnd && PlotSize2 > 0)
             {
                 // Show end position of track to follow
                 float[] Long = { PlotLong2[PlotSize2 - 1] };
                 float[] Lat = { PlotLat2[PlotSize2 - 1] };
-                SetAutoScale(Long, Lat, 1, false);
+                SetAutoScale(utmUtil, Long, Lat, 1, false);
             }
             else if (parent.trackEditMode != Form1.TrackEditMode.Off)
-            { }                                                     // in trackEditMode prevent autoscale
+            {
+                SetAutoScale(utmUtil, null, null, 0, false);           // in trackEditMode prevent autoscale; only update vars
+            }
             else if (lifeview)
             {
                 // Show current GPS position (last position)
-                SetAutoScale(CurLongA, CurLatA, 1, lifeview);
+                SetAutoScale(utmUtil, CurLongA, CurLatA, 1, lifeview);
             }
-            else if (PlotSize != 0)
+            else if (PlotSize > 0)
             {
                 // Show all points of loaded track
-                SetAutoScale(PlotLong, PlotLat, PlotSize, lifeview);
+                SetAutoScale(utmUtil, PlotLong, PlotLat, PlotSize, lifeview);
             }
-            else if (PlotSize2 != 0)
+            else if (PlotSize2 > 0 && ShowTrackToFollowMode != ShowTrackToFollow.T2FCurrent)
             {
                 // Show all points of track to follow
-                SetAutoScale(PlotLong2, PlotLat2, PlotSize2, false);
+                SetAutoScale(utmUtil, PlotLong2, PlotLat2, PlotSize2, false);
             }
             else
             {
                 // Show last position
-                SetAutoScale(CurLongA, CurLatA, 1, false);
+                SetAutoScale(utmUtil, CurLongA, CurLatA, 1, false);
             }
 
             // need to draw the picture first into back buffer
@@ -2052,9 +2325,9 @@ namespace GpsUtils
                     // Update screen coordinates for all maps
                     for (int i = 0; i < NumMaps; i++)
                     {
-                        Maps[i].scrX1 = ToScreenX(Maps[i].lon1);
-                        Maps[i].scrX2 = ToScreenX(Maps[i].lon2);
-                        Maps[i].scrY1 = ToScreenY(Maps[i].lat1);
+                        Maps[i].scrX1_ix = ToScreenX(Maps[i].lon1);
+                        Maps[i].scrX2_iz = ToScreenX(Maps[i].lon2);
+                        Maps[i].scrY1_iy = ToScreenY(Maps[i].lat1);
                         Maps[i].scrY2 = ToScreenY(Maps[i].lat2);
                     }
 
@@ -2063,13 +2336,19 @@ namespace GpsUtils
                     RemoveBitmaps(NumBitmaps); // removes unused bitmaps
                     DrawJpeg(BackBufferGraphics);
                 }
-                
+                if (mapCopyright != null)
+                {
+                    Font drawFont = new Font("Arial", 8 * parent.df, FontStyle.Bold);
+                    SolidBrush drawBrush = new SolidBrush(mapLabelColor);
+                    SizeF size = BackBufferGraphics.MeasureString(mapCopyright, drawFont);
+                    BackBufferGraphics.DrawString(mapCopyright, drawFont, drawBrush, ScreenX - size.Width - 2, size.Height);
+                }
             }
 
             Pen pen = new Pen(Color.LightGray, 1);
 
             // draw the track-to-follow line
-            if (PlotSize2 != 0)
+            if (PlotSize2 > 0 && hideT2f == false)
             {
                 pen.Color = line_color2;
                 pen.Width = line_width2;
@@ -2078,7 +2357,7 @@ namespace GpsUtils
             }
 
             // draw the main track line
-            if (PlotSize != 0 && hideTrack == false)
+            if (PlotSize > 0 && hideTrack == false)
             {
                 pen.Color = line_color;
                 pen.Width = line_width;
@@ -2102,16 +2381,18 @@ namespace GpsUtils
                 bool outside1 = false;
                 if (heading == 720) { col = Color.DimGray; col2 = Color.DimGray; }
 
-                if (PlotSize2 != 0 && (!hideNav || playVoiceCommand))
+                if (PlotSize2 > 0 && (showNav || parent.comboNavCmd.SelectedIndex > 0))
                 {
-                    GetNavigationData(PlotLong2, PlotLat2, PlotSize2, CurrentLong, CurrentLat);
-                    DoVoiceCommand();
-                    if (!hideNav)
+#if debugNav
+                    GetNavigationData(utmUtil, PlotLong2, PlotLat2, parent.Plot2ndD, PlotSize2, CurrentLong, CurrentLat);
+#endif
+                    //DoVoiceCommand();
+                    if (showNav && !hideAllInfos)
                     {
                         // We draw the line between current position and T2F with half of the T2F width and somewhat lighter
                         pen.Width = Math.Max(2, line_width2 / 2);
                         pen.Color = Utils.modifyColor(line_color2, +100);
-                        Point p1 = new Point(ToScreenX(nav.LongMinDistance), ToScreenY(nav.LatMinDistance));
+                        Point p1 = new Point(ToScreenX(nav.LongIntersection), ToScreenY(nav.LatIntersection));
                         outside0 = ScreenClip(ref p0, p1);
                         outside1 = ScreenClip(ref p1, p0);
                         BackBufferGraphics.DrawLine(pen, p0.X, p0.Y, p1.X, p1.Y);
@@ -2122,64 +2403,26 @@ namespace GpsUtils
                         if (!outside0)
                             DrawArrow(BackBufferGraphics, p0.X, p0.Y, nav.Angle100mAhead, line_width2 * 3 + 7, line_color2);                    //navigation arrow pointing at t2f 100m ahead
                         DrawArrow(BackBufferGraphics, ScreenX * 4 / 5, ScreenY / 5, nav.Angle100mAhead - heading, ScreenX / 5, col2);   //big navigation arrow in direction of travel
-                        int clock = nav.Angle100mAhead - parent.Heading;
-                        while (clock < 0) clock += 360;
-                        string str = "";
-                        if (nav.MinDistance > 50)
+                        
+                        Font drawFont = new Font("Arial", 22, FontStyle.Bold);
+                        SolidBrush drawBrush = new SolidBrush(line_color2);
+                        //if (nav.strCmd.Length > 8)
+                        //{
+                        //    int blank = nav.strCmd.IndexOf(" ", 5);
+                        //    if (blank > 1)
+                        //    {
+                        //        string navstr2 = nav.strCmd.Remove(0, blank + 1);
+                        //        nav.strCmd = nav.strCmd.Remove(blank, nav.strCmd.Length - blank);
+                        //        BackBufferGraphics.DrawString(navstr2, drawFont, drawBrush, ScreenX / 40, ScreenY / 12 + (int)BackBufferGraphics.MeasureString(nav.strCmd, drawFont).Height);
+                        //    }
+                        //}
+                        if (nav.Symbol != null)
                         {
-                            str = "ToR ";
-                            if (parent.Heading != 720)
-                            {
-                                if (clock < 45)
-                                    str += "Forw";
-                                else if (clock < 135)
-                                    str += "Right";
-                                else if (clock < 225)
-                                    str += "Back";
-                                else if (clock < 315)
-                                    str += "Left";
-                                else
-                                    str += "Forw";
-                            }
-                            else
-                            {
-                                int dir = nav.Angle100mAhead;
-                                if (dir < -135)
-                                    str += "South";
-                                else if (dir < -45)
-                                    str += "West";
-                                else if (dir < 45)
-                                    str += "North";
-                                else if (dir < 135)
-                                    str += "East";
-                                else
-                                    str += "South";
-                            }
-                            //if (nav.MinDistance >= 10000)
-                            //    str += " " + ((int)nav.MinDistance / 1000).ToString() + "km";
-                            //else
-                            //    str += " " + ((int)nav.MinDistance / 10 * 10).ToString() + "m";
-                            str += " " + (nav.MinDistance * unit_cff).ToString("0.00") + unit_name;
+                            DrawNavSymbol(BackBufferGraphics, drawBrush, ScreenX / 40, ScreenY / 12, nav.Symbol, nav.orient, nav.SkyDirection, false);
+                            BackBufferGraphics.DrawString(nav.strCmd, drawFont, drawBrush, ScreenX * 130 / 480, ScreenY / 14);
                         }
-                        else if (parent.Heading != 720 && clock > 135 && clock < 225)
+                        if (corner.Type != 0)
                         {
-                            str = "Turn over";      //wenden
-                        }
-                        else if (corner.Type != 0)        //navigation command
-                        {
-                            switch (corner.Type)
-                            {
-                                case 1: str = "H"; break;
-                                case 2: str = ""; break;
-                                case 3: str = "S"; break;
-                                default: str = ""; break;
-                            }
-                            if (corner.angle < 0)
-                                str += "L ";
-                            else
-                                str += "R ";
-                            //str = corner.angle.ToString() + str;
-                            str += corner.distance.ToString() + "m";
                             //DrawCurrentPoint(BackBufferGraphics, PlotLong2[corner.IndexT2F], PlotLat2[corner.IndexT2F], 6, Color.Fuchsia);
                             DrawCurrentPoint(BackBufferGraphics, corner.Long, corner.Lat, line_width2, Color.Yellow);
 
@@ -2187,11 +2430,7 @@ namespace GpsUtils
                             //DrawCurrentPoint(BackBufferGraphics, PlotLong2[corner.IndexT2F - 1], PlotLat2[corner.IndexT2F - 1], 4, Color.Yellow);
                             //DrawCurrentPoint(BackBufferGraphics, PlotLong2[corner.IndexT2F + 1], PlotLat2[corner.IndexT2F + 1], 4, Color.Yellow);
                             //DrawCurrentPoint(BackBufferGraphics, PlotLong2[corner.IndexT2F + 2], PlotLat2[corner.IndexT2F + 2], 4, Color.Yellow);
-
                         }
-                        Font drawFont = new Font("Arial", 14, FontStyle.Bold);
-                        SolidBrush drawBrush = new SolidBrush(line_color2);
-                        BackBufferGraphics.DrawString(str, drawFont, drawBrush, ScreenX / 40, ScreenY / 12);
                     }
                 }
                 if (!outside0)
@@ -2199,17 +2438,20 @@ namespace GpsUtils
                 // draw gps led point
                 //DrawCurrentPoint(BackBufferGraphics, CurLong[0], CurLat[0], line_width, CurrentGpsLedColor);
             }
+            if (showMapLabel && !hideAllInfos || parent.trackEditMode == Form1.TrackEditMode.T2f)
+            {
+                // draw tick label and map name
+                double screen_width_units = ScreenX / Long2Pixel * unit_cff / utmUtil.meter2longit;
+                // tick distance in "units" (i.e. km or miles)
+                double tick_distance_units = TickMark(screen_width_units, 4);
+                // tick distance in screen pixels
+                int tick_distance_screen = (int)(tick_distance_units * Long2Pixel / unit_cff * utmUtil.meter2longit);
 
-            // draw tick label and map name
-            double screen_width_units = (ScreenX / (Data2Screen * ZoomValue)) * unit_cff / utmUtil.meter2longit;
-            // tick distance in "units" (i.e. km or miles)
-            double tick_distance_units = TickMark(screen_width_units, 4);
-            // tick distance in screen pixels
-            int tick_distance_screen = (int)(tick_distance_units * (Data2Screen * ZoomValue) / unit_cff * utmUtil.meter2longit);
-
-            pen.Color = mapLabelColor;
-            DrawTickLabel(BackBufferGraphics, pen, tick_distance_screen, tick_distance_units, unit_name, clickLatLon);
-
+                pen.Color = mapLabelColor;
+                DrawTickLabel(BackBufferGraphics, pen, tick_distance_screen, tick_distance_units, unit_name, clickLatLon);
+            }
+            if (!hideAllInfos)
+                DrawMapValues(BackBufferGraphics, mapLabelColor);
             // draw back buffer on screen
             g.DrawImage(BackBuffer, 0, 0);
         }
@@ -2253,192 +2495,219 @@ namespace GpsUtils
             return clipped;
         }
 
-        public void DrawNavigate(Graphics g, Bitmap BackBuffer, Graphics BackBufferGraphics, float[] PlotLong2, float[] PlotLat2, int PlotSize2, float CurLong, float CurLat, int heading, Color col, double unit_cff, string unit_name)
+        public void DrawNavigate(Graphics g, Bitmap BackBuffer, Graphics BackBufferGraphics, float[] PlotLong2, float[] PlotLat2, int PlotSize2, float CurLong, float CurLat, int heading, Color col)
         {
             BackBufferGraphics.Clear(Back_Color);
-            Font drawFont = new Font("Arial", 20, FontStyle.Regular);
             SolidBrush drawBrush = new SolidBrush(col);
             string str_nav;
+            ScreenX = BackBuffer.Width; ScreenY = BackBuffer.Height;
             if (PlotSize2 > 0)
             {
-                GetNavigationData(PlotLong2, PlotLat2, PlotSize2, CurLong, CurLat);
-                DoVoiceCommand();
-
-                int size = Math.Min(BackBuffer.Width, BackBuffer.Height*4/5) / 2;
+                int size = Math.Min(ScreenX, ScreenY * 66 / 100) / 2;
                 if (heading == 720) col = Color.DimGray;
-                DrawArrow(BackBufferGraphics, BackBuffer.Width/2, size, nav.Angle100mAhead - heading, size, col);
-                
-                
-                if (nav.MinDistance > 100.0)
-                    str_nav = (nav.MinDistance * unit_cff).ToString("0.00") + unit_name + " to Track";
-                else
-                    str_nav = (nav.Distance2Dest * unit_cff).ToString("0.00") + unit_name + " to Destin.";
+                DrawArrow(BackBufferGraphics, ScreenX / 2, size, nav.Angle100mAhead - heading, size, col);
+
+                if (nav.Symbol != null)
+                {
+                    DrawNavSymbol(BackBufferGraphics, drawBrush, ScreenX / 50, ScreenY * 78 / 100 - NavSymbol_size, nav.Symbol, nav.orient, nav.SkyDirection, false);
+                    BackBufferGraphics.DrawString(nav.strCmd, new Font("Arial", 24 * parent.df, FontStyle.Bold), drawBrush, ScreenX * 28 / 100, ScreenY * 66 / 100);
+                }
+                str_nav = nav.strDistance2Dest;
             }
             else
             {
                 str_nav = "no Track2F loaded";
             }
-            BackBufferGraphics.DrawString(str_nav, drawFont, drawBrush, 2, BackBuffer.Height * 41 / 50);
+            //BackBufferGraphics.DrawString(str_nav, new Font("Arial", 18 * parent.df, FontStyle.Bold), drawBrush, BackBuffer.Width / 50, BackBuffer.Height * 88 / 100);
+            DrawMapValues(BackBufferGraphics, col);
             g.DrawImage(BackBuffer, 0, 0); // draw back buffer on screen
         }
 
 
-        public void GetNavigationData(float[] PlotLong2, float[] PlotLat2, int PlotSize2, double CurLong, double CurLat)
+        public void GetNavigationData(UtmUtil utmUtil, float[] PlotLong2, float[] PlotLat2, int[] PlotD2, int PlotSize2, double CurLong, double CurLat)
         {
-            double x, y;                    //m  (related to CurPos)
-            double dist2, MinDistance2;     //m2
+            //System.Diagnostics.Debug.WriteLine("GetNavigationData");
+            double x, y;                                            //m  (related to CurPos)
+            double dist2, MinDistance2 = double.MaxValue / 16;      //m2
             int j = 0, k = 0;
             const int ArSize = 14;
             int[] indexAr = new int[ArSize];
-            double[] xAr = new double[ArSize];
+            double[] xAr = new double[ArSize];      //Array in m relative to intersection/MinDistance
             double[] yAr = new double[ArSize];
-            double LongOld;
-            double LatOld;
 
-            int begin = 0, end = PlotSize2-1, increment = 1;
-            if (navigate_backward)
+            int begin = 0, end = PlotSize2-1, increment = 1;    //GetNavigationData is only executed if PlotSize2 > 0
+            if (nav.backward)
             { 
                 begin = end;
                 end = 0;
                 increment = -1;
             }
-            if (nav.ix >= PlotSize2) nav.ix = PlotSize2 - 1;    //in case trackpoints were removed
-            if (nav.ShortSearch == 0) nav.ix = begin;
-            if (nav.ix != begin)
-                nav.ix -= increment;            //while ShortSearch test one more point (in case of moving backward)
-            MinDistance2 = double.MaxValue / 4;
-            for (int i = nav.ix; i < PlotSize2 && i >= 0; i += increment)    //search trackpoint with min distance
+            if (nav.ix >= PlotSize2)    //in case trackpoints were removed
             {
-                //calculate distance to track2follow
+                nav.ix = PlotSize2 - 1;     //set parameters in case point is more than 500m away
+                nav.ixd_intersec = nav.ix;
+                nav.ix_next_drive = nav.ix;
+                nav.LongIntersection = PlotLong2[nav.ix];
+                nav.LatIntersection = PlotLat2[nav.ix];
+            }
+            if (nav.ShortSearch == 0) nav.ix = begin;
+            int beginindex = nav.ix;
+            int min_ix = beginindex;
+            int min_ixb = beginindex;
+            double ca2 = 0, cb2 = 0, t2 = 0, min_ca2 = 0, min_t2 = 0;
+            int min_segType = 0;
+            int FBSearch = 1;       //1=forward  -1=backward   other=stop
+            int min_FBSearch = 1;
+            int min_increment = 0;
+            while (FBSearch == 1 || FBSearch == -1)
+            {
+                int increment2 = increment * FBSearch;
+                int i = beginindex;
                 x = (PlotLong2[i] - CurLong) * utmUtil.longit2meter;
                 y = (PlotLat2[i] - CurLat) * utmUtil.lat2meter;
-                dist2 = x * x + y * y;
-                if (dist2 < MinDistance2)
+                ca2 = x * x + y * y;
+                while (i < PlotSize2 && i >= 0)    //search segment and point with min distance
                 {
-                    nav.ix = i;
-                    MinDistance2 = dist2;
+                    int segType = 0;
+                    dist2 = ca2;
+                    int ib = i + increment2;
+                    if (ib < PlotSize2 && ib >= 0)
+                    {
+                        while (true)
+                        {
+                            x = (PlotLong2[ib] - PlotLong2[i]) * utmUtil.longit2meter;
+                            y = (PlotLat2[ib] - PlotLat2[i]) * utmUtil.lat2meter;
+                            t2 = x * x + y * y;
+                            if (t2 < 4 && ib + increment2 < PlotSize2 && ib + increment2 >= 0)    //next point closer than 2m
+                                ib += increment2;
+                            else break;
+                        }
+                        x = (PlotLong2[ib] - CurLong) * utmUtil.longit2meter;
+                        y = (PlotLat2[ib] - CurLat) * utmUtil.lat2meter;
+                        cb2 = x * x + y * y;
+                        
+                        if (t2 <= cb2 - ca2)            //before i
+                        {
+                            segType = 0;
+                            dist2 = ca2;
+                        }
+                        else if (t2 <= ca2 - cb2)       //after i+1
+                        {
+                            segType = 1;
+                            dist2 = cb2;
+                        }
+                        else
+                        {                               //currentPos inbetween track segment
+                            segType = 2;
+                            dist2 = (2 * (ca2 * cb2 + cb2 * t2 + t2 * ca2) - (ca2 * ca2 + cb2 * cb2 + t2 * t2)) / (4 * t2); //Dreieck-Höhenformel (t2 cannot be 0 here)
+                        }
+                    }
+                    if (dist2 < MinDistance2)
+                    {
+                        min_ix = i;
+                        min_ixb = ib;
+                        MinDistance2 = dist2;
+                        min_ca2 = ca2;
+                        min_t2 = t2;
+                        min_segType = segType;
+                        min_increment = increment2;
+                        min_FBSearch = FBSearch;
+                    }
+                    if (nav.ShortSearch != 0 && dist2 > MinDistance2 * 4 + 10000)
+                        break;
+
+                    i = ib;
+                    ca2 = cb2;
                 }
-                if (nav.ShortSearch != 0 && dist2 > MinDistance2 * 2 + 10000)
-                    break;
+                if (min_ix == beginindex && FBSearch == 1)
+                    FBSearch = -1;                         //try also backward
+                else
+                    FBSearch = 0;
             }
-            if (nav.ShortSearch > 0)
-                nav.ShortSearch--;
-            else
-                nav.ShortSearch = 30;       //for 30s only shortSearch
-            //nav.ix = index with minDistance
-            nav.ixd_intersec = nav.ix;
-            nav.MinDistance = Math.Sqrt(MinDistance2);
-            nav.LongMinDistance = PlotLong2[nav.ix];
-            nav.LatMinDistance = PlotLat2[nav.ix];
-            nav.Distance2Dest = 0;
-            xAr[0] = 0; yAr[0] = 0; j = 1;
-            indexAr[0] = 0;
-            LongOld = CurLong;    //point to begin accumulation of Distance2Dest
-            LatOld = CurLat;
-            x = 0;
-            y = 0;
 
-            double Angle = 0;
-            double TrackAngle = 0;
-            double CurAngle = 0;
-
-            if (PlotSize2 > 1)      //search intersection point
+            if (MinDistance2 < 500 * 500 || nav.ShortSearch == 0)  //use only if within 500m of track zone
             {
-                bool dirChanged = false; ;
-                if (nav.ix == begin)
-                {
-                    increment = -increment;     //temporarily change direction for intersection calculation
-                    dirChanged = true;
-                }
-                //test if nav.ix must be incremented so that cur is between nav.ix-increment and nav.ix
-                //max 2 times
-                CurAngle = Math.Atan2((PlotLong2[nav.ix] - CurLong) * utmUtil.longit2meter, (PlotLat2[nav.ix] - CurLat) * utmUtil.lat2meter);
-                TrackAngle = Math.Atan2((PlotLong2[nav.ix] - PlotLong2[nav.ix - increment]) * utmUtil.longit2meter, (PlotLat2[nav.ix] - PlotLat2[nav.ix - increment]) * utmUtil.lat2meter);
-                Angle = Math.Abs(TrackAngle - CurAngle);
-                if (Angle > Math.PI) Angle = Math.Abs(Angle - 2 * Math.PI);
-                if (Angle > Math.PI / 2)   //already over nav.ix
-                {
-                    if ((nav.ix + increment) >= PlotSize2 || (nav.ix + increment) < 0)
-                        goto noIntersection;
-                    //test if next tracksegment has intersection
-                    //CurAngle = Math.Atan2((CurLong - PlotLong2[nav.ix]) * utmUtil.longit2meter, (CurLat - PlotLat2[nav.ix]) * utmUtil.lat2meter);
-                    TrackAngle = Math.Atan2((PlotLong2[nav.ix] - PlotLong2[nav.ix + increment]) * utmUtil.longit2meter, (PlotLat2[nav.ix] - PlotLat2[nav.ix + increment]) * utmUtil.lat2meter);
-                    Angle = Math.Abs(TrackAngle - CurAngle);
-                    if (Angle > Math.PI) Angle = Math.Abs(Angle - 2 * Math.PI);
-                    if (Angle > Math.PI / 2)
-                        goto noIntersection;
-                    nav.ix += increment;
-                    CurAngle = Math.Atan2((CurLong - PlotLong2[nav.ix]) * utmUtil.longit2meter, (CurLat - PlotLat2[nav.ix]) * utmUtil.lat2meter);
-                    Angle = Math.Abs(TrackAngle - CurAngle);        //recalculate Angle
-                    if (Angle > Math.PI) Angle = Math.Abs(Angle - 2 * Math.PI);
-                }
-                //calculate shortest distance to track (right angle)
-                // nav.ix is now first index to drive over
-                x = (PlotLong2[nav.ix] - CurLong) * utmUtil.longit2meter;   //point nav.ix relativ to current
-                y = (PlotLat2[nav.ix] - CurLat) * utmUtil.lat2meter;
-                double h = Math.Sqrt(x * x + y * y);        //distance between current and i
-                nav.MinDistance = h * Math.Abs(Math.Sin(Angle));  //min distance to track (right angled)
+                nav.ix = min_ix;
+                nav.MinDistance = Math.Sqrt(MinDistance2);
                 nav.Distance2Dest = nav.MinDistance;
-                double a = h * Math.Cos(Angle);     //piece of track to drive between points
-                double xi = (PlotLong2[nav.ix - increment] - PlotLong2[nav.ix]) * utmUtil.longit2meter;
-                double yi = (PlotLat2[nav.ix - increment] - PlotLat2[nav.ix]) * utmUtil.lat2meter;
-                double mi = Math.Sqrt(xi * xi + yi * yi);      //distance between i and i-1
-                if (mi < 0.1) goto noIntersection;
-                x = x + a / mi * xi;    //intersection point relative to current [in m]     (a / mi * xi   is intersection point relative to nav.ix)
-                y = y + a / mi * yi;
-                nav.ixd_intersec = nav.ix - a / mi * increment;
-                if (nav.ixd_intersec < 0)       //for safety; can happen if position changes after ShortSearch
+                if (min_segType == 0)
                 {
-                    nav.ixd_intersec = 0;
-                    nav.ShortSearch = 0;
+                    nav.ix_next_drive = min_ix;
+                    nav.ixd_intersec = min_ix;
+                    nav.LongIntersection = PlotLong2[min_ix];
+                    nav.LatIntersection = PlotLat2[min_ix];
                 }
-                if (nav.ixd_intersec > PlotSize2 - 1)
+                else if (min_segType == 1)
                 {
-                    nav.ixd_intersec = PlotSize2 - 1;
-                    nav.ShortSearch = 0;
+                    nav.ix_next_drive = min_ixb;
+                    nav.ixd_intersec = min_ixb;
+                    nav.LongIntersection = PlotLong2[min_ixb];
+                    nav.LatIntersection = PlotLat2[min_ixb];
                 }
-
-                LongOld = CurLong + x * utmUtil.meter2longit;       //intersection point
-                LatOld = CurLat + y * utmUtil.meter2lat;
-                nav.LongMinDistance = LongOld;
-                nav.LatMinDistance = LatOld;
-                xAr[0] = x; yAr[0] = y;
-
-                //while (j < ArSize && j * 20 < nav.Distance2Dest)    //first section: current to intersection point
-                //{                                                   //fill array every 20m for corner search [0, 20, 40,.. 260] 
-                //    double quot = j * 20 / nav.Distance2Dest;
-                //    xAr[j] = quot * x;
-                //    yAr[j] = quot * y;
-                //    indexAr[j] = PlotSize2;
-                //    j++;
-                //}
-
-                if (dirChanged)
-                    nav.ix -= increment;    // nav.ix is now first index to drive over
-            noIntersection:
-                if (dirChanged)
-                    increment = -increment;
+                else
+                {
+                    double quot;
+                    if (min_t2 > 1) quot = Math.Sqrt((min_ca2 - MinDistance2) / min_t2);
+                    else quot = 0;
+                    if (min_FBSearch == 1)
+                        nav.ix_next_drive = min_ixb;
+                    else
+                    {
+                        nav.ix = min_ixb;
+                        nav.ix_next_drive = min_ix;
+                    }
+                    nav.ixd_intersec = min_ix + quot * min_increment; ;
+                    nav.LongIntersection = PlotLong2[min_ix] + quot * (PlotLong2[min_ixb] - PlotLong2[min_ix]);
+                    nav.LatIntersection = PlotLat2[min_ix] + quot * (PlotLat2[min_ixb] - PlotLat2[min_ix]);
+                }
             }
-        
+            else
+            {
+                if (nav.MinDistance == -1.0)    //not initialized yet
+                {
+                    nav.LongIntersection = PlotLong2[nav.ix];
+                    nav.LatIntersection = PlotLat2[nav.ix];
+                }
+                x = (nav.LongIntersection - CurLong) * utmUtil.longit2meter;
+                y = (nav.LatIntersection - CurLat) * utmUtil.lat2meter;
+                nav.MinDistance = Math.Sqrt(x * x + y * y);
+                nav.Distance2Dest = nav.MinDistance;
+            }
+
+            nav.ShortSearch = -1;
+            //if (nav.ShortSearch > 0)
+            //    nav.ShortSearch--;
+            //else
+            //    nav.ShortSearch = 30;       //for 30s only shortSearch
+
+            // ix_next_drive is now first index to drive over
 
 #if debugNav            //debug   intersection point
-            DrawCurrentPoint(parent.BackBufferGraphics, nav.LongMinDistance, nav.LatMinDistance, 6, Color.Violet);
+            DrawCurrentPoint(parent.BackBufferGraphics, nav.LongIntersection, nav.LatIntersection, 6, Color.Violet);
 #endif
-            //accumulate Distance2Dest from LongOld (intersection or CurPos)
+            //accumulate Distance2Dest from LongOld (intersection or MinDistance)
             double accu = 0;        //use extra accu because Distance2Dest not always starts from 0
-            for (int i = nav.ix; i < PlotSize2 && i >= 0; i += increment)   
+            double LongOld = nav.LongIntersection;     //point to begin accumulation of Distance2Dest
+            double LatOld = nav.LatIntersection;
+            xAr[0] = 0; yAr[0] = 0; j = 1;
+            indexAr[0] = 0;
+            x = 0; y = 0;
+
+            for (int i = nav.ix_next_drive; i < PlotSize2 && i >= 0; i += increment)   
             {
                 //accumulate distance to destination
                 double xa = (PlotLong2[i] - LongOld) * utmUtil.longit2meter;
                 double ya = (PlotLat2[i] - LatOld) * utmUtil.lat2meter;
                 double ma = Math.Sqrt(xa * xa + ya * ya);
+                if (i == nav.ix_next_drive)
+                    nav.Distance2Dest += ma;    //Distance2Dest now: Current - Intersection - ix_next_drive
                 int dist = (int)(accu + ma);
                 while (j < ArSize && j * 20 < dist)        //fill array every 20m for corner search [0, 20, 40,.. 260]
                 {
                     double quot = (j * 20 - accu) / ma;
                     xAr[j] = x + xa * quot;    // xOld + quot * (x - xOld);
                     yAr[j] = y + ya * quot;    //yOld + quot * (y - yOld);
-                    indexAr[j] = nav.ix;
+                    indexAr[j] = nav.ix_next_drive;
                     j++;
                 }
                 accu += ma;
@@ -2446,22 +2715,25 @@ namespace GpsUtils
                 LatOld = PlotLat2[i];
                 if (j < ArSize)           //only necessary for array fill
                 {
-                    x = (PlotLong2[i] - CurLong) * utmUtil.longit2meter;    //can get inacurate for long tracks, therefore not used for Distance2Dest
-                    y = (PlotLat2[i] - CurLat) * utmUtil.lat2meter;
+                    x = (LongOld - nav.LongIntersection) * utmUtil.longit2meter;    //can get inacurate for long tracks, therefore not used for Distance2Dest
+                    y = (LatOld - nav.LatIntersection) * utmUtil.lat2meter;
                 }
+                else
+                    break;
             }
-            nav.Distance2Dest += accu;
+
+            nav.Distance2Dest += (PlotD2[end] - PlotD2[nav.ix_next_drive]) * increment;
         
 
 #if debugNav            //debug   260m line
             for (int n = 0; n < j; n++)
             {
-                DrawCurrentPoint(parent.BackBufferGraphics, (xAr[n] * utmUtil.meter2longit + CurLong), (yAr[n] * utmUtil.meter2lat + CurLat), 2, Color.White);
+                DrawCurrentPoint(parent.BackBufferGraphics, (xAr[n] * utmUtil.meter2longit + nav.LongIntersection), (yAr[n] * utmUtil.meter2lat + nav.LatIntersection), 2, Color.White);
             }
 #endif
             //nav.Angle100mAhead = (int)(180.0 / Math.PI * Math.Atan2((PlotLong2[Index100mDistance] - CurLong) * utmUtil.longit2meter, (PlotLat2[Index100mDistance] - CurLat) * utmUtil.lat2meter));
             int jdx100 = Math.Min(5, j - 1);
-            nav.Angle100mAhead = (int)(180.0 / Math.PI * Math.Atan2(xAr[jdx100], yAr[jdx100]));
+            nav.Angle100mAhead = (int)(180.0 / Math.PI * Math.Atan2(xAr[jdx100] - (CurLong - nav.LongIntersection) * utmUtil.longit2meter, yAr[jdx100] - (CurLat - nav.LatIntersection) * utmUtil.lat2meter));
 
             if (corner.Type == 0)      //search corner
             {
@@ -2509,8 +2781,8 @@ namespace GpsUtils
                         corner.Type = 3;     //sharp turn
                     corner.distance = int.MaxValue;    //to overcome invalidate algorithm
 
-                    corner.Long = (float)(xAr[kc] * utmUtil.meter2longit + CurLong);
-                    corner.Lat = (float)(yAr[kc] * utmUtil.meter2lat + CurLat);
+                    corner.Long = (float)(xAr[kc] * utmUtil.meter2longit + nav.LongIntersection);
+                    corner.Lat = (float)(yAr[kc] * utmUtil.meter2lat + nav.LatIntersection);
                     corner.voicePlayed = false;
 
 #if debugNav                    //debug
@@ -2531,8 +2803,7 @@ namespace GpsUtils
                 int cornerdistance = (int)Math.Sqrt(x * x + y * y) / 10 * 10;       //rounded to 10m
                 if (cornerdistance > corner.distance || cornerdistance > 300)
                 {
-                    corner.Type = 0;                        //invalidate corner
-                    corner.processedIndex = -1;
+                    invalidateCorner();
                 }
                 else
                 {
@@ -2542,198 +2813,307 @@ namespace GpsUtils
             }
 
 
-            /*
-            //search corner
-            double cornerQuotMin2 = 1.0;
-            cornerDist = 1000;
-            int kc = -1;    //index of corner (0..23)
-            double vectorprod = 0.0;
-            int step = 2;       //corner test -20m 0m 20m
-            if (j < 6)          //too few points
-                step = 1;       //corner test -10m 0m 10m   or at points available
-            for (k = step; k < j - step; k++)
-            {
-                //getCornerQuot(k - step, k, k + step);
-                int km = k-step, kp = k+step;
-                double d12 = (xAr[k] - xAr[km]) * (xAr[k] - xAr[km]) + (yAr[k] - yAr[km]) * (yAr[k] - yAr[km]);       //distance1 squared
-                double d22 = (xAr[kp] - xAr[k]) * (xAr[kp] - xAr[k]) + (yAr[kp] - yAr[k]) * (yAr[kp] - yAr[k]);       //distance2 squared
-                double dd2 = (xAr[kp] - xAr[km]) * (xAr[kp] - xAr[km]) + (yAr[kp] - yAr[km]) * (yAr[kp] - yAr[km]);      //direct distance squared
-                //double cornerQuot = Math.Sqrt(dd2) / (Math.Sqrt(d12) + Math.Sqrt(d22));
-                //double cornerQuotSquared = cornerQuot * cornerQuot; //test
-                double cornerQuot2 = dd2 / (d12 + 2 * Math.Sqrt(d12 * d22) + d22);  // straight = 1    right angle = 0.5   
+            double unit_cff = parent.GetUnitsConversionCff();
+            string unit_name = parent.GetUnitsName();
 
-                if (cornerQuot2 < cornerQuotMin2)
+            int dir = nav.Angle100mAhead;
+            if (parent.Heading != 720)
+                dir -= parent.Heading;
+            while (dir < 0) dir += 360;
+            nav.orient = Orientation.normal;
+            nav.SkyDirection = false;
+            if (nav.MinDistance > (double)parent.numericTrackTolerance.Value)
+            {
+                nav.Symbol = arrow_to;
+                if (parent.Heading == 720)
+                    nav.SkyDirection = true;
+                if (dir < 45)
+                    nav.orient = Orientation.normal;
+                else if (dir < 135)
+                    nav.orient = Orientation.right;
+                else if (dir < 225)
+                    nav.orient = Orientation.mirrorY;
+                else if (dir < 315)
+                    nav.orient = Orientation.left;
+                //else
+                //nav.orient = Orientation.normal;
+                //if (nav.MinDistance >= 10000)
+                //    str += " " + ((int)nav.MinDistance / 1000).ToString() + "km";
+                //else
+                //    str += " " + ((int)nav.MinDistance / 10 * 10).ToString() + "m";
+                nav.strCmd = (nav.MinDistance * unit_cff).ToString("0.00") + unit_name;
+            }
+            else if (parent.Heading != 720 && dir > 135 && dir < 225 && parent.CurrentSpeed > 4.0)
+            {
+                nav.Symbol = arrow_turn;      //wenden
+                nav.strCmd = "";
+            }
+            else if (corner.Type != 0)        //navigation command
+            {
+                switch (corner.Type)
                 {
-                    cornerQuotMin2 = cornerQuot2;
-                    kc = k;
+                    case 1: nav.Symbol = arrow_hr; break;
+                    case 2: nav.Symbol = arrow_r; break;
+                    case 3: nav.Symbol = arrow_sr; break;
+                    default: nav.Symbol = null; break;
                 }
-                if (cornerQuotMin2 < 0.8 && cornerQuot2 > 0.9)
-                    break;                                  //break after first corner found
+                if (corner.angle < 0)
+                    nav.orient = Orientation.mirrorX;   //left
+                //str = corner.angle.ToString() + str;
+                nav.strCmd = corner.distance.ToString() + "m";
             }
-            if (kc != -1)
+            else if (nav.Distance2Dest <= 200)
             {
-                cornerDist = (int)Math.Sqrt(xAr[kc] * xAr[kc] + yAr[kc] * yAr[kc])/10*10;
-                vectorprod = (xAr[kc] - xAr[kc - step]) * (yAr[kc + step] - yAr[kc]) - (yAr[kc] - yAr[kc - step]) * (xAr[kc + step] - xAr[kc]);  //vector product to determine right or left turn
+                nav.Symbol = destination;
+                nav.strCmd = (((int)nav.Distance2Dest / 10) * 10).ToString() + "m";
             }
-            System.Diagnostics.Debug.WriteLine(cornerQuotMin2.ToString() + "   dist=" + cornerDist.ToString() + "    vp="+vectorprod.ToString());
-
-            if (cornerQuotMin2 > 0.8)
-                cornerType = 0;     //straight
-            else if (cornerQuotMin2 > 0.7)
-                cornerType = 1;     //half turn
-            else if (cornerQuotMin2 > 0.5)
-                cornerType = 2;     //turn
             else
-                cornerType = 3;     //sharp turn
-            if (vectorprod < 0)
-                cornerType = -cornerType;       //neg = right turn
-             */
+                nav.Symbol = null;
+
+            nav.strDistance2Dest = (nav.Distance2Dest * unit_cff).ToString("0.00") + unit_name + " to destin.";
 
             return;
+        }
+
+        public void invalidateCorner()
+        {
+            corner.Type = 0;
+            corner.processedIndex = -1;
+        }
+
+        double absAngle(double a)       // -360..360deg reduced to 0..180deg   (but in rad)
+        {
+            double ret = Math.Abs(a);
+            if (ret > Math.PI)
+                ret = Math.Abs(2 * Math.PI - ret);
+            return ret;
+        }
+
+        public void DrawNavSymbol(Graphics g, SolidBrush sb, int x, int y, Point[] symbol, Orientation or, bool SkyDir, bool shrink)
+        {
+            Point[] pa = (Point[])symbol.Clone();
+            int len = pa.Length;
+
+            for (int i = 0; i < len; i++)
+            {
+                switch (or)
+                {
+                    case Orientation.mirrorX:
+                        pa[i].X = NavSymbol_size - pa[i].X;
+                        break;
+                    case Orientation.mirrorY:
+                        pa[i].Y = NavSymbol_size - pa[i].Y;
+                        break;
+                    case Orientation.right:
+                        pa[i].Y = symbol[i].X;
+                        pa[i].X = NavSymbol_size - symbol[i].Y;
+                        break;
+                    case Orientation.left:
+                        pa[i].Y = NavSymbol_size - symbol[i].X;
+                        pa[i].X = symbol[i].Y;
+                        break;
+                }
+                if (SkyDir)
+                    if (or == Orientation.right || or == Orientation.left)
+                        pa[i].Y -= NavSymbol_size / 5;
+                    else
+                        pa[i].X -= NavSymbol_size / 5;
+                if (shrink)
+                {
+                    pa[i].X /= 2;
+                    pa[i].Y /= 2;
+                }
+                pa[i].X += x;
+                pa[i].Y += y;
+            }
+            Pen pen = new Pen(Color.Black, NavSymbol_size / (shrink ? 24 : 12));
+            g.DrawPolygon(pen, pa);
+            g.FillPolygon(sb, pa);
+            if (symbol == arrow_to)
+            {
+                DrawNavSymbol(g, sb, x, y, line_to, or, false, shrink);     //draw other parts of symbol
+                if (SkyDir)
+                {
+                    string s;
+                    int dx, dy;
+                    float fontsize;
+                    int quot;
+                    switch (or)
+                    {
+                        case Orientation.normal: s = "N"; dx = 60; dy = 50; break;
+                        case Orientation.left: s = "W"; dx = 50; dy = 50; break;
+                        case Orientation.right: s = "E"; dx = 0; dy = 40; break;
+                        case Orientation.mirrorY: s = "S"; dx = 60; dy = -10; break;
+                        default: s = ""; dx = x; dy = y; break;
+                    }
+                    if (shrink)
+                    { fontsize = 8; quot = 200; }
+                    else
+                    { fontsize = 20; quot = 100; }
+                    Font font = new Font("Arial", fontsize * parent.df, FontStyle.Bold);
+                    dx = dx * NavSymbol_size / quot + x;
+                    dy = dy * NavSymbol_size / quot + y;
+                    g.DrawString(s, font, sb, dx, dy);
+                }
+            }
         }
 
         int msTicks = Int16.MinValue;
         public void DoVoiceCommand()
         {
-            if (!playVoiceCommand)
+            if (parent.comboNavCmd.SelectedIndex <= 0)
                 return;
             int clock = nav.Angle100mAhead - parent.Heading;
             while (clock < 0) clock += 360;
-            if (nav.MinDistance > 50)
+            if (nav.MinDistance > (double)parent.numericTrackTolerance.Value)
             {
                 if (!nav.voicePlayed_toRoute)            // if (Environment.TickCount - msTicks > 15000)
                 {
-                    FileStream fs = null;
-                    StreamReader sr = null;
-                    try
+                    if (parent.comboNavCmd.SelectedIndex > 2)
                     {
-                        if (threadRunning == true)
+                        Utils.buzzer(1000);
+                    }
+                    else
+                    {
+                        FileStream fs = null;
+                        StreamReader sr = null;
+                        try
                         {
-                            thr.Abort();
-                            threadRunning = false;
-                        }
-                        fs = new FileStream(parent.LanguageDirectory + "\\seq_toRoute.txt", FileMode.Open, FileAccess.Read);
-                        sr = new StreamReader(fs);
-                        string word;
-                        VoiceStrAr.Clear();
-                        while (true)
-                        {
-                            try { word = sr.ReadLine(); }
-                            catch (EndOfStreamException) { break; }
-                            if (word == null) break;
-                            switch (word)
+                            if (threadRunning == true)
                             {
-                                case "%Distance":
-                                    if (nav.MinDistance > 13000)
-                                        VoiceStrAr.Add("Many.wav");
-                                    else if (nav.MinDistance > 11000)
-                                        VoiceStrAr.Add("Twelve.wav");
-                                    else if (nav.MinDistance > 9000)
-                                        VoiceStrAr.Add("Ten.wav");
-                                    else if (nav.MinDistance > 7000)
-                                        VoiceStrAr.Add("Eight.wav");
-                                    else if (nav.MinDistance > 5000)
-                                        VoiceStrAr.Add("Six.wav");
-                                    else if (nav.MinDistance > 3000)
-                                        VoiceStrAr.Add("Four.wav");
-                                    else if (nav.MinDistance > 1500)
-                                        VoiceStrAr.Add("Two.wav");
-                                    else if (nav.MinDistance > 750)
-                                        VoiceStrAr.Add("One.wav");
-                                    else if (nav.MinDistance > 300)
-                                        VoiceStrAr.Add("Fivehundred.wav");
-                                    else if (nav.MinDistance > 150)
-                                        VoiceStrAr.Add("Twohundred.wav");
-                                    else if (nav.MinDistance > 50)
-                                        VoiceStrAr.Add("Onehundred.wav");
-                                    break;
-                                case "%Unit":
-                                    if (nav.MinDistance > 1500)
-                                        VoiceStrAr.Add("Kilometers.wav");
-                                    else if (nav.MinDistance > 750)
-                                        VoiceStrAr.Add("Kilometer.wav");
-                                    else
-                                        VoiceStrAr.Add("Meters.wav");
-                                    break;
-                                case "%Direction":
-                                    if (parent.Heading != 720)
-                                    {
-                                        if (clock < 30)
-                                            VoiceStrAr.Add("Twelve.wav");
-                                        else if (clock < 90)
-                                            VoiceStrAr.Add("Two.wav");
-                                        else if (clock < 150)
-                                            VoiceStrAr.Add("Four.wav");
-                                        else if (clock < 210)
-                                            VoiceStrAr.Add("Six.wav");
-                                        else if (clock < 270)
-                                            VoiceStrAr.Add("Eight.wav");
-                                        else if (clock < 330)
-                                            VoiceStrAr.Add("Ten.wav");
-                                        else
-                                            VoiceStrAr.Add("Twelve.wav");
-                                    }
-                                    else
-                                    {
-                                        int dir = nav.Angle100mAhead;
-                                        if (dir < -135)
-                                            VoiceStrAr.Add("South.wav");
-                                        else if (dir < -45)
-                                            VoiceStrAr.Add("West.wav");
-                                        else if (dir < 45)
-                                            VoiceStrAr.Add("North.wav");
-                                        else if (dir < 135)
-                                            VoiceStrAr.Add("East.wav");
-                                        else
-                                            VoiceStrAr.Add("South.wav");
-                                    }
-                                    break;
-                                case "%OClock":
-                                    if (parent.Heading != 720)
-                                        VoiceStrAr.Add("OClock.wav");
-                                    break;
-                                default:
-                                    if (word.Length > 0)
-                                        VoiceStrAr.Add(word);
-                                    break;
+                                thr.Abort();
+                                threadRunning = false;
                             }
+                            fs = new FileStream(parent.LanguageDirectory + "\\seq_toRoute.txt", FileMode.Open, FileAccess.Read);
+                            sr = new StreamReader(fs);
+                            string word;
+                            VoiceStrAr.Clear();
+                            while (true)
+                            {
+                                try { word = sr.ReadLine(); }
+                                catch (EndOfStreamException) { break; }
+                                if (word == null) break;
+                                switch (word)
+                                {
+                                    case "%Distance":
+                                        if (nav.MinDistance > 13000)
+                                            VoiceStrAr.Add("Many.wav");
+                                        else if (nav.MinDistance > 11000)
+                                            VoiceStrAr.Add("Twelve.wav");
+                                        else if (nav.MinDistance > 9000)
+                                            VoiceStrAr.Add("Ten.wav");
+                                        else if (nav.MinDistance > 7000)
+                                            VoiceStrAr.Add("Eight.wav");
+                                        else if (nav.MinDistance > 5000)
+                                            VoiceStrAr.Add("Six.wav");
+                                        else if (nav.MinDistance > 3000)
+                                            VoiceStrAr.Add("Four.wav");
+                                        else if (nav.MinDistance > 1500)
+                                            VoiceStrAr.Add("Two.wav");
+                                        else if (nav.MinDistance > 750)
+                                            VoiceStrAr.Add("One.wav");
+                                        else if (nav.MinDistance > 300)
+                                            VoiceStrAr.Add("Fivehundred.wav");
+                                        else if (nav.MinDistance > 150)
+                                            VoiceStrAr.Add("Twohundred.wav");
+                                        else if (nav.MinDistance > 50)
+                                            VoiceStrAr.Add("Onehundred.wav");
+                                        break;
+                                    case "%Unit":
+                                        if (nav.MinDistance > 1500)
+                                            VoiceStrAr.Add("Kilometers.wav");
+                                        else if (nav.MinDistance > 750)
+                                            VoiceStrAr.Add("Kilometer.wav");
+                                        else
+                                            VoiceStrAr.Add("Meters.wav");
+                                        break;
+                                    case "%Direction":
+                                        if (parent.Heading != 720)
+                                        {
+                                            if (clock < 30)
+                                                VoiceStrAr.Add("Twelve.wav");
+                                            else if (clock < 90)
+                                                VoiceStrAr.Add("Two.wav");
+                                            else if (clock < 150)
+                                                VoiceStrAr.Add("Four.wav");
+                                            else if (clock < 210)
+                                                VoiceStrAr.Add("Six.wav");
+                                            else if (clock < 270)
+                                                VoiceStrAr.Add("Eight.wav");
+                                            else if (clock < 330)
+                                                VoiceStrAr.Add("Ten.wav");
+                                            else
+                                                VoiceStrAr.Add("Twelve.wav");
+                                        }
+                                        else
+                                        {
+                                            int dir = nav.Angle100mAhead;
+                                            if (dir < -135)
+                                                VoiceStrAr.Add("South.wav");
+                                            else if (dir < -45)
+                                                VoiceStrAr.Add("West.wav");
+                                            else if (dir < 45)
+                                                VoiceStrAr.Add("North.wav");
+                                            else if (dir < 135)
+                                                VoiceStrAr.Add("East.wav");
+                                            else
+                                                VoiceStrAr.Add("South.wav");
+                                        }
+                                        break;
+                                    case "%OClock":
+                                        if (parent.Heading != 720)
+                                            VoiceStrAr.Add("OClock.wav");
+                                        break;
+                                    default:
+                                        if (word.Length > 0)
+                                            VoiceStrAr.Add(word);
+                                        break;
+                                }
+                            }
+                            thr = new Thread(new ThreadStart(VoiceThreadProc));
+                            thr.Start();
                         }
-                        thr = new Thread(new ThreadStart(VoiceThreadProc));
-                        thr.Start();
+                        catch (Exception e)
+                        {
+                            Utils.log.Error(" seq_toRoute ", e);
+                        }
+                        if (sr != null) sr.Close();
+                        if (fs != null) fs.Close();
                     }
-                    catch (Exception e)
-                    {
-                        Utils.log.Error(" seq_toRoute ", e);
-                    }
-                    if (sr != null) sr.Close();
-                    if (fs != null) fs.Close();
                     nav.voicePlayed_toRoute = true;          //msTicks = Environment.TickCount;
                 }
             }
-            else if (parent.Heading != 720 && clock > 135 && clock < 225)
+            else if (parent.Heading != 720 && clock > 135 && clock < 225 && parent.CurrentSpeed > 4.0)
             {
                 if (Environment.TickCount - msTicks > 30000)
                 {
-                    try
+                    if (parent.comboNavCmd.SelectedIndex > 2)
                     {
-                        if (threadRunning == true)
-                        {
-                            thr.Abort();
-                            threadRunning = false;
-                        }
-                        VoiceStrAr.Clear();
-                        VoiceStrAr.Add("TurnOver.wav");
-                        thr = new Thread(new ThreadStart(VoiceThreadProc));
-                        thr.Start();
+                        Utils.buzzer(1000);
                     }
-                    catch (Exception e)
+                    else
                     {
-                        Utils.log.Error(" turn over ", e);
+                        try
+                        {
+                            if (threadRunning == true)
+                            {
+                                thr.Abort();
+                                threadRunning = false;
+                            }
+                            VoiceStrAr.Clear();
+                            VoiceStrAr.Add("TurnOver.wav");
+                            thr = new Thread(new ThreadStart(VoiceThreadProc));
+                            thr.Start();
+                        }
+                        catch (Exception e)
+                        {
+                            Utils.log.Error(" turn over ", e);
+                        }
                     }
                     msTicks = Environment.TickCount;
                 }
             }
-            else if (corner.Type > 0)
+            else if (corner.Type > 0 && ((parent.comboNavCmd.SelectedIndex & 1) == 1))
             {
                 string s_dist = null;
                 switch (corner.distance)
@@ -2750,68 +3130,75 @@ namespace GpsUtils
                 }
                 if (s_dist != null && !corner.voicePlayed)
                 {
-                    FileStream fs = null;
-                    StreamReader sr = null;
-                    try
+                    if (parent.comboNavCmd.SelectedIndex > 2)
                     {
-                        if (threadRunning == true)
+                        Utils.buzzer(1000);
+                    }
+                    else
+                    {
+                        FileStream fs = null;
+                        StreamReader sr = null;
+                        try
                         {
-                            thr.Abort();
-                            threadRunning = false;
-                        }
-                        fs = new FileStream(parent.LanguageDirectory + "\\seq_turn.txt", FileMode.Open, FileAccess.Read);
-                        sr = new StreamReader(fs);
-                        string word;
-                        VoiceStrAr.Clear();
-                        while (true)
-                        {
-                            try { word = sr.ReadLine(); }
-                            catch (EndOfStreamException) { break; }
-                            if (word == null) break;
-                            switch (word)
+                            if (threadRunning == true)
                             {
-                                case "%In":
-                                    if (corner.distance > 50)
-                                        VoiceStrAr.Add("In.wav");
-                                    break;
-                                case "%Distance":
-                                    VoiceStrAr.Add(s_dist);
-                                    break;
-                                case "%Unit":
-                                    if (corner.distance > 50)
-                                        VoiceStrAr.Add("Meters.wav");
-                                    break;
-                                case "%Half":
-                                    if (corner.Type == 1)
-                                        VoiceStrAr.Add("Half.wav");
-                                    else if (corner.Type == 3)
-                                        VoiceStrAr.Add("Sharp.wav");
-                                    break;
-                                case "%Left":
-                                    if (corner.angle < 0)
-                                        VoiceStrAr.Add("Left.wav");
-                                    else
-                                        VoiceStrAr.Add("Right.wav");
-                                    break;
-                                default:
-                                    if (word.Length > 0)
-                                        VoiceStrAr.Add(word);
-                                    break;
+                                thr.Abort();
+                                threadRunning = false;
                             }
+                            fs = new FileStream(parent.LanguageDirectory + "\\seq_turn.txt", FileMode.Open, FileAccess.Read);
+                            sr = new StreamReader(fs);
+                            string word;
+                            VoiceStrAr.Clear();
+                            while (true)
+                            {
+                                try { word = sr.ReadLine(); }
+                                catch (EndOfStreamException) { break; }
+                                if (word == null) break;
+                                switch (word)
+                                {
+                                    case "%In":
+                                        if (corner.distance > 50)
+                                            VoiceStrAr.Add("In.wav");
+                                        break;
+                                    case "%Distance":
+                                        VoiceStrAr.Add(s_dist);
+                                        break;
+                                    case "%Unit":
+                                        if (corner.distance > 50)
+                                            VoiceStrAr.Add("Meters.wav");
+                                        break;
+                                    case "%Half":
+                                        if (corner.Type == 1)
+                                            VoiceStrAr.Add("Half.wav");
+                                        else if (corner.Type == 3)
+                                            VoiceStrAr.Add("Sharp.wav");
+                                        break;
+                                    case "%Left":
+                                        if (corner.angle < 0)
+                                            VoiceStrAr.Add("Left.wav");
+                                        else
+                                            VoiceStrAr.Add("Right.wav");
+                                        break;
+                                    default:
+                                        if (word.Length > 0)
+                                            VoiceStrAr.Add(word);
+                                        break;
+                                }
+                            }
+                            thr = new Thread(new ThreadStart(VoiceThreadProc));
+                            thr.Start();
                         }
-                        thr = new Thread(new ThreadStart(VoiceThreadProc));
-                        thr.Start();
+                        catch (Exception e)
+                        {
+                            Utils.log.Error(" seq_turn ", e);
+                        }
+                        if (sr != null) sr.Close();
+                        if (fs != null) fs.Close();
                     }
-                    catch (Exception e)
-                    {
-                        Utils.log.Error(" seq_turn ", e);
-                    }
-                    if (sr != null) sr.Close();
-                    if (fs != null) fs.Close();
                     corner.voicePlayed = true;
                 }
             }//corner
-            else if (nav.Distance2Dest <= 200)
+            else if (nav.Distance2Dest <= 200)      //destination
             {
                 string s_dist = null;
                 int dist = (int)(nav.Distance2Dest + 5) / 10 * 10;
@@ -2829,52 +3216,59 @@ namespace GpsUtils
                 }
                 if (s_dist != null && !nav.voicePlayed_dest)
                 {
-                    FileStream fs = null;
-                    StreamReader sr = null;
-                    try
+                    if (parent.comboNavCmd.SelectedIndex > 2)
                     {
-                        if (threadRunning == true)
+                        Utils.buzzer(1000);
+                    }
+                    else
+                    {
+                        FileStream fs = null;
+                        StreamReader sr = null;
+                        try
                         {
-                            thr.Abort();
-                            threadRunning = false;
-                        }
-                        fs = new FileStream(parent.LanguageDirectory + "\\seq_destination.txt", FileMode.Open, FileAccess.Read);
-                        sr = new StreamReader(fs);
-                        string word;
-                        VoiceStrAr.Clear();
-                        while (true)
-                        {
-                            try { word = sr.ReadLine(); }
-                            catch (EndOfStreamException) { break; }
-                            if (word == null) break;
-                            switch (word)
+                            if (threadRunning == true)
                             {
-                                case "%In":
-                                    if (dist > 50)
-                                        VoiceStrAr.Add("In.wav");
-                                    break;
-                                case "%Distance":
-                                    VoiceStrAr.Add(s_dist);
-                                    break;
-                                case "%Unit":
-                                    if (dist > 50)
-                                        VoiceStrAr.Add("Meters.wav");
-                                    break;
-                                default:
-                                    if (word.Length > 0)
-                                        VoiceStrAr.Add(word);
-                                    break;
+                                thr.Abort();
+                                threadRunning = false;
                             }
+                            fs = new FileStream(parent.LanguageDirectory + "\\seq_destination.txt", FileMode.Open, FileAccess.Read);
+                            sr = new StreamReader(fs);
+                            string word;
+                            VoiceStrAr.Clear();
+                            while (true)
+                            {
+                                try { word = sr.ReadLine(); }
+                                catch (EndOfStreamException) { break; }
+                                if (word == null) break;
+                                switch (word)
+                                {
+                                    case "%In":
+                                        if (dist > 50)
+                                            VoiceStrAr.Add("In.wav");
+                                        break;
+                                    case "%Distance":
+                                        VoiceStrAr.Add(s_dist);
+                                        break;
+                                    case "%Unit":
+                                        if (dist > 50)
+                                            VoiceStrAr.Add("Meters.wav");
+                                        break;
+                                    default:
+                                        if (word.Length > 0)
+                                            VoiceStrAr.Add(word);
+                                        break;
+                                }
+                            }
+                            thr = new Thread(new ThreadStart(VoiceThreadProc));
+                            thr.Start();
                         }
-                        thr = new Thread(new ThreadStart(VoiceThreadProc));
-                        thr.Start();
+                        catch (Exception e)
+                        {
+                            Utils.log.Error(" seq_destination ", e);
+                        }
+                        if (sr != null) sr.Close();
+                        if (fs != null) fs.Close();
                     }
-                    catch (Exception e)
-                    {
-                        Utils.log.Error(" seq_destination ", e);
-                    }
-                    if (sr != null) sr.Close();
-                    if (fs != null) fs.Close();
                     nav.voicePlayed_dest = true;
                 }
             }
@@ -2889,41 +3283,48 @@ namespace GpsUtils
 
         public void playVoiceTest()
         {
-            FileStream fs = null;
-            StreamReader sr = null;
-            try
+            if (parent.comboNavCmd.SelectedIndex > 2)
             {
-                if (threadRunning == true)
+                Utils.buzzer(1000);
+            }
+            else
+            {
+                FileStream fs = null;
+                StreamReader sr = null;
+                try
                 {
-                    thr.Abort();
-                    threadRunning = false;
-                }
-                fs = new FileStream(parent.LanguageDirectory + "\\seq_test.txt", FileMode.Open, FileAccess.Read);
-                sr = new StreamReader(fs);
-                string word;
-                VoiceStrAr.Clear();
-                while (true)
-                {
-                    try { word = sr.ReadLine(); }
-                    catch (EndOfStreamException) { break; }
-                    if (word == null) break;
-                    switch (word)
+                    if (threadRunning == true)
                     {
-                        default:
-                            if (word.Length > 0)
-                                VoiceStrAr.Add(word);
-                            break;
+                        thr.Abort();
+                        threadRunning = false;
                     }
+                    fs = new FileStream(parent.LanguageDirectory + "\\seq_test.txt", FileMode.Open, FileAccess.Read);
+                    sr = new StreamReader(fs);
+                    string word;
+                    VoiceStrAr.Clear();
+                    while (true)
+                    {
+                        try { word = sr.ReadLine(); }
+                        catch (EndOfStreamException) { break; }
+                        if (word == null) break;
+                        switch (word)
+                        {
+                            default:
+                                if (word.Length > 0)
+                                    VoiceStrAr.Add(word);
+                                break;
+                        }
+                    }
+                    thr = new Thread(new ThreadStart(VoiceThreadProc));
+                    thr.Start();
                 }
-                thr = new Thread(new ThreadStart(VoiceThreadProc));
-                thr.Start();
+                catch (Exception e)
+                {
+                    Utils.log.Error(" seq_test ", e);
+                }
+                if (sr != null) sr.Close();
+                if (fs != null) fs.Close();
             }
-            catch (Exception e)
-            {
-                Utils.log.Error(" seq_test ", e);
-            }
-            if (sr != null) sr.Close();
-            if (fs != null) fs.Close();
         }
 
         [DllImport("coredll.dll")]
@@ -2952,23 +3353,20 @@ namespace GpsUtils
             threadRunning = false;
         }
 
-
         // make sure that the central point is stationary after zoom in / zoom out
         public void ZoomIn()
         {
-            if (Data2Screen * ZoomValue > 5000000)
+            if (OsmZoom >= OsmNumZoomLevels-1 || Long2Pixel > 5000000)
                 return;
-            ScreenShiftX -= (ScreenX / 2 - ScreenShiftX) / 2;
-            ScreenShiftY -= (ScreenY / 2 - ScreenShiftY) / 2;
-            ZoomValue *= 1.5;
+            //LatShift *= 2;
+            ZoomValue *= 2;
         }
         public void ZoomOut()
         {
-            if (Data2Screen * ZoomValue < 1)
+            if (OsmZoom <= 0 || Long2Pixel < 1)
                 return;
-            ScreenShiftX += (int)((ScreenX / 2 - ScreenShiftX) * (1.0 - 1.0 / 1.5));
-            ScreenShiftY += (int)((ScreenY / 2 - ScreenShiftY) * (1.0 - 1.0 / 1.5));
-            ZoomValue /= 1.5;
+            //LatShift /= 2;
+            ZoomValue /= 2;
         }
 
         // DEBUG printout - called in DrawJpeg (make sure it is commented out in release).

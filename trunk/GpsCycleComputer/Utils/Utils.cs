@@ -49,7 +49,7 @@ namespace GpsUtils
         public static GpsCycleComputer.Form1 form1ref;
         public static Logger log = new Logger (Path.GetDirectoryName (System.Reflection.Assembly.GetExecutingAssembly ().GetName ().CodeBase)); // current dir
 
-        public Utils() {}
+        public Utils() { }  //never executed
 
         public static IntPtr LocalAlloc(int byteCount)
         {
@@ -98,7 +98,7 @@ namespace GpsUtils
         {
             string ps = new string('\0', 4);
             uint pflag = 0;
-            GetSystemPowerState(ps, 12, ref pflag);
+            GetSystemPowerState(ps, 4, ref pflag);
             if ((pflag & 0x00010000) > 0 || ps.StartsWith("on"))
                 return true;
             else
@@ -140,7 +140,7 @@ namespace GpsUtils
                         {
                             gpsPowerHandle1 = SetPowerRequirement("GPD0:", CedevicePowerState.D0, POWER_NAME | POWER_FORCE, null, 0);
                             gpsPowerHandle2 = SetPowerRequirement("GPS0:", CedevicePowerState.D0, POWER_NAME | POWER_FORCE, null, 0);
-                            if (form1ref.mapUtil.playVoiceCommand)
+                            if (form1ref.comboNavCmd.SelectedIndex == 1 || form1ref.comboNavCmd.SelectedIndex == 2)
                                 gpsPowerHandle3 = SetPowerRequirement("WAV1:", CedevicePowerState.D0, POWER_NAME | POWER_FORCE, null, 0);
                         }
 #else
@@ -607,7 +607,7 @@ namespace GpsUtils
             Cursor.Current = Cursors.WaitCursor;
             try
             {
-                WebRequest request = WebRequest.Create("http://gccv2.googlecode.com/files/GpsCycleComputer.xml");
+                WebRequest request = WebRequest.Create("http://dl.dropbox.com/s/rnuxgbd6yq5r3ui/GpsCycleComputer.xml");
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
                 if (response != null && "OK" == response.StatusDescription)
                 {
@@ -629,9 +629,9 @@ namespace GpsUtils
                                 case "version":
                                     webVersion = child.InnerText.ToString();
                                     if (Revision2Number(webVersion) > Revision2Number(Revision))
-                                        up2date = 1;
-                                    else
                                         up2date = -1;
+                                    else
+                                        up2date = 1;
                                     break;
                                 case "caburl":
                                     link = child.InnerText.ToString();
@@ -698,6 +698,81 @@ namespace GpsUtils
             return str;
         }
 
+
+        public enum BeepType
+        {
+            SimpleBeep = -1,
+            IconAsterisk = 0x00000040,
+            IconExclamation = 0x00000030,
+            IconHand = 0x00000010,
+            IconQuestion = 0x00000020,
+            Ok = 0x00000000,
+        }
+
+        [DllImport("COREDLL.DLL")]
+        public static extern bool MessageBeep(BeepType beepType);
+
+
+#if true        //BUZZER S3857
+
+        const Int32 MIO_FCC_BASE = 2048;
+        const Int32 FILE_DEVICE_MIO_BUZZER = 0x00008020;
+        const Int32 MIO_FCC_BUZZER = MIO_FCC_BASE + 270;
+
+        const int IOCTL_MIO_SET_BUZZER_FREQ = ((FILE_DEVICE_MIO_BUZZER) << 16) | ((0) << 14) | ((MIO_FCC_BUZZER) << 2) | (0);
+
+        [DllImport("coredll", SetLastError = true)]
+        static extern int CreateFile(String lpFileName, UInt32 dwDesiredAccess, UInt32 dwShareMode,
+                                        IntPtr lpSecurityAttributes, UInt32 dwCreationDisposition, UInt32 dwFlagsAndAttributes, IntPtr hTemplateFile);
+        [DllImport("coredll", SetLastError = true)]
+        public static extern bool CloseHandle(int hObject);
+        [DllImport("coredll.dll", EntryPoint = "DeviceIoControl", SetLastError = true)]
+        internal static extern int DeviceIoControl(
+            int hDevice,
+            int dwIoControlCode,
+            int[] lpInBuffer,
+            int nInBufferSize,
+            int[] lpOutBuffer,
+            int nOutBufferSize,
+            ref int lpBytesReturned,
+            IntPtr lpOverlapped);
+
+        static Timer beepTimer = null;
+
+        public static void buzzer(int duration)             //duration=1000 -> buzzer 1000ms on;    duration=0 -> buzzer off
+        {
+            int[] dwFreq = { 0 };
+            int bytesreturned = 0;
+                      //  CreateFile(L"BUZ1:",GENERIC_READ,FILE_SHARE_READ,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS,NULL);
+            int hDev = CreateFile("BUZ1:", 0x80000000, 0x00000001, IntPtr.Zero, 3, 0x00000080 | 0x10000000, IntPtr.Zero);
+            if ((-1) != hDev)
+            {
+                if (beepTimer == null)
+                {
+                    beepTimer = new Timer();
+                    beepTimer.Tick += new EventHandler(beepTimer_Tick);
+                }
+                if (duration > 0)
+                {
+                    dwFreq[0] = 1000;
+                    beepTimer.Interval = duration;
+                    beepTimer.Enabled = true;
+                }
+                DeviceIoControl(hDev, IOCTL_MIO_SET_BUZZER_FREQ, dwFreq, sizeof(int), null, 0, ref bytesreturned, IntPtr.Zero);
+                CloseHandle(hDev);
+            }
+            else if (duration > 0)
+            {
+                MessageBeep(BeepType.IconExclamation);
+            }
+        }
+
+        static void beepTimer_Tick(object sender, EventArgs e)
+        {
+            beepTimer.Enabled = false;
+            buzzer(0);
+        }
+#endif
 
         public static DialogResult InputBox(string title, string promptText, ref string value)
         {

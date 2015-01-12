@@ -366,14 +366,14 @@ namespace GpsCycleComputer
                 //thresh = (s_env_max + 1 * noise) / 2;
                 thresh = (s_env_max - noise) / 8 + noise;
 
-                Debug.WriteLine(noise + "  " + thresh + "  " + s_env_max);
+                //Debug.WriteLine(noise + "  " + thresh + "  " + s_env_max);
 
                 MMRESULT res;
-                res = waveInUnprepareHeader(hwWaveIn, whdr[cur_whdr], whdrsize);    //test if neccessary
+                res = waveInUnprepareHeader(hwWaveIn, whdr[cur_whdr], whdrsize);    //test if necessary
                 if (res != MMRESULT.MMSYSERR_NOERROR)
                     GpsUtils.Utils.log.Error("waveInUnprepareHeader", null);
                 Marshal.WriteInt32(whdr[cur_whdr], dwFlags, 0);                        //dwFlags = 0;
-                res = waveInPrepareHeader(hwWaveIn, whdr[cur_whdr], whdrsize);    //test if neccessary
+                res = waveInPrepareHeader(hwWaveIn, whdr[cur_whdr], whdrsize);    //test if necessary
                 if (res != MMRESULT.MMSYSERR_NOERROR)
                     GpsUtils.Utils.log.Error("waveInPrepareHeader", null);
                 res = waveInAddBuffer(hwWaveIn, whdr[cur_whdr], whdrsize);        //feed buffer in queue again

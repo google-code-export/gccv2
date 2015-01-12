@@ -10,28 +10,33 @@ namespace GpsSample.FileSupport
     class GccSupport : IFileSupport
     {                                                                   //load as T2F (WayPoints)
         public bool Load(string filename, ref Form1.WayPointInfo WayPoints,
-            int vector_size, ref float[] dataLat, ref float[] dataLong, ref Int16[] dataZ, ref Int32[] dataT, ref Int32[] dataD, ref Form1.TrackSummary ts, out int data_size)
+            int vector_size, ref float[] dataLat, ref float[] dataLong, ref Int16[] dataZ, ref Int32[] dataT, ref Int32[] dataD, ref Form1.TrackSummary ts, ref int data_size, bool append)
         {
-            int Counter = 0;
             int DecimateCount = 0, Decimation = 1;
             double OriginShiftX = 0.0;
             double OriginShiftY = 0.0;
             bool Status = false;
-            ts.Clear();
-            Int16 ReferenceAlt = Int16.MaxValue;
-
             UtmUtil utmUtil = new UtmUtil();
+            Int16 ReferenceAlt;
 
-            data_size = 0;
-            WayPoints.Count = 0;
+            if (!append)
+            {
+                data_size = 0;
+                WayPoints.Count = 0;
+                ts.Clear();
+            }
+            if (data_size == 0)
+                ReferenceAlt = Int16.MaxValue;
+            else
+                ReferenceAlt = dataZ[data_size - 1];
 
             Cursor.Current = Cursors.WaitCursor;
-            ts.filename = Path.GetFileName(filename);
 
             do
             {
                 try
                 {
+                    ts.filename = filename;
                     FileStream fs = new FileStream(filename, FileMode.Open, FileAccess.Read);
                     BinaryReader rd = new BinaryReader(fs, System.Text.Encoding.Unicode);
 
@@ -117,7 +122,7 @@ namespace GpsSample.FileSupport
                                 default:
                                     if ((1UL << z_int & recordError) == 0)
                                     {
-                                        if (MessageBox.Show("unknown special record " + z_int + " at " + Counter + "\ntry to continue load anyway?", "Load Error",
+                                        if (MessageBox.Show("unknown special record " + z_int + " at " + data_size + "\ntry to continue load anyway?", "Load Error",
                                             MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1)
                                             == DialogResult.Cancel)
                                             loop = false; ;
@@ -131,7 +136,7 @@ namespace GpsSample.FileSupport
                         else    // "normal" record
                         {
                             // check if we need to decimate arrays
-                            if (Counter >= vector_size)
+                            if (data_size >= vector_size)
                             {
                                 for (int i = 0; i < vector_size / 2; i++)
                                 {
@@ -141,7 +146,7 @@ namespace GpsSample.FileSupport
                                     dataT[i] = dataT[i * 2];
                                     dataD[i] = dataD[i * 2];
                                 }
-                                Counter /= 2;
+                                data_size /= 2;
                                 Decimation *= 2;
                             }
 
@@ -175,15 +180,15 @@ namespace GpsSample.FileSupport
                             if (DecimateCount == 0)    //when decimating, add only first sample, ignore rest of decimation
                             {                          //but calculate distance and elevation from all points
                                 utmUtil.getLatLong(real_x, real_y, out out_lat, out out_long);
-                                dataLat[Counter] = (float)out_lat;
-                                dataLong[Counter] = (float)out_long;
-                                dataZ[Counter] = z_int;
+                                dataLat[data_size] = (float)out_lat;
+                                dataLong[data_size] = (float)out_long;
+                                dataZ[data_size] = z_int;
                                 if (t_16 < t_16last)        // handle overflow
                                     t_high += 65536;
                                 t_16last = t_16;
-                                dataT[Counter] = t_high + t_16;
-                                dataD[Counter] = (int)ts.Distance;
-                                Counter++;
+                                dataT[data_size] = t_high + t_16;
+                                dataD[data_size] = (int)ts.Distance;
+                                data_size++;
                             }
                             DecimateCount++;
                             if (DecimateCount >= Decimation)
@@ -200,7 +205,6 @@ namespace GpsSample.FileSupport
                     Utils.log.Error(" LoadGcc ", e);
                 }
             } while (false);
-            data_size = Counter;
             Cursor.Current = Cursors.Default;
 
             return Status;

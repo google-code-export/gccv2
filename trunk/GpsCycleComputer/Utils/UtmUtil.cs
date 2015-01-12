@@ -18,10 +18,10 @@ namespace GpsUtils
         private double referenceY = 0.0;
         private int referenceZone = 0;
 
-        public double lat2meter = 0.0;
-        public double longit2meter = 0.0;
-        public double meter2lat = 0.0;
-        public double meter2longit = 0.0;
+        public double lat2meter = 1.0;
+        public double longit2meter = 1.0;
+        public double meter2lat = 1.0;
+        public double meter2longit = 1.0;
 
         public bool referenceSet = false;
 
