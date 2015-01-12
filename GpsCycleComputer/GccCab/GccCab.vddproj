@@ -140,6 +140,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_6E582DD430C845B3B952978DC0A2E4DB"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_70028366BFC54F2DB34EBADF9641AE69"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -387,6 +393,12 @@
         "Entry"
         {
         "MsmKey" = "8:_E1B89FECE0AC4ABFAB1E3888F1EF4B65"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_E5804C8641984A1FA4F30FA4DB580867"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -776,6 +788,24 @@
             "TargetName" = "8:Right.wav"
             "Tag" = "8:"
             "Folder" = "8:_1B99BCB9ECF347FAA1A9E11716EB71AC"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_6E582DD430C845B3B952978DC0A2E4DB"
+            {
+            "SourcePath" = "8:..\\osm_servers.txt"
+            "TargetName" = "8:osm_servers.txt"
+            "Tag" = "8:"
+            "Folder" = "8:_A279FA883AA84AE392BA265B237C07ED"
             "Condition" = "8:"
             "Vital" = "11:TRUE"
             "ReadOnly" = "11:FALSE"
@@ -1342,6 +1372,24 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{BA458234-9B71-4F46-8107-E91156377184}:_E5804C8641984A1FA4F30FA4DB580867"
+            {
+            "SourcePath" = "8:..\\Readme.txt"
+            "TargetName" = "8:Readme.txt"
+            "Tag" = "8:"
+            "Folder" = "8:_A279FA883AA84AE392BA265B237C07ED"
+            "Condition" = "8:"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "Register" = "3:0"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{BA458234-9B71-4F46-8107-E91156377184}:_E63E63F06B9C41DD85E2BD4E9F7E1640"
             {
             "SourcePath" = "8:..\\Readme.htm"
@@ -1542,7 +1590,7 @@
         {
             "{605BE39E-5046-48BD-AEC0-63C3A46626D5}:_5A23394E9E8C42468666EFEFA9F0B926"
             {
-            "SourcePath" = "8:..\\obj\\Debug\\GpsCycleComputer.exe"
+            "SourcePath" = "8:..\\obj\\Release\\GpsCycleComputer.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_A279FA883AA84AE392BA265B237C07ED"

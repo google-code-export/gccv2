@@ -144,6 +144,8 @@
     <EmbeddedResource Include="Graphics\restore.jpg" />
     <EmbeddedResource Include="Graphics\restore_p.jpg" />
     <EmbeddedResource Include="Graphics\hourglass.png" />
+    <EmbeddedResource Include="Graphics\waypoint.jpg" />
+    <EmbeddedResource Include="Graphics\waypoint_p.jpg" />
     <Content Include="Properties\icon2.ico" />
     <EmbeddedResource Include="Graphics\pause_mode.jpg" />
     <EmbeddedResource Include="Graphics\pause_p.jpg" />

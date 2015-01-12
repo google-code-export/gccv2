@@ -301,17 +301,26 @@ namespace GpsSample.FileSupport
 
 #else
         public bool Load(string filename, ref Form1.WayPointInfo WayPoints,
-            int vector_size, ref float[] dataLat, ref float[] dataLong, ref Int16[] dataZ, ref Int32[] dataT, ref Int32[] dataD, ref Form1.TrackSummary ts, out int data_size)
+            int vector_size, ref float[] dataLat, ref float[] dataLong, ref Int16[] dataZ, ref Int32[] dataT, ref Int32[] dataD, ref Form1.TrackSummary ts, ref int data_size, bool append)
         {
             bool Status = false;
             TimeSpan tspan;
-            ts.Clear();
-            Int16 ReferenceAlt = Int16.MaxValue;
             UtmUtil utmUtil = new UtmUtil();
             double OldLat = 0.0, OldLong = 0.0;
             int DecimateCount = 0, Decimation = 1;
-            data_size = 0;
-            WayPoints.Count = 0;
+            Int16 ReferenceAlt;
+
+            if (!append)
+            {
+                data_size = 0;
+                WayPoints.Count = 0;
+                ts.Clear();
+            }
+            if (data_size == 0)
+                ReferenceAlt = Int16.MaxValue;
+            else
+                ReferenceAlt = dataZ[data_size - 1];
+            
             Cursor.Current = Cursors.WaitCursor;
             try
             {
@@ -320,23 +329,24 @@ namespace GpsSample.FileSupport
                 settings.IgnoreWhitespace = true;
                 StreamReader sr = new StreamReader(filename, System.Text.Encoding.UTF8);        //use StreamReader to overwrite encoding ISO-8859-1, which is not supported by .NETCF (no speed drawback)
                 XmlReader reader = XmlReader.Create(sr, settings);
-                ts.filename = Path.GetFileName(filename);
+                ts.filename = filename;
                 //reader.MoveToContent();
                 reader.ReadToFollowing("gpx");
                 reader.Read();
                 while (reader.NodeType == XmlNodeType.Element)
                 {
-                    if (reader.Name == "trk")
+                    bool isTrack;
+                    if ((isTrack = reader.Name == "trk") || reader.Name == "rte")
                     {
-                        reader.Read();
+                        if (isTrack) reader.Read();
                         while (reader.NodeType == XmlNodeType.Element)
                         {
-                            if (reader.Name == "trkseg")
+                            if (reader.Name == "trkseg" || reader.Name == "rte")
                             {
                                 reader.Read();
                                 while (reader.NodeType == XmlNodeType.Element)
                                 {
-                                    if (reader.Name == "trkpt")
+                                    if (reader.Name == "trkpt" || reader.Name == "rtept")
                                     {
                                     trkpt:
                                         bool jumptrkpt = false;
@@ -403,6 +413,7 @@ namespace GpsSample.FileSupport
                                                     reader.Skip();
                                                     break;
                                                 case "trkpt":           //trkpt without EndElement <trkpt lat="47.2615199999997" lon="10.2016400000003"/>
+                                                case "rtept":
                                                     jumptrkpt = true;
                                                     goto savepoint;
                                                 default:
@@ -410,7 +421,7 @@ namespace GpsSample.FileSupport
                                                     break;
                                             }
                                         }
-                                        reader.ReadEndElement();
+                                        reader.ReadEndElement();    //trkpt
                                     savepoint:
                                         if (DecimateCount == 0)    //when decimating, add only first sample, ignore rest of decimation
                                         {
@@ -429,7 +440,7 @@ namespace GpsSample.FileSupport
                                     else
                                         reader.Skip();
                                 }
-                                reader.ReadEndElement();
+                                if (isTrack) reader.ReadEndElement();    //trkseg
                             }
                             else if (reader.Name == "name")
                             {
@@ -442,26 +453,34 @@ namespace GpsSample.FileSupport
                             else
                                 reader.Skip();
                         }
-                        reader.ReadEndElement();
+                        reader.ReadEndElement();    //trk
                     }
                     else if (reader.Name == "wpt")
                     {
-                        WayPoints.lat[WayPoints.Count] = (float)Convert.ToDouble(reader.GetAttribute("lat"), IC);
-                        WayPoints.lon[WayPoints.Count] = (float)Convert.ToDouble(reader.GetAttribute("lon"), IC);
+                        float lat = (float)Convert.ToDouble(reader.GetAttribute("lat"), IC);
+                        float lon = (float)Convert.ToDouble(reader.GetAttribute("lon"), IC);
+                        string name = "";
+                        string desc = "";
                         reader.Read();
                         while (reader.NodeType == XmlNodeType.Element)
                         {
                             if (reader.Name == "name")
                             {
-                                WayPoints.name[WayPoints.Count] = reader.ReadElementString();
-                                WayPoints.Count++;
+                                name = reader.ReadElementString();
                             }
                             else if (reader.Name == "desc")
                             {
-                                string wp_desc = reader.ReadElementString();        //prepared for later use
+                                desc = reader.ReadElementString();        //prepared for later use
                             }
                             else
                                 reader.Skip();
+                        }
+                        if (WayPoints.Count < WayPoints.DataSize)
+                        {
+                            WayPoints.lat[WayPoints.Count] = lat;
+                            WayPoints.lon[WayPoints.Count] = lon;
+                            WayPoints.name[WayPoints.Count] = name;
+                            WayPoints.Count++;
                         }
                         reader.ReadEndElement();
                     }

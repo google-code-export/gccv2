@@ -26,7 +26,7 @@ namespace GpsCycleComputer
             public MButton(BFkt f, String bm, String txt)
             {
                 func = f;
-                icon = Form1.LoadBitmap(bm);                        //don't know how to call constructor explicitly
+                icon = Form1.LoadBitmap(bm);                        //don't know how to call constructor explicitly and subroutine isn't possible
                 icon_p = Form1.LoadBitmap(bm.Replace(".", "_p."));
                 text = txt;
                 enabled = true;
@@ -39,8 +39,8 @@ namespace GpsCycleComputer
         public MButton mBGpsOff = new MButton(BFkt.gps_toggle, "gps_off.jpg", "GPS is off", true);
         public MButton mBmPageUp = new MButton(BFkt.mPageUp, "up.jpg", "", true);
         public MButton mBmPageDown = new MButton(BFkt.mPageDown, "down.jpg", "", true);
-        public MButton mBmPageBKLight = new MButton (BFkt.backlight_off, "bklight.jpg", "BKLight");
-        public MButton mBmPageOptions = new MButton (BFkt.options, "options.jpg", "Options");
+        public MButton mBmPageBKLight = new MButton(BFkt.backlight_off, "bklight.jpg", "BKLight");
+        public MButton mBmPageOptions = new MButton(BFkt.options, "options.jpg", "Options");
 
         public MButton[] mBAr = new MButton[] {                 //menu buttons; keep in sync with BFkt!
                                                   new MButton (BFkt.map, "map.jpg", "Map"),
@@ -49,27 +49,27 @@ namespace GpsCycleComputer
 
                                                   new MButton (BFkt.navigate, "navigate.jpg", "Navigate"),
                                                   new MButton (BFkt.inputLatLon, "checkpoint.jpg", "Input LatLon"),
-                                                  new MButton (BFkt.waypoint, "checkpoint.jpg", "Add Waypoint"),
+                                                  new MButton (BFkt.waypoint, "waypoint.jpg", "Add Waypoint"),
 
                                                   new MButton (BFkt.load_gcc, "edit.jpg", "File/Export"),
                                                   new MButton (BFkt.load_2follow, "edit.jpg", "Track2Follow"),
                                                   new MButton (BFkt.lap, "lap.jpg", "Lap"),
 
                                                   new MButton (BFkt.clearTrack, "cancel.jpg", "ClearTrack"),
+                                                  new MButton (BFkt.restore_clear2f, "restore.jpg", "Restore"),
                                                   new MButton (BFkt.continu, "continue.jpg", "Continue"),
-                                                  new MButton (BFkt.restore, "restore.jpg", "Restore"),
 
                                                   new MButton (BFkt.graph_alt, "graph.jpg", "Altitude"),
                                                   new MButton (BFkt.graph_speed, "graph.jpg", "Speed"),
                                                   new MButton (BFkt.graph_heartRate, "graph.jpg", "Heart Rate", false),
 
-                                                  new MButton (BFkt.recall1, "recall.jpg", "Recall 1"),
-                                                  new MButton (BFkt.recall2, "recall.jpg", "Recall 2"),
-                                                  new MButton (BFkt.recall3, "recall.jpg", "Recall 3"),
-
                                                   new MButton (BFkt.backlight_off, "bklight.jpg", "BKLight"),
                                                   new MButton (BFkt.help, "help.jpg", "Help"),
                                                   new MButton (BFkt.about, "help.jpg", "About"),
+
+                                                  new MButton (BFkt.recall1, "recall.jpg", "Recall 1"),
+                                                  new MButton (BFkt.recall2, "recall.jpg", "Recall 2"),
+                                                  new MButton (BFkt.recall3, "recall.jpg", "Recall 3"),
                                                   //end of menu page
 
                                                   new MButton (BFkt.main, "main.jpg", "Main"),
@@ -97,6 +97,7 @@ namespace GpsCycleComputer
                                                   new MButton (BFkt.mPageUp, "up.jpg", ""),
                                                   new MButton (BFkt.mPageDown, "down.jpg", ""),
 
+                                                  new MButton (BFkt.waypoint2, "waypoint.jpg", ""),
 
                                                   new MButton (BFkt.nothing, "blank.jpg", "")
                                                                        
@@ -116,22 +117,22 @@ namespace GpsCycleComputer
             lap,
 
             clearTrack,
+            restore_clear2f,
             continu,            //'continue' is reserved for c instruction
-            restore,
             
             graph_alt,
             graph_speed,
             graph_heartRate,
 
-            recall1,
-            recall2,
-            recall3,
-
             backlight_off,
             help,
             about,
 
-            endOfMenuPage = about,
+            recall1,
+            recall2,
+            recall3,
+
+            endOfMenuPage = recall3,
 
             //separate buttons on bottom
             main,
@@ -158,8 +159,9 @@ namespace GpsCycleComputer
             mPageUp,
             mPageDown,
 
+            waypoint2,
 
-            nothing
+            nothing,
         }
 
 
@@ -184,18 +186,28 @@ namespace GpsCycleComputer
             //disableColor = mBmPageUp.icon.GetPixel(0, 0);
         }
 
+        public bool buttonIsClear2F = false;
+        public void ChangeRestore2Clear()
+        {
+            if (buttonIsClear2F) return;
+            mBAr[(int)BFkt.restore_clear2f].icon = mBAr[(int)BFkt.clearTrack].icon;
+            mBAr[(int)BFkt.restore_clear2f].icon_p = mBAr[(int)BFkt.clearTrack].icon_p;
+            mBAr[(int)BFkt.restore_clear2f].text = "Clear2Follow";
+            buttonIsClear2F = true;
+        }
+
         public void ShowMenu()
         {
             i_p = -1;
             if (form1ref.checkChangeMenuOptBKL.Checked)
             {
-                mBAr[1] = mBmPageBKLight;
-                mBAr[18] = mBmPageOptions;
+                mBAr[(int)BFkt.options] = mBmPageBKLight;
+                mBAr[(int)BFkt.backlight_off] = mBmPageOptions;
             }
             else
             {
-                mBAr[1] = mBmPageOptions;
-                mBAr[18] = mBmPageBKLight;
+                mBAr[(int)BFkt.options] = mBmPageOptions;
+                mBAr[(int)BFkt.backlight_off] = mBmPageBKLight;
             }
             form1ref.BufferDrawMode = Form1.BufferDrawModeMenu;
             
@@ -323,24 +335,26 @@ namespace GpsCycleComputer
         protected override void OnPaint(PaintEventArgs e)
         {
             //determine enabled state
-            mBAr[(int)BFkt.clearTrack].enabled = (form1ref.Plot2ndCount + form1ref.PlotCount == 0) ? false : true;
+            mBAr[(int)BFkt.clearTrack].enabled = (form1ref.TSummary.StartTime != DateTime.MinValue || form1ref.WayPointsT.Count > 0) ? true : false;
             mBAr[(int)BFkt.continu].enabled = (form1ref.PlotCount == 0) ? false : true;
-            mBAr[(int)BFkt.restore].enabled = form1ref.stateSaved ? false : true;
             mBAr[(int)BFkt.waypoint].enabled = (form1ref.state == Form1.State.logging || form1ref.state == Form1.State.paused) ? true : false;
             mBAr[(int)BFkt.navigate].enabled = (form1ref.Plot2ndCount > 0) ? true : false;
             mBAr[(int)BFkt.graph_alt].enabled = (form1ref.Plot2ndCount + form1ref.PlotCount == 0) ? false : true;
             mBAr[(int)BFkt.graph_speed].enabled = (form1ref.PlotCount == 0) ? false : true;
             //mBAr[(int)BFkt.graph_heartRate].enabled =      is set from AddPlotData and cleared from ClearHR
+            if (buttonIsClear2F)
+                mBAr[(int)BFkt.restore_clear2f].enabled = (form1ref.Plot2ndCount + form1ref.WayPointsT2F.Count == 0) ? false : true;
 
             bWidth = this.Width / 3;
             bHeigh = bWidth / 2;
             GridHeigh = bHeigh * 3 / 2;
 
             //mBAr[(int)BFkt.gps_toggle] = Form1.gps.OpenedOrSuspended ? mBGpsOn : mBGpsOff;
-            mBAr[(int)BFkt.clearTrack].text = (form1ref.Plot2ndCount == 0) ? "Clear Track" : "Clear2Follow";
+            //mBAr[(int)BFkt.clearTrack].text = (form1ref.Plot2ndCount + form1ref.WayPointsT2F.Count == 0) ? "Clear Track" : "Clear2Follow";
             SolidBrush br = new SolidBrush(this.ForeColor);
             //Pen pen = new Pen(disableColor, bWidth / 40);
             Pen pen = new Pen(Color.FromArgb(0x555555), 1);
+            Font f = new Font("Arial", 9 * form1ref.df, FontStyle.Regular);
             //int dx = bWidth / 8;
             //int dy = bHeigh / 8;
             Bitmap temp = new Bitmap(this.Width, this.Height);
@@ -361,8 +375,8 @@ namespace GpsCycleComputer
                 Bitmap bm = (i == i_p && mBAr[i].enabled) ? mBAr[i].icon_p : mBAr[i].icon;
                 graphics.DrawImage(bm, dest_rect, new Rectangle(0, 0, mBAr[i].icon.Width, mBAr[i].icon.Height), GraphicsUnit.Pixel);
                 if (mBAr[i].enabled) br.Color = ForeColor; else br.Color = Color.FromArgb(0x606060);
-                SizeF Tsize = graphics.MeasureString(mBAr[i].text, this.Font);
-                graphics.DrawString(mBAr[i].text, this.Font, br, bWidth * ix + (bWidth - Tsize.Width) / 2, GridHeigh * iy + bHeigh + mouseDrag);
+                SizeF Tsize = graphics.MeasureString(mBAr[i].text, f);
+                graphics.DrawString(mBAr[i].text, f, br, bWidth * ix + (bWidth - Tsize.Width) / 2, GridHeigh * iy + bHeigh + mouseDrag);
                 if (!mBAr[i].enabled)
                 {
                     //graphics.DrawLine(pen, bWidth * ix + dx, GridHeigh * iy + dy + mouseDrag, bWidth * (ix + 1) - dx, GridHeigh * iy + bHeigh - dy + mouseDrag);

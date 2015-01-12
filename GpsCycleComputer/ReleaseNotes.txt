@@ -1,5 +1,31 @@
 GPS Cycle Computer GCC
 
+********* version 4.12 *********
+- option to have App maximized (context menu of clock)
+- option for "one tap config on main screen"
+- optional navigation info on main screen (instead of compass)
+- improved navigation (if multiple t2f lines on the same road; long distance between t2f points; performance on long t2f)
+- navigation symbols instead of letter abbreviations
+- waypoints (at cursor coordinates) can be added to t2f
+- if t2f only contains waypoints, they can be used as track to navigate
+- multiple files can be appended to t2f (context menu of Track2Follow button)
+- files can be renamed or deleted in file selector (not on WinCE)
+- aygshell.dll no longer required on WinCE
+- kml files from gpsies.com load correct
+- besides gpx tracks now also gpx routes can be loaded as t2f
+- improved map display quality for osm style maps (for best results use multimap off or 1:1 zoom)
+- minor changes in menu page
+- configurable info values in map and nav display (context menu: config map display)
+- display of Readme.htm or Readme.txt
+- update of vars even when not logging
+- copyright string for maps
+- improved "Input LatLon"; additional waypoint is created if you add a name
+- additional option: voice commands only for important messages i.e. when leaving track for more than 100m (configurable in map options)
+- additional option: beep instead of voice commands (especially for devices without voice capability i.e. S3857)
+
+- bugfix: pause button; Recall
+
+
 ********* version 4.11 *********
 - display track summary on load
 - improved time unit display when > 24h
